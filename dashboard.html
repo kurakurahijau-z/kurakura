@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard | kura kura hijau</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap">
+
+  <style>
+    * { font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+    body {
+      background: linear-gradient(-45deg, #e0f2fe, #dcfce7, #ecfccb, #dbeafe);
+      background-size: 400% 400%;
+      animation: bgMove 18s ease infinite;
+    }
+    @keyframes bgMove {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+  </style>
+</head>
+
+<body class="min-h-screen flex items-center justify-center px-6">
+
+  <div class="bg-white/80 backdrop-blur rounded-3xl shadow-xl p-8 max-w-md w-full text-center">
+    <h1 class="text-3xl font-bold text-emerald-900 mb-2">Dashboard</h1>
+    <p class="text-slate-600 mb-6">kura kura hijau</p>
+
+    <div id="userBox" class="hidden text-left bg-white rounded-2xl border p-4 mb-6">
+      <p class="text-sm"><strong>Nama:</strong> <span id="uName"></span></p>
+      <p class="text-sm"><strong>Email:</strong> <span id="uEmail"></span></p>
+      <p class="text-sm"><strong>Peranan:</strong> <span id="uRole"></span></p>
+    </div>
+
+    <button id="btnLogout"
+      class="w-full rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold py-3 transition">
+      Logout
+    </button>
+
+    <div class="mt-6 text-xs text-slate-500">
+      © 2026 kura kura hijau
+    </div>
+  </div>
+
+<script>
+  // ===== Auth Guard =====
+  const token = localStorage.getItem("kkh_token");
+  const userRaw = localStorage.getItem("kkh_user");
+
+  if (!token || !userRaw) {
+    // Tak login → balik ke kelas.html
+    window.location.href = "kelas.html";
+  } else {
+    try {
+      const user = JSON.parse(userRaw);
+      document.getElementById("uName").textContent = user.name || "-";
+      document.getElementById("uEmail").textContent = user.email || "-";
+      document.getElementById("uRole").textContent = user.isAdmin ? "Admin" : "Pelajar";
+      document.getElementById("userBox").classList.remove("hidden");
+    } catch (e) {
+      // data rosak → reset
+      localStorage.removeItem("kkh_token");
+      localStorage.removeItem("kkh_user");
+      window.location.href = "kelas.html";
+    }
+  }
+
+  document.getElementById("btnLogout").addEventListener("click", () => {
+    localStorage.removeItem("kkh_token");
+    localStorage.removeItem("kkh_user");
+    window.location.href = "kelas.html";
+  });
+</script>
+
+</body>
+</html>
