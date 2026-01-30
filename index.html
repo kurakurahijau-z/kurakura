@@ -3,77 +3,138 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Kura Kura Hijau</title>
+  <title>kura kura hijau – Portal Pembelajaran</title>
 
-  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Quicksand:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
   <style>
-    body {
-      font-family: 'Quicksand', sans-serif;
+    * { font-family: 'Inter', sans-serif; }
+
+    :root {
+      --emerald: #10b981;
+      --teal: #14b8a6;
+      --sky: #0ea5e9;
+      --lime: #84cc16;
+      --mint: #6ee7b7;
     }
 
-    .hero-title {
-      font-family: 'Fredoka', sans-serif;
-      text-shadow: 0 12px 30px rgba(60, 0, 120, 0.25);
+    .gradient-bg {
+      background: linear-gradient(-45deg, #e0f2fe, #f0fdf4, #ecfccb, #cffafe, #dbeafe);
+      background-size: 400% 400%;
+      animation: gradientShift 20s ease infinite;
     }
 
-    /* CARD HOVER – SAFE */
-    .card-glass {
-      background: rgba(255, 255, 255, 0.75);
-      border-radius: 24px;
-      box-shadow: 0 18px 50px rgba(40, 0, 80, 0.18);
-      backdrop-filter: blur(12px);
-      transition: transform .25s ease, box-shadow .25s ease;
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
     }
 
-    .card-glass:hover {
-      transform: translateY(-8px) scale(1.03);
-      box-shadow: 0 28px 70px rgba(40, 0, 80, 0.28);
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.35;
+      animation: float 25s ease-in-out infinite;
+    }
+
+    .blob-1 { width: 480px; height: 480px; background: linear-gradient(135deg, var(--emerald), var(--teal)); top: 10%; right: -10%; }
+    .blob-2 { width: 420px; height: 420px; background: linear-gradient(135deg, var(--sky), var(--teal)); bottom: 15%; left: -10%; }
+    .blob-3 { width: 380px; height: 380px; background: linear-gradient(135deg, var(--lime), var(--mint)); top: 55%; right: -8%; }
+
+    @keyframes float {
+      0%,100% { transform: translate(0,0); }
+      50% { transform: translate(20px,-15px); }
+    }
+
+    .glass {
+      background: rgba(255,255,255,0.8);
+      backdrop-filter: blur(18px);
+      border: 1px solid rgba(16,185,129,0.15);
+      box-shadow: 0 10px 30px rgba(16,185,129,0.08);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--emerald), var(--teal));
+      transition: all .2s ease;
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 12px 30px rgba(16,185,129,0.25);
+    }
+
+    .btn-secondary {
+      background: linear-gradient(135deg, #fbbf24, #fb923c);
     }
   </style>
 </head>
 
-<body class="min-h-screen bg-gradient-to-br from-purple-200 via-pink-200 to-yellow-100 flex items-center justify-center">
-
-  <div class="absolute top-6 left-6 flex items-center gap-2 text-purple-700 font-semibold">
-    🐢 kura kura hijau
+<body class="h-full relative overflow-x-hidden">
+  <!-- Background -->
+  <div class="fixed inset-0 gradient-bg -z-10">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
   </div>
 
-  <div class="absolute top-6 right-6 text-purple-600 text-sm cursor-pointer">
-    Log Keluar
-  </div>
+  <!-- Navbar -->
+  <nav class="fixed top-0 left-0 right-0 z-40 glass">
+    <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+      <div class="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-teal-500">
+        kura kura hijau
+      </div>
+      <a href="kelas.html" class="btn-primary px-6 py-2 rounded-lg text-white font-semibold">
+        Mula Sekarang
+      </a>
+    </div>
+  </nav>
 
-  <main class="text-center">
-    <h1 class="hero-title text-6xl text-purple-800 mb-16">
-      kurakura
+  <!-- Hero -->
+  <section class="pt-32 pb-24 px-6 text-center">
+    <h1 class="text-5xl md:text-6xl font-semibold text-emerald-900 mb-8">
+      kura kura hijau
     </h1>
 
-    <div class="flex gap-8 justify-center">
-      <!-- KELAS -->
-      <div class="card-glass w-72 h-48 flex flex-col items-center justify-center cursor-pointer">
-        <div class="w-14 h-14 rounded-2xl bg-yellow-400 flex items-center justify-center text-white text-2xl mb-4">
-          📘
-        </div>
-        <div class="text-xl font-semibold text-purple-800">Kelas</div>
-        <div class="text-sm text-purple-500 mt-1">Kuiz & aktiviti</div>
-      </div>
+    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+      <a href="kelas.html" class="btn-primary px-8 py-4 rounded-xl text-white font-bold text-lg">
+        Mula Sekarang
+      </a>
+      <a href="#kelas" class="btn-secondary px-8 py-4 rounded-xl text-white font-bold text-lg">
+        Lihat Kelas
+      </a>
+    </div>
+  </section>
 
-      <!-- PROFIL -->
-      <div class="card-glass w-72 h-48 flex flex-col items-center justify-center cursor-pointer">
-        <div class="w-14 h-14 rounded-2xl bg-pink-400 flex items-center justify-center text-white text-2xl mb-4">
-          👤
+  <!-- Features -->
+  <section id="kelas" class="pb-24 px-6">
+    <div class="max-w-6xl mx-auto">
+      <h2 class="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-12">
+        Kelas Pembelajaran
+      </h2>
+
+      <div class="grid md:grid-cols-3 gap-6">
+        <div class="glass rounded-2xl p-8">
+          <h3 class="text-xl font-bold mb-2">Berperingkat</h3>
+          <p class="text-gray-600">Struktur pembelajaran yang kemas dan tidak tergesa-gesa.</p>
         </div>
-        <div class="text-xl font-semibold text-purple-800">Profil</div>
-        <div class="text-sm text-purple-500 mt-1">Maklumat akaun</div>
+
+        <div class="glass rounded-2xl p-8">
+          <h3 class="text-xl font-bold mb-2">Berfokus</h3>
+          <p class="text-gray-600">Satu kelas, satu hala tuju, tanpa gangguan.</p>
+        </div>
+
+        <div class="glass rounded-2xl p-8">
+          <h3 class="text-xl font-bold mb-2">Berkembang</h3>
+          <p class="text-gray-600">Direka untuk berkembang perlahan, tapi kekal lama.</p>
+        </div>
       </div>
     </div>
-  </main>
+  </section>
 
+  <!-- Footer -->
+  <footer class="py-8 text-center text-gray-600">
+    © 2026 kura kura hijau
+  </footer>
 </body>
 </html>
