@@ -3,31 +3,19 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Kelas | kura kura hijau</title>
+  <title>kura kura hijau — Kelas</title>
 
-  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- Font -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap">
 
   <style>
-    * { font-family: 'Inter', sans-serif; }
-
+    * { font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
     body {
-      background: linear-gradient(
-        -45deg,
-        #e0f2fe,
-        #f0fdf4,
-        #ecfccb,
-        #cffafe,
-        #dbeafe
-      );
+      background: linear-gradient(-45deg, #e0f2fe, #dcfce7, #ecfccb, #dbeafe, #d1fae5);
       background-size: 400% 400%;
-      animation: gradientMove 20s ease infinite;
+      animation: bgMove 18s ease infinite;
     }
-
-    @keyframes gradientMove {
+    @keyframes bgMove {
       0% { background-position: 0% 50%; }
       50% { background-position: 100% 50%; }
       100% { background-position: 0% 50%; }
@@ -35,30 +23,183 @@
   </style>
 </head>
 
-<body class="min-h-screen flex items-center justify-center px-6">
+<body class="min-h-screen flex items-center justify-center px-4">
+  <main class="w-full max-w-md">
+    <div class="bg-white/80 backdrop-blur rounded-3xl shadow-xl border border-white/60 p-7">
+      <div class="text-center mb-6">
+        <h1 class="text-3xl font-extrabold tracking-tight text-emerald-900">kura kura hijau</h1>
+        <p class="mt-2 text-sm text-slate-600">Login untuk akses kelas & kuiz.</p>
+      </div>
 
-  <div class="bg-white/80 backdrop-blur-md rounded-2xl shadow-lg px-10 py-12 text-center max-w-sm w-full">
+      <div id="alert" class="hidden mb-4 rounded-xl px-4 py-3 text-sm"></div>
 
-    <h1 class="text-3xl font-semibold text-emerald-700 mb-2">
-      kura kura hijau
-    </h1>
+      <form id="loginForm" class="space-y-4">
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 mb-1">Email</label>
+          <input id="email" type="email" autocomplete="username"
+            class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 outline-none focus:ring-2 focus:ring-emerald-300"
+            placeholder="nama@pms.edu.my" required />
+        </div>
 
-    <p class="text-gray-600 mb-8">
-      Portal Kelas
-    </p>
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 mb-1">Password</label>
+          <input id="password" type="password" autocomplete="current-password"
+            class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 outline-none focus:ring-2 focus:ring-emerald-300"
+            placeholder="••••••••" required />
+        </div>
 
-    <button
-      class="w-full py-3 rounded-xl font-semibold text-white
-             bg-gradient-to-r from-emerald-500 to-teal-500
-             hover:opacity-90 transition mb-4">
-      Log Masuk
-    </button>
+        <button id="btnLogin" type="submit"
+          class="w-full rounded-xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold py-3 transition disabled:opacity-60 disabled:cursor-not-allowed">
+          Login
+        </button>
 
-    <a href="index.html" class="text-sm text-gray-500 hover:text-gray-700">
-      ← Kembali ke Home
-    </a>
+        <div class="flex items-center justify-between pt-2">
+          <button id="btnHealth" type="button"
+            class="text-sm font-semibold text-slate-700 hover:text-slate-900 underline decoration-slate-300">
+            Test API
+          </button>
 
-  </div>
+          <button id="btnClear" type="button"
+            class="text-sm font-semibold text-slate-700 hover:text-slate-900 underline decoration-slate-300">
+            Reset token
+          </button>
+        </div>
+      </form>
 
+      <div class="mt-6 text-center text-xs text-slate-500">
+        © 2026 kura kura hijau
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // ====== CONFIG (DAH FIX, TAK PAYAH EDIT) ======
+    const BASE_URL = "https://script.google.com/macros/s/AKfycbzeD9VIaDzvbtllYJSWuk7duqEMCdDfXJE8zakhe_S_-5h4cQe9180RaEh77fDuq5IheQ/exec";
+    const API_KEY  = "PPF-KEY-2026-FAIZAL-SECRET";
+
+    // ====== Helpers ======
+    const $ = (id) => document.getElementById(id);
+
+    function showAlert(type, msg) {
+      const el = $("alert");
+      el.classList.remove("hidden");
+      el.textContent = msg;
+
+      // reset classes
+      el.className = "mb-4 rounded-xl px-4 py-3 text-sm";
+
+      if (type === "success") {
+        el.classList.add("bg-emerald-100", "text-emerald-900", "border", "border-emerald-200");
+      } else if (type === "warn") {
+        el.classList.add("bg-amber-100", "text-amber-900", "border", "border-amber-200");
+      } else {
+        el.classList.add("bg-rose-100", "text-rose-900", "border", "border-rose-200");
+      }
+    }
+
+    function setLoading(isLoading) {
+      $("btnLogin").disabled = isLoading;
+      $("btnLogin").textContent = isLoading ? "Login..." : "Login";
+    }
+
+    function buildUrl(params) {
+      const q = new URLSearchParams(params);
+      return `${BASE_URL}?${q.toString()}`;
+    }
+
+    // ====== API Calls ======
+    async function apiHealth() {
+      const url = buildUrl({ action: "health", key: API_KEY });
+      const res = await fetch(url, { method: "GET" });
+      return res.json();
+    }
+
+    async function apiLogin(email, password) {
+      const url = buildUrl({ action: "login", key: API_KEY });
+
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ email, password })
+      });
+
+      // Apps Script kadang-kadang pulang 200 tapi JSON error
+      const data = await res.json().catch(() => ({ ok:false, message:"Response bukan JSON" }));
+      return data;
+    }
+
+    // ====== UI Logic ======
+    $("btnHealth").addEventListener("click", async () => {
+      try {
+        showAlert("warn", "Testing API...");
+        const out = await apiHealth();
+        if (out && out.ok) {
+          showAlert("success", `API ok ✅ (${out.time || "no time"})`);
+        } else {
+          showAlert("error", `API tak ok ❌ ${out && (out.error || out.message) ? (out.error || out.message) : ""}`.trim());
+        }
+      } catch (e) {
+        showAlert("error", `API error ❌ ${String(e.message || e)}`);
+      }
+    });
+
+    $("btnClear").addEventListener("click", () => {
+      localStorage.removeItem("kkh_token");
+      localStorage.removeItem("kkh_user");
+      showAlert("success", "Token dah di-reset ✅");
+    });
+
+    $("loginForm").addEventListener("submit", async (ev) => {
+      ev.preventDefault();
+
+      const email = $("email").value.trim();
+      const password = $("password").value;
+
+      if (!email || !email.includes("@")) {
+        showAlert("error", "Email tak sah.");
+        return;
+      }
+      if (!password || password.length < 6) {
+        showAlert("error", "Password minimum 6 aksara.");
+        return;
+      }
+
+      try {
+        setLoading(true);
+        showAlert("warn", "Login sedang diproses...");
+
+        const out = await apiLogin(email, password);
+
+        if (out && (out.ok === true || out.success === true) && out.token) {
+          localStorage.setItem("kkh_token", out.token);
+          localStorage.setItem("kkh_user", JSON.stringify(out.user || {}));
+
+          showAlert("success", "Login berjaya ✅ redirect...");
+          setTimeout(() => {
+            // Kalau dashboard.html belum ada, tukar sini kemudian
+            window.location.href = "dashboard.html";
+          }, 500);
+          return;
+        }
+
+        // fallback message ikut backend kau
+        const msg = (out && (out.message || out.error)) ? (out.message || out.error) : "Email atau password salah";
+        showAlert("error", msg);
+
+      } catch (e) {
+        showAlert("error", `Login error ❌ ${String(e.message || e)}`);
+      } finally {
+        setLoading(false);
+      }
+    });
+
+    // Optional: auto-check token (kalau dah ada, bagi hint je)
+    (function boot() {
+      const t = localStorage.getItem("kkh_token");
+      if (t) {
+        showAlert("warn", "Token dah ada. Kalau nak login semula, tekan 'Reset token'.");
+      }
+    })();
+  </script>
 </body>
 </html>
