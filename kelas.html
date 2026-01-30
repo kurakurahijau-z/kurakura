@@ -3,203 +3,519 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>kura kura hijau — Kelas</title>
+  <title>Kura Kura Hijau — Kelas</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap">
+
+  <!-- ✅ 1) CONFIG GLOBAL -->
+  <script src="./config.js"></script>
 
   <style>
-    * { font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
-    body {
-      background: linear-gradient(-45deg, #e0f2fe, #dcfce7, #ecfccb, #dbeafe, #d1fae5);
-      background-size: 400% 400%;
-      animation: bgMove 18s ease infinite;
-    }
-    @keyframes bgMove {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
   </style>
 </head>
 
-<body class="min-h-screen flex items-center justify-center px-4">
-  <main class="w-full max-w-md">
-    <div class="bg-white/80 backdrop-blur rounded-3xl shadow-xl border border-white/60 p-7">
-      <div class="text-center mb-6">
-        <h1 class="text-3xl font-extrabold tracking-tight text-emerald-900">kura kura hijau</h1>
-        <p class="mt-2 text-sm text-slate-600">Login untuk akses kelas & kuiz.</p>
+<body class="min-h-screen bg-slate-50 text-slate-900">
+  <!-- Topbar -->
+  <header class="sticky top-0 z-10 bg-white/80 backdrop-blur border-b border-slate-200">
+    <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-emerald-600 text-white grid place-items-center font-bold">KK</div>
+        <div>
+          <div class="font-semibold leading-tight">Kura Kura Hijau</div>
+          <div class="text-xs text-slate-500 leading-tight">Kelas</div>
+        </div>
       </div>
 
-      <div id="alert" class="hidden mb-4 rounded-xl px-4 py-3 text-sm"></div>
-
-      <form id="loginForm" class="space-y-4">
-        <div>
-          <label class="block text-sm font-semibold text-slate-700 mb-1">Email</label>
-          <input id="email" type="email" autocomplete="username"
-            class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 outline-none focus:ring-2 focus:ring-emerald-300"
-            placeholder="nama@pms.edu.my" required />
-        </div>
-
-        <div>
-          <label class="block text-sm font-semibold text-slate-700 mb-1">Password</label>
-          <input id="password" type="password" autocomplete="current-password"
-            class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 outline-none focus:ring-2 focus:ring-emerald-300"
-            placeholder="••••••••" required />
-        </div>
-
-        <button id="btnLogin" type="submit"
-          class="w-full rounded-xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold py-3 transition disabled:opacity-60 disabled:cursor-not-allowed">
-          Login
+      <div class="flex items-center gap-2">
+        <button id="btnLogout"
+          class="hidden px-3 py-2 rounded-xl border border-slate-300 hover:bg-slate-100 text-sm">
+          Logout
         </button>
-
-        <div class="flex items-center justify-between pt-2">
-          <button id="btnHealth" type="button"
-            class="text-sm font-semibold text-slate-700 hover:text-slate-900 underline decoration-slate-300">
-            Test API
-          </button>
-
-          <button id="btnClear" type="button"
-            class="text-sm font-semibold text-slate-700 hover:text-slate-900 underline decoration-slate-300">
-            Reset token
-          </button>
-        </div>
-      </form>
-
-      <div class="mt-6 text-center text-xs text-slate-500">
-        © 2026 kura kura hijau
       </div>
     </div>
+  </header>
+
+  <main class="max-w-5xl mx-auto px-4 py-6">
+    <!-- Status bar -->
+    <div id="statusBar" class="mb-4 hidden">
+      <div class="p-3 rounded-2xl border border-slate-200 bg-white flex items-start gap-3">
+        <div class="w-2.5 h-2.5 rounded-full mt-1.5 bg-slate-400" id="statusDot"></div>
+        <div class="flex-1">
+          <div class="font-medium" id="statusTitle">Status</div>
+          <div class="text-sm text-slate-600" id="statusMsg">...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gate: need login -->
+    <section id="gateLogin" class="hidden">
+      <div class="p-5 rounded-3xl border border-slate-200 bg-white">
+        <h1 class="text-xl font-semibold">Login dulu</h1>
+        <p class="text-slate-600 mt-1 text-sm">
+          Page ini perlukan <span class="font-medium">token</span>. Kalau belum login, pergi ke <span class="font-medium">index.html</span>.
+        </p>
+
+        <div class="mt-4 flex flex-col sm:flex-row gap-2">
+          <a href="./index.html"
+             class="inline-flex items-center justify-center px-4 py-2 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 text-sm">
+            Pergi Index (Login)
+          </a>
+          <button id="btnClearToken"
+             class="inline-flex items-center justify-center px-4 py-2 rounded-xl border border-slate-300 hover:bg-slate-100 text-sm">
+            Buang token (reset)
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main content -->
+    <section id="app" class="hidden space-y-6">
+      <!-- Welcome -->
+      <div class="p-5 rounded-3xl border border-slate-200 bg-white">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <div class="text-sm text-slate-500">Logged in as</div>
+            <div class="text-lg font-semibold" id="userName">...</div>
+            <div class="text-sm text-slate-600" id="userMeta">...</div>
+          </div>
+
+          <div class="flex gap-2">
+            <button id="btnRefresh"
+              class="px-4 py-2 rounded-xl border border-slate-300 hover:bg-slate-100 text-sm">
+              Refresh
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Admin: Create class -->
+      <section id="adminCreate" class="hidden">
+        <div class="p-5 rounded-3xl border border-slate-200 bg-white">
+          <h2 class="text-lg font-semibold">Admin: Create Class</h2>
+          <p class="text-sm text-slate-600 mt-1">Bina kelas baru, kemudian bagi student class code.</p>
+
+          <div class="mt-4 grid grid-cols-1 md:grid-cols-4 gap-3">
+            <div class="md:col-span-2">
+              <label class="text-sm text-slate-600">Class name</label>
+              <input id="inClassName" class="mt-1 w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                     placeholder="Contoh: DUP4A / Accounting / etc" />
+            </div>
+            <div>
+              <label class="text-sm text-slate-600">Year</label>
+              <input id="inYear" class="mt-1 w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                     placeholder="2026" />
+            </div>
+            <div>
+              <label class="text-sm text-slate-600">Semester</label>
+              <input id="inSemester" class="mt-1 w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                     placeholder="S1 / S2" />
+            </div>
+          </div>
+
+          <div class="mt-4 flex flex-col sm:flex-row gap-2">
+            <button id="btnCreateClass"
+              class="px-4 py-2 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 text-sm">
+              Create Class
+            </button>
+            <div class="text-sm text-slate-600 flex-1" id="createHint"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Student: Enroll -->
+      <section id="studentEnroll" class="hidden">
+        <div class="p-5 rounded-3xl border border-slate-200 bg-white">
+          <h2 class="text-lg font-semibold">Student: Enroll Class</h2>
+          <p class="text-sm text-slate-600 mt-1">Masukkan class code yang lecturer bagi.</p>
+
+          <div class="mt-4 flex flex-col sm:flex-row gap-3">
+            <input id="inClassCode" class="flex-1 px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                   placeholder="Contoh: PMS-FAIZAL-2026-S1-DUP4A" />
+            <button id="btnEnroll"
+              class="px-4 py-2 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 text-sm">
+              Enroll
+            </button>
+          </div>
+          <div class="mt-2 text-sm text-slate-600" id="enrollHint"></div>
+        </div>
+      </section>
+
+      <!-- My enrollments / Classes -->
+      <section>
+        <div class="p-5 rounded-3xl border border-slate-200 bg-white">
+          <div class="flex items-center justify-between gap-3">
+            <h2 class="text-lg font-semibold" id="listTitle">Kelas</h2>
+            <button id="btnLoad"
+              class="px-3 py-2 rounded-xl border border-slate-300 hover:bg-slate-100 text-sm">
+              Load
+            </button>
+          </div>
+
+          <div class="mt-4 overflow-x-auto">
+            <table class="min-w-full text-sm">
+              <thead class="text-slate-500">
+                <tr class="border-b">
+                  <th class="text-left py-2 pr-4">Class</th>
+                  <th class="text-left py-2 pr-4">Year</th>
+                  <th class="text-left py-2 pr-4">Semester</th>
+                  <th class="text-left py-2 pr-4">Status</th>
+                  <th class="text-left py-2 pr-0">Action</th>
+                </tr>
+              </thead>
+              <tbody id="tblBody">
+                <tr><td class="py-3 text-slate-500" colspan="5">Belum load…</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="mt-3 text-xs text-slate-500">
+            Tip: Student akan nampak “My Enrollments”, Admin akan nampak “All Classes”.
+          </div>
+        </div>
+      </section>
+    </section>
   </main>
 
   <script>
-    // ====== CONFIG (DAH FIX, TAK PAYAH EDIT) ======
-    const BASE_URL = "https://script.google.com/macros/s/AKfycbzeD9VIaDzvbtllYJSWuk7duqEMCdDfXJE8zakhe_S_-5h4cQe9180RaEh77fDuq5IheQ/exec";
-    const API_KEY  = "PPF-KEY-2026-FAIZAL-SECRET";
+    // ====== CONFIG (from config.js) ======
+    const { BASE_URL, API_KEY } = window.APP_CONFIG || {};
+
+    // ====== Storage keys ======
+    const LS_TOKEN = 'kkh_token';
+    const LS_USER  = 'kkh_user';
+
+    // ====== UI refs ======
+    const gateLogin = document.getElementById('gateLogin');
+    const app = document.getElementById('app');
+
+    const statusBar = document.getElementById('statusBar');
+    const statusDot = document.getElementById('statusDot');
+    const statusTitle = document.getElementById('statusTitle');
+    const statusMsg = document.getElementById('statusMsg');
+
+    const userName = document.getElementById('userName');
+    const userMeta = document.getElementById('userMeta');
+
+    const btnLogout = document.getElementById('btnLogout');
+    const btnClearToken = document.getElementById('btnClearToken');
+    const btnRefresh = document.getElementById('btnRefresh');
+    const btnLoad = document.getElementById('btnLoad');
+
+    const adminCreate = document.getElementById('adminCreate');
+    const studentEnroll = document.getElementById('studentEnroll');
+
+    const inClassName = document.getElementById('inClassName');
+    const inYear = document.getElementById('inYear');
+    const inSemester = document.getElementById('inSemester');
+    const btnCreateClass = document.getElementById('btnCreateClass');
+    const createHint = document.getElementById('createHint');
+
+    const inClassCode = document.getElementById('inClassCode');
+    const btnEnroll = document.getElementById('btnEnroll');
+    const enrollHint = document.getElementById('enrollHint');
+
+    const listTitle = document.getElementById('listTitle');
+    const tblBody = document.getElementById('tblBody');
 
     // ====== Helpers ======
-    const $ = (id) => document.getElementById(id);
-
-    function showAlert(type, msg) {
-      const el = $("alert");
-      el.classList.remove("hidden");
-      el.textContent = msg;
-
-      // reset classes
-      el.className = "mb-4 rounded-xl px-4 py-3 text-sm";
-
-      if (type === "success") {
-        el.classList.add("bg-emerald-100", "text-emerald-900", "border", "border-emerald-200");
-      } else if (type === "warn") {
-        el.classList.add("bg-amber-100", "text-amber-900", "border", "border-amber-200");
-      } else {
-        el.classList.add("bg-rose-100", "text-rose-900", "border", "border-rose-200");
-      }
+    function showStatus(type, title, msg) {
+      statusBar.classList.remove('hidden');
+      statusTitle.textContent = title || 'Status';
+      statusMsg.textContent = msg || '';
+      statusDot.className = 'w-2.5 h-2.5 rounded-full mt-1.5 ' + (
+        type === 'ok' ? 'bg-emerald-500' :
+        type === 'warn' ? 'bg-amber-500' :
+        'bg-rose-500'
+      );
     }
 
-    function setLoading(isLoading) {
-      $("btnLogin").disabled = isLoading;
-      $("btnLogin").textContent = isLoading ? "Login..." : "Login";
+    function hideStatus() {
+      statusBar.classList.add('hidden');
     }
 
-    function buildUrl(params) {
-      const q = new URLSearchParams(params);
-      return `${BASE_URL}?${q.toString()}`;
+    function getToken() {
+      return localStorage.getItem(LS_TOKEN) || '';
     }
 
-    // ====== API Calls ======
-    async function apiHealth() {
-      const url = buildUrl({ action: "health", key: API_KEY });
-      const res = await fetch(url, { method: "GET" });
-      return res.json();
+    function setToken(token) {
+      localStorage.setItem(LS_TOKEN, token || '');
     }
 
-    async function apiLogin(email, password) {
-      const url = buildUrl({ action: "login", key: API_KEY });
+    function setUser(user) {
+      localStorage.setItem(LS_USER, JSON.stringify(user || {}));
+    }
 
-      const res = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ email, password })
+    function getUser() {
+      try { return JSON.parse(localStorage.getItem(LS_USER) || '{}'); }
+      catch { return {}; }
+    }
+
+    async function apiGet(action, params = {}) {
+      if (!BASE_URL || !API_KEY) throw new Error('Missing BASE_URL / API_KEY in config.js');
+
+      const url = new URL(BASE_URL);
+      url.searchParams.set('action', action);
+      url.searchParams.set('key', API_KEY);
+
+      Object.entries(params).forEach(([k,v]) => {
+        if (v !== undefined && v !== null && String(v).length) url.searchParams.set(k, v);
       });
 
-      // Apps Script kadang-kadang pulang 200 tapi JSON error
-      const data = await res.json().catch(() => ({ ok:false, message:"Response bukan JSON" }));
+      const res = await fetch(url.toString(), { method: 'GET' });
+      const data = await res.json();
       return data;
     }
 
-    // ====== UI Logic ======
-    $("btnHealth").addEventListener("click", async () => {
+    async function apiPost(action, body = {}, params = {}) {
+      if (!BASE_URL || !API_KEY) throw new Error('Missing BASE_URL / API_KEY in config.js');
+
+      const url = new URL(BASE_URL);
+      url.searchParams.set('action', action);
+      url.searchParams.set('key', API_KEY);
+
+      Object.entries(params).forEach(([k,v]) => {
+        if (v !== undefined && v !== null && String(v).length) url.searchParams.set(k, v);
+      });
+
+      const res = await fetch(url.toString(), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body || {})
+      });
+      const data = await res.json();
+      return data;
+    }
+
+    function renderRows(rows, role, enrolledMode) {
+      if (!rows || rows.length === 0) {
+        tblBody.innerHTML = `<tr><td class="py-3 text-slate-500" colspan="5">Tiada data.</td></tr>`;
+        return;
+      }
+
+      tblBody.innerHTML = rows.map(r => {
+        const className = r.className || '(no name)';
+        const year = r.year || '';
+        const semester = r.semester || '';
+        const isActive = String(r.isActive || '').toLowerCase() === 'true';
+        const status = enrolledMode ? 'enrolled' : (isActive ? 'active' : 'inactive');
+
+        // Action: go to dashboard with classId
+        const classId = r.classId || '';
+        const btn = classId
+          ? `<button class="px-3 py-1.5 rounded-xl bg-slate-900 text-white hover:bg-slate-800 text-xs"
+                     data-go="${classId}">Open</button>`
+          : `<span class="text-xs text-slate-400">-</span>`;
+
+        return `
+          <tr class="border-b last:border-b-0">
+            <td class="py-2 pr-4">
+              <div class="font-medium">${escapeHtml(className)}</div>
+              ${role === 'admin' && r.classCode ? `<div class="text-xs text-slate-500">${escapeHtml(r.classCode)}</div>` : ''}
+            </td>
+            <td class="py-2 pr-4">${escapeHtml(year)}</td>
+            <td class="py-2 pr-4">${escapeHtml(semester)}</td>
+            <td class="py-2 pr-4">
+              <span class="inline-flex items-center px-2 py-1 rounded-lg text-xs border border-slate-200 bg-slate-50">
+                ${escapeHtml(status)}
+              </span>
+            </td>
+            <td class="py-2 pr-0">${btn}</td>
+          </tr>
+        `;
+      }).join('');
+
+      // bind buttons
+      tblBody.querySelectorAll('[data-go]').forEach(el => {
+        el.addEventListener('click', () => {
+          const classId = el.getAttribute('data-go');
+          // future: go dashboard page
+          // for now: just show classId
+          showStatus('ok', 'Class selected', `classId: ${classId}`);
+          // location.href = `./dashboard.html?classId=${encodeURIComponent(classId)}`;
+        });
+      });
+    }
+
+    function escapeHtml(s) {
+      return String(s || '')
+        .replaceAll('&','&amp;')
+        .replaceAll('<','&lt;')
+        .replaceAll('>','&gt;')
+        .replaceAll('"','&quot;')
+        .replaceAll("'","&#039;");
+    }
+
+    async function boot() {
+      hideStatus();
+
+      // basic config sanity
+      if (!BASE_URL || !API_KEY) {
+        gateLogin.classList.remove('hidden');
+        showStatus('err', 'Config belum ada', 'Pastikan config.js ada BASE_URL dan API_KEY.');
+        return;
+      }
+
+      const token = getToken();
+      if (!token) {
+        gateLogin.classList.remove('hidden');
+        app.classList.add('hidden');
+        btnLogout.classList.add('hidden');
+        showStatus('warn', 'Token tak jumpa', 'Pergi index.html untuk login. Lepas login, token akan tersimpan.');
+        return;
+      }
+
+      gateLogin.classList.add('hidden');
+      app.classList.remove('hidden');
+      btnLogout.classList.remove('hidden');
+
+      await loadMe();
+    }
+
+    async function loadMe() {
       try {
-        showAlert("warn", "Testing API...");
-        const out = await apiHealth();
-        if (out && out.ok) {
-          showAlert("success", `API ok ✅ (${out.time || "no time"})`);
+        showStatus('warn', 'Loading…', 'Semak token & profile…');
+        const token = getToken();
+        const res = await apiGet('me', { token });
+
+        if (!res.ok) throw new Error(res.error || 'ME failed');
+
+        setUser(res.user);
+        const u = res.user || {};
+        userName.textContent = u.name || '(no name)';
+        userMeta.textContent = `${u.email || ''} • role: ${u.role || ''}`;
+
+        // role-aware UI
+        const role = String(u.role || '').toLowerCase();
+        if (role === 'admin') {
+          adminCreate.classList.remove('hidden');
+          studentEnroll.classList.add('hidden');
+          listTitle.textContent = 'All Classes (Admin)';
         } else {
-          showAlert("error", `API tak ok ❌ ${out && (out.error || out.message) ? (out.error || out.message) : ""}`.trim());
+          adminCreate.classList.add('hidden');
+          studentEnroll.classList.remove('hidden');
+          listTitle.textContent = 'My Enrollments (Student)';
         }
-      } catch (e) {
-        showAlert("error", `API error ❌ ${String(e.message || e)}`);
+
+        showStatus('ok', 'Ready', 'Token valid. Kau boleh load kelas sekarang.');
+      } catch (err) {
+        console.error(err);
+        showStatus('err', 'Token problem', String(err.message || err));
+        // fallback: force relogin
+        app.classList.add('hidden');
+        gateLogin.classList.remove('hidden');
+        btnLogout.classList.add('hidden');
       }
-    });
+    }
 
-    $("btnClear").addEventListener("click", () => {
-      localStorage.removeItem("kkh_token");
-      localStorage.removeItem("kkh_user");
-      showAlert("success", "Token dah di-reset ✅");
-    });
-
-    $("loginForm").addEventListener("submit", async (ev) => {
-      ev.preventDefault();
-
-      const email = $("email").value.trim();
-      const password = $("password").value;
-
-      if (!email || !email.includes("@")) {
-        showAlert("error", "Email tak sah.");
-        return;
-      }
-      if (!password || password.length < 6) {
-        showAlert("error", "Password minimum 6 aksara.");
-        return;
-      }
-
+    async function loadList() {
       try {
-        setLoading(true);
-        showAlert("warn", "Login sedang diproses...");
+        const u = getUser();
+        const role = String(u.role || '').toLowerCase();
+        const token = getToken();
 
-        const out = await apiLogin(email, password);
+        showStatus('warn', 'Loading…', role === 'admin' ? 'Ambil senarai kelas…' : 'Ambil senarai enrollment…');
 
-        if (out && (out.ok === true || out.success === true) && out.token) {
-          localStorage.setItem("kkh_token", out.token);
-          localStorage.setItem("kkh_user", JSON.stringify(out.user || {}));
+        if (role === 'admin') {
+          const res = await apiGet('listClasses', { token });
+          if (!res.ok) throw new Error(res.error || 'listClasses failed');
+          renderRows(res.classes || [], 'admin', false);
+        } else {
+          const res = await apiGet('myEnrollments', { token });
+          if (!res.ok) throw new Error(res.error || 'myEnrollments failed');
 
-          showAlert("success", "Login berjaya ✅ redirect...");
-          setTimeout(() => {
-            // Kalau dashboard.html belum ada, tukar sini kemudian
-            window.location.href = "dashboard.html";
-          }, 500);
+          // normalize shape to match table renderer
+          const rows = (res.enrollments || []).map(e => ({
+            classId: e.classId,
+            className: e.className,
+            year: e.year,
+            semester: e.semester,
+            isActive: e.isActive
+          }));
+
+          renderRows(rows, 'student', true);
+        }
+
+        showStatus('ok', 'Loaded', 'Senarai dah masuk.');
+      } catch (err) {
+        console.error(err);
+        showStatus('err', 'Load gagal', String(err.message || err));
+      }
+    }
+
+    // ====== Actions ======
+    btnLogout.addEventListener('click', () => {
+      localStorage.removeItem(LS_TOKEN);
+      localStorage.removeItem(LS_USER);
+      location.href = './index.html';
+    });
+
+    btnClearToken.addEventListener('click', () => {
+      localStorage.removeItem(LS_TOKEN);
+      localStorage.removeItem(LS_USER);
+      showStatus('ok', 'Token dibuang', 'Pergi index.html untuk login semula.');
+    });
+
+    btnRefresh.addEventListener('click', loadMe);
+    btnLoad.addEventListener('click', loadList);
+
+    btnCreateClass.addEventListener('click', async () => {
+      try {
+        createHint.textContent = '';
+        const token = getToken();
+        const className = (inClassName.value || '').trim();
+        const year = (inYear.value || '').trim();
+        const semester = (inSemester.value || '').trim();
+
+        if (!className || !year || !semester) {
+          createHint.textContent = 'Isi className, year, semester.';
           return;
         }
 
-        // fallback message ikut backend kau
-        const msg = (out && (out.message || out.error)) ? (out.message || out.error) : "Email atau password salah";
-        showAlert("error", msg);
+        showStatus('warn', 'Creating…', 'Bina kelas baru…');
+        const res = await apiPost('createClass',
+          { className, year, semester },
+          { token }
+        );
 
-      } catch (e) {
-        showAlert("error", `Login error ❌ ${String(e.message || e)}`);
-      } finally {
-        setLoading(false);
+        if (!res.ok) throw new Error(res.error || 'createClass failed');
+
+        const cls = res.class || {};
+        showStatus('ok', 'Class created', `Class code: ${cls.classCode || '(no code)'}`);
+        createHint.textContent = `Class code: ${cls.classCode || ''}`;
+        await loadList();
+      } catch (err) {
+        console.error(err);
+        showStatus('err', 'Create gagal', String(err.message || err));
       }
     });
 
-    // Optional: auto-check token (kalau dah ada, bagi hint je)
-    (function boot() {
-      const t = localStorage.getItem("kkh_token");
-      if (t) {
-        showAlert("warn", "Token dah ada. Kalau nak login semula, tekan 'Reset token'.");
+    btnEnroll.addEventListener('click', async () => {
+      try {
+        enrollHint.textContent = '';
+        const token = getToken();
+        const classCode = (inClassCode.value || '').trim();
+        if (!classCode) {
+          enrollHint.textContent = 'Masukkan class code.';
+          return;
+        }
+
+        showStatus('warn', 'Enrolling…', 'Daftar masuk kelas…');
+        const res = await apiPost('enroll', { classCode }, { token });
+
+        if (!res.ok) throw new Error(res.error || 'enroll failed');
+
+        showStatus('ok', 'Enrolled', `classId: ${res.classId || ''}`);
+        enrollHint.textContent = 'Enroll berjaya.';
+        await loadList();
+      } catch (err) {
+        console.error(err);
+        showStatus('err', 'Enroll gagal', String(err.message || err));
       }
-    })();
+    });
+
+    // ====== Start ======
+    boot();
   </script>
 </body>
 </html>
