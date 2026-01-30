@@ -1,23 +1,64 @@
 <!doctype html>
 <html lang="ms">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kelas – kura kura hijau</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kelas | kura kura hijau</title>
 
+  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Font -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
   <style>
     * { font-family: 'Inter', sans-serif; }
+
+    body {
+      background: linear-gradient(
+        -45deg,
+        #e0f2fe,
+        #f0fdf4,
+        #ecfccb,
+        #cffafe,
+        #dbeafe
+      );
+      background-size: 400% 400%;
+      animation: gradientMove 20s ease infinite;
+    }
+
+    @keyframes gradientMove {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
   </style>
 </head>
 
-<body class="min-h-screen bg-slate-50 flex items-center justify-center">
+<body class="min-h-screen flex items-center justify-center px-6">
 
-  <h1 class="text-3xl font-bold text-slate-800">
-    Halaman Kelas (akan datang)
-  </h1>
+  <div class="bg-white/80 backdrop-blur-md rounded-2xl shadow-lg px-10 py-12 text-center max-w-sm w-full">
+
+    <h1 class="text-3xl font-semibold text-emerald-700 mb-2">
+      kura kura hijau
+    </h1>
+
+    <p class="text-gray-600 mb-8">
+      Portal Kelas
+    </p>
+
+    <button
+      class="w-full py-3 rounded-xl font-semibold text-white
+             bg-gradient-to-r from-emerald-500 to-teal-500
+             hover:opacity-90 transition mb-4">
+      Log Masuk
+    </button>
+
+    <a href="index.html" class="text-sm text-gray-500 hover:text-gray-700">
+      ← Kembali ke Home
+    </a>
+
+  </div>
 
 </body>
 </html>
