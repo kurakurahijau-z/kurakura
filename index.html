@@ -77,9 +77,11 @@
 
   <script>
     const CFG = window.APP_CONFIG || {};
-    const BASE = CFG.BASE_URL || "";
-    const KEY  = CFG.API_KEY || "";
-    const TOKEN_KEY = CFG.TOKEN_KEY || "kk_token";
+
+    // normalize (trim) supaya tak ada whitespace pelik
+    const BASE = String(CFG.BASE_URL || "").trim();
+    const KEY  = String(CFG.API_KEY || "").trim();
+    const TOKEN_KEY = String(CFG.TOKEN_KEY || "kk_token").trim();
 
     const $ = (id) => document.getElementById(id);
 
@@ -98,16 +100,33 @@
       label.textContent = text;
     }
 
+    function configOk_() {
+      if (!BASE) return { ok:false, error:"BASE_URL kosong. config.js tak load atau broken." };
+      if (!KEY)  return { ok:false, error:"API_KEY kosong. config.js tak load atau broken." };
+      // ensure BASE is a valid absolute URL
+      try { new URL(BASE); } catch (e) {
+        return { ok:false, error:"BASE_URL tak sah. Pastikan link /exec betul." };
+      }
+      return { ok:true };
+    }
+
     async function apiGet(action, params={}) {
+      const chk = configOk_();
+      if (!chk.ok) return { ok:false, error: chk.error };
+
       const url = new URL(BASE);
       url.searchParams.set("action", action);
       url.searchParams.set("key", KEY);
       Object.entries(params).forEach(([k,v]) => url.searchParams.set(k, v));
+
       const res = await fetch(url.toString(), { method: "GET" });
       return res.json();
     }
 
     async function apiPost(action, body={}, params={}) {
+      const chk = configOk_();
+      if (!chk.ok) return { ok:false, error: chk.error };
+
       const url = new URL(BASE);
       url.searchParams.set("action", action);
       url.searchParams.set("key", KEY);
@@ -122,6 +141,13 @@
     }
 
     async function testApi() {
+      const chk = configOk_();
+      if (!chk.ok) {
+        setApiStatus(false, "API error ❌");
+        setMsg(chk.error, false);
+        return;
+      }
+
       try {
         const data = await apiGet("health");
         if (data && data.ok) {
@@ -146,7 +172,9 @@
       const email = ($("email").value || "").trim();
       const password = ($("password").value || "");
 
-      if (!BASE || !KEY) return setMsg("config.js belum betul (BASE_URL / API_KEY kosong).", false);
+      const chk = configOk_();
+      if (!chk.ok) return setMsg(chk.error, false);
+
       if (!email || email.indexOf("@") < 1) return setMsg("Email tak sah.", false);
       if (!password) return setMsg("Password diperlukan.", false);
 
@@ -158,17 +186,13 @@
           return setMsg(data.error || data.message || "Login gagal.", false);
         }
 
-        // SIMPAN TOKEN (ini yang selalu orang tertinggal)
         localStorage.setItem(TOKEN_KEY, data.token);
-
-        // redirect terus ke kelas.html
         window.location.href = "./kelas.html";
       } catch (e) {
         setMsg(String(e.message || e), false);
       }
     }
 
-    // Button wiring
     $("btnTest").addEventListener("click", testApi);
     $("btnReset").addEventListener("click", resetToken);
     $("btnLogin").addEventListener("click", doLogin);
@@ -177,7 +201,7 @@
       window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
     });
 
-    // Auto test API on load (optional)
+    // Auto test (takkan crash walaupun config rosak)
     testApi();
   </script>
 </body>
