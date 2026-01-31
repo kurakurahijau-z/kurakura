@@ -3,17 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Kelas — kura kura hijau</title>
+  <title>Kelas - kura kura hijau</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
-
   <link rel="stylesheet" href="./theme.css" />
   <script src="./config.js"></script>
 </head>
 
 <body>
   <div class="stage">
-    <!-- Topbar -->
     <header class="topbar">
       <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
         <div class="flex items-center gap-3">
@@ -24,282 +22,223 @@
           </div>
         </div>
 
-        <button id="btnLogout" class="px-4 py-2 rounded-2xl border border-emerald-200 bg-white/70 hover:bg-white font-semibold">
+        <button id="logoutBtn" class="px-4 py-2 rounded-xl border border-emerald-200 bg-white/70 font-semibold">
           Log keluar
         </button>
       </div>
     </header>
 
-    <main class="max-w-5xl mx-auto px-4 py-12">
-      <div class="text-center">
-        <h1 class="text-5xl font-extrabold text-emerald-900">Senarai Kelas</h1>
-        <p class="mt-3 text-slate-600">Kelas yang tersedia untuk akaun anda.</p>
-        <div id="status" class="mt-4 text-sm"></div>
+    <main class="max-w-5xl mx-auto px-4 py-10">
+      <div class="text-center mt-6 mb-10">
+        <h1 class="text-6xl font-extrabold tracking-tight text-emerald-900">Senarai Kelas</h1>
+        <p class="mt-3 text-slate-700">Kelas yang tersedia untuk akaun anda.</p>
+        <div id="status" class="mt-4 text-sm font-semibold text-red-600"></div>
       </div>
 
-      <div class="mt-10 grid gap-6 md:grid-cols-2">
-        <!-- Left: Kelas -->
-        <section class="card">
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="card">
           <div class="flex items-center justify-between">
-            <div class="font-bold text-lg">Kelas Aktif</div>
-            <button id="btnRefresh" class="text-emerald-700 font-semibold hover:underline">Refresh</button>
+            <div class="text-xl font-bold">Kelas Aktif</div>
+            <button id="refreshBtn" class="text-emerald-700 font-semibold hover:underline">Refresh</button>
           </div>
-          <div id="kelasList" class="mt-4 text-sm text-slate-600">Loading kelas...</div>
-        </section>
+          <div id="kelasList" class="mt-4 text-slate-700 text-sm">Loading kelas...</div>
+        </div>
 
-        <!-- Right: Join / Create (role-aware bila me() ada isAdmin) -->
-        <section class="card">
-          <div class="font-bold text-lg">Aksi</div>
-          <div class="text-sm text-slate-500 mt-1" id="who"></div>
+        <div class="card">
+          <div class="text-xl font-bold">Aksi</div>
 
-          <div class="mt-5 space-y-4">
-            <div>
-              <div class="text-sm font-semibold">Join kelas (student)</div>
-              <div class="text-xs text-slate-500">Masukkan class code.</div>
-              <div class="mt-2 flex gap-2">
-                <input id="classCode" class="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-white/70"
-                  placeholder="cth: PMS-ABC123" />
-                <button id="btnJoin" class="btn-primary">Join</button>
-              </div>
-              <div id="joinMsg" class="text-sm mt-2"></div>
+          <div id="aksiStudent" class="mt-4">
+            <div class="font-semibold">Join kelas (student)</div>
+            <div class="text-sm text-slate-600">Masukkan class code.</div>
+            <div class="mt-3 flex gap-2">
+              <input id="classCode" placeholder="cth: PMS-ABC123"
+                class="w-full rounded-xl border border-slate-200 px-4 py-3 outline-none focus:ring-2 focus:ring-emerald-200 bg-white/80" />
+              <button id="joinBtn" class="btn-primary">Join</button>
             </div>
-
-            <div id="adminBox" class="hidden">
-              <div class="text-sm font-semibold">Create kelas (admin)</div>
-              <div class="text-xs text-slate-500">Nama kelas untuk dijana.</div>
-              <div class="mt-2 space-y-2">
-                <input id="className" class="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-white/70"
-                  placeholder="cth: DUP4A Accounting" />
-                <button id="btnCreate" class="btn-primary w-full">Create</button>
-                <div id="createMsg" class="text-sm mt-1"></div>
-              </div>
-            </div>
-
-            <div class="pt-2 text-xs text-slate-400" id="debug"></div>
           </div>
-        </section>
+
+          <div id="aksiAdmin" class="mt-4 hidden">
+            <div class="font-semibold">Admin mode</div>
+            <div class="text-sm text-slate-600">Admin akan nampak semua kelas (listClasses).</div>
+          </div>
+
+          <div id="aksiMsg" class="mt-4 text-sm"></div>
+        </div>
       </div>
     </main>
   </div>
 
   <script>
-    // ---------- CONFIG ----------
     const CFG = window.APP_CONFIG || {};
-    const BASE = (CFG.BASE_URL || "").trim();
-    const KEY  = (CFG.API_KEY || "").trim();
-    const TOKEN_KEY = (CFG.TOKEN_KEY || "kk_token").trim();
+    const BASE_URL = CFG.BASE_URL || "";
+    const API_KEY = CFG.API_KEY || "";
+    const TOKEN_KEY = CFG.TOKEN_KEY || "kk_token";
 
-    const $ = (id) => document.getElementById(id);
-
-    function setStatus(text, ok=true){
-      const el = $("status");
-      el.textContent = text || "";
-      el.className = ok ? "mt-4 text-sm text-emerald-700" : "mt-4 text-sm text-rose-700";
-    }
-
-    function setSmallMsg(id, text, ok=true){
-      const el = $(id);
-      el.textContent = text || "";
-      el.className = ok ? "text-sm text-emerald-700" : "text-sm text-rose-700";
-    }
-
-    function getToken(){
-      return localStorage.getItem(TOKEN_KEY) || "";
-    }
-
-    function buildUrl(action, params={}){
-      if (!BASE) throw new Error("BASE_URL kosong. Semak config.js.");
-      const url = new URL(BASE);
-      url.searchParams.set("action", action);
-      if (KEY) url.searchParams.set("key", KEY);
-      Object.entries(params).forEach(([k,v]) => {
-        if (v !== undefined && v !== null && String(v).length) url.searchParams.set(k, v);
+    function qs(obj) {
+      const p = new URLSearchParams();
+      Object.entries(obj || {}).forEach(([k,v]) => {
+        if (v !== undefined && v !== null && String(v).length) p.set(k, v);
       });
-      return url.toString();
+      return p.toString();
     }
 
-    async function apiGet(action, params={}){
-      const res = await fetch(buildUrl(action, params), { method: "GET" });
-      return await res.json();
+    function apiUrl(action, extraParams) {
+      const q = qs({ action, key: API_KEY, ...(extraParams||{}) });
+      return `${BASE_URL}?${q}`;
     }
 
-    async function apiPost(action, body={}, params={}){
-      const res = await fetch(buildUrl(action, params), {
+    function cleanToken(t) {
+      if (!t) return "";
+      t = String(t).trim();
+      if (t.toLowerCase().startsWith("bearer ")) t = t.slice(7).trim();
+      t = t.replace(/^"+|"+$/g, "");
+      return t.trim();
+    }
+
+    function getToken() {
+      return cleanToken(localStorage.getItem(TOKEN_KEY));
+    }
+    function clearToken() {
+      localStorage.removeItem(TOKEN_KEY);
+    }
+
+    function setStatus(msg) {
+      document.getElementById("status").textContent = msg || "";
+    }
+    function setAksiMsg(msg, type="info") {
+      const el = document.getElementById("aksiMsg");
+      el.textContent = msg || "";
+      el.className = "mt-4 text-sm " + (type==="err" ? "text-red-600" : type==="ok" ? "text-emerald-700" : "text-slate-700");
+    }
+
+    async function apiGet(action, params) {
+      const token = getToken();
+      const url = apiUrl(action, { token, ...(params||{}) });
+      const r = await fetch(url);
+      return await r.json();
+    }
+
+    async function apiPost(action, body) {
+      const token = getToken();
+      const url = apiUrl(action, { token });
+      const r = await fetch(url, {
         method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body || {})
       });
-      return await res.json();
+      return await r.json();
     }
 
-    // ---------- LOAD ME + CLASSES ----------
+    // --------- main flow ----------
     let ME = null;
 
-    async function loadMe(){
-      const token = getToken();
-      if (!token){
-        setStatus("Token tak jumpa. Pergi index.html untuk login.", false);
-        $("kelasList").textContent = "Tiada token.";
-        return null;
+    async function validateMe() {
+      if (!BASE_URL || !API_KEY) {
+        setStatus("config.js belum betul (BASE_URL / API_KEY).");
+        return false;
       }
 
-      try{
-        const data = await apiGet("me", { token });
-        if (!data || !data.ok){
-          setStatus(data?.error || data?.message || "Token tak sah. Sila login semula.", false);
-          return null;
-        }
-        ME = data.user || data.me || data;
-        return ME;
-      }catch(e){
-        setStatus("Failed to fetch (network/CORS/BASE_URL).", false);
-        return null;
+      const token = getToken();
+      if (!token) {
+        window.location.href = "./index.html";
+        return false;
+      }
+
+      try {
+        const j = await apiGet("me");
+        if (!j.ok) throw new Error(j.error || j.message || "Token invalid");
+        ME = j.user;
+        return true;
+      } catch (e) {
+        // ini part paling penting untuk error "Invalid token format"
+        clearToken();
+        setStatus("Token rosak / invalid. Aku clear token. Sila login semula.");
+        setTimeout(() => window.location.href = "./index.html", 900);
+        return false;
       }
     }
 
-    // IMPORTANT: action ni ikut backend kau.
-    // Kalau backend kau guna nama lain (contoh: listClasses / myClasses), bagitahu aku — aku adjust.
-    async function loadClasses(){
-      const token = getToken();
-      $("kelasList").textContent = "Loading kelas...";
-      try{
-        // Cuba beberapa nama action yang biasa orang guna (fallback)
-        const tries = ["listClasses", "myClasses", "classes"];
-        let data = null;
-
-        for (const act of tries){
-          data = await apiGet(act, { token });
-          if (data && data.ok) { data.__act = act; break; }
-        }
-
-        if (!data || !data.ok){
-          $("kelasList").textContent = "";
-          setStatus(data?.error || data?.message || "Tak dapat load kelas (action tak match backend).", false);
-          return;
-        }
-
-        const classes = data.classes || data.items || [];
-        $("debug").textContent = `loadClasses action: ${data.__act || "unknown"} | count: ${classes.length}`;
-
-        if (!classes.length){
-          $("kelasList").innerHTML = "<div class='text-slate-600'>Belum ada kelas untuk akaun ini.</div>";
-          setStatus("Ok. Tiada kelas lagi.", true);
-          return;
-        }
-
-        $("kelasList").innerHTML = classes.map(c => {
-          const name = c.name || c.className || "Untitled";
-          const code = c.code || c.classCode || "";
-          const id = c.id || c.classId || "";
-          return `
-            <div class="p-4 rounded-2xl bg-white/60 border border-white/60 mb-3">
-              <div class="font-semibold">${escapeHtml(name)}</div>
-              <div class="text-xs text-slate-500 mt-1">Code: <span class="font-mono">${escapeHtml(code)}</span></div>
-              <div class="text-xs text-slate-400 mt-1">ID: <span class="font-mono">${escapeHtml(id)}</span></div>
-              <div class="mt-3">
-                <a class="text-emerald-700 font-semibold hover:underline" href="./dashboard.html?classId=${encodeURIComponent(id)}">Buka dashboard →</a>
-              </div>
-            </div>
-          `;
-        }).join("");
-
-        setStatus("Kelas loaded ✅", true);
-      }catch(e){
-        $("kelasList").textContent = "Gagal load kelas.";
-        setStatus("Failed to fetch (network/CORS/BASE_URL).", false);
+    function renderList(items, modeLabel) {
+      const wrap = document.getElementById("kelasList");
+      if (!items || !items.length) {
+        wrap.innerHTML = `<div class="text-slate-600">Tiada kelas (${modeLabel}).</div>`;
+        return;
       }
+
+      wrap.innerHTML = items.map(x => `
+        <div class="p-4 rounded-2xl border border-white/60 bg-white/60 mb-3">
+          <div class="font-bold text-slate-900">${escapeHtml(x.className || "(no name)")}</div>
+          <div class="text-slate-600 text-sm">
+            ${escapeHtml(x.year || "")} ${x.semester ? "• " + escapeHtml(x.semester) : ""}
+          </div>
+          ${x.classCode ? `<div class="mt-2 text-xs text-slate-500">Code: <span class="font-mono">${escapeHtml(x.classCode)}</span></div>` : ""}
+        </div>
+      `).join("");
     }
 
-    function escapeHtml(s){
+    function escapeHtml(s) {
       return String(s || "")
         .replaceAll("&","&amp;")
         .replaceAll("<","&lt;")
         .replaceAll(">","&gt;")
-        .replaceAll('"',"&quot;");
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
     }
 
-    // ---------- ACTIONS: JOIN/CREATE/LOGOUT ----------
-    async function joinClass(){
-      const token = getToken();
-      const code = ($("classCode").value || "").trim();
-      if (!code) return setSmallMsg("joinMsg","Class code diperlukan.", false);
+    async function loadKelas() {
+      setStatus("");
+      document.getElementById("kelasList").textContent = "Loading kelas...";
+      setAksiMsg("");
 
-      setSmallMsg("joinMsg","Joining...", true);
+      if (!ME) return;
 
-      try{
-        // cuba joinClass dulu; kalau backend pakai enrollClass pun kita fallback
-        const tries = ["joinClass", "enrollClass", "join"];
-        let data = null;
+      // toggle UI by role
+      const isAdmin = ME.isAdmin === true || String(ME.role||"").toLowerCase()==="admin";
+      document.getElementById("aksiStudent").classList.toggle("hidden", isAdmin);
+      document.getElementById("aksiAdmin").classList.toggle("hidden", !isAdmin);
 
-        for (const act of tries){
-          data = await apiPost(act, { classCode: code }, { token });
-          if (data && data.ok) { data.__act = act; break; }
+      try {
+        if (isAdmin) {
+          const j = await apiGet("listClasses");
+          if (!j.ok) throw new Error(j.error || j.message || "listClasses failed");
+          renderList(j.classes || [], "admin:listClasses");
+        } else {
+          const j = await apiGet("myEnrollments");
+          if (!j.ok) throw new Error(j.error || j.message || "myEnrollments failed");
+          // myEnrollments dah siap ada className/year/semester
+          renderList(j.enrollments || [], "student:myEnrollments");
         }
-
-        if (!data || !data.ok) return setSmallMsg("joinMsg", data?.error || data?.message || "Join gagal.", false);
-
-        setSmallMsg("joinMsg", `Join berjaya ✅ (${data.__act})`, true);
-        await loadClasses();
-      }catch(e){
-        setSmallMsg("joinMsg","Failed to fetch (network/CORS).", false);
+      } catch (e) {
+        setStatus(String(e.message || e));
+        document.getElementById("kelasList").textContent = "Gagal load kelas.";
       }
     }
 
-    async function createClass(){
-      const token = getToken();
-      const name = ($("className").value || "").trim();
-      if (!name) return setSmallMsg("createMsg","Nama kelas diperlukan.", false);
+    async function joinKelas() {
+      setAksiMsg("");
+      const code = document.getElementById("classCode").value.trim();
+      if (!code) return setAksiMsg("Masukkan class code dulu.", "err");
 
-      setSmallMsg("createMsg","Creating...", true);
-
-      try{
-        const tries = ["createClass", "newClass"];
-        let data = null;
-
-        for (const act of tries){
-          data = await apiPost(act, { name }, { token });
-          if (data && data.ok) { data.__act = act; break; }
-        }
-
-        if (!data || !data.ok) return setSmallMsg("createMsg", data?.error || data?.message || "Create gagal.", false);
-
-        setSmallMsg("createMsg", `Create berjaya ✅ (${data.__act})`, true);
-        $("className").value = "";
-        await loadClasses();
-      }catch(e){
-        setSmallMsg("createMsg","Failed to fetch (network/CORS).", false);
+      try {
+        const j = await apiPost("enroll", { classCode: code });
+        if (!j.ok) throw new Error(j.error || j.message || "Enroll failed");
+        setAksiMsg("Join berjaya. Aku refresh senarai.", "ok");
+        await loadKelas();
+      } catch (e) {
+        setAksiMsg(String(e.message || e), "err");
       }
     }
 
-    function logout(){
-      localStorage.removeItem(TOKEN_KEY);
+    document.getElementById("refreshBtn").addEventListener("click", loadKelas);
+    document.getElementById("joinBtn").addEventListener("click", joinKelas);
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+      clearToken();
       window.location.href = "./index.html";
-    }
+    });
 
-    // ---------- INIT ----------
-    $("btnLogout").addEventListener("click", logout);
-    $("btnRefresh").addEventListener("click", loadClasses);
-    $("btnJoin").addEventListener("click", joinClass);
-    $("btnCreate").addEventListener("click", createClass);
-
-    (async function init(){
-      if (!BASE) {
-        setStatus("BASE_URL kosong. Semak config.js.", false);
-        return;
-      }
-
-      const me = await loadMe();
-      if (!me) return;
-
-      const name = me.name || me.email || "User";
-      const isAdmin = !!(me.isAdmin || me.admin);
-
-      $("who").textContent = `Login sebagai: ${name}${isAdmin ? " (admin)" : " (student)"}`;
-      $("adminBox").classList.toggle("hidden", !isAdmin);
-
-      setStatus("Token ok ✅", true);
-      $("debug").textContent = `BASE ok | TOKEN_KEY=${TOKEN_KEY}`;
-      await loadClasses();
+    (async () => {
+      const ok = await validateMe();
+      if (ok) await loadKelas();
     })();
   </script>
 </body>
