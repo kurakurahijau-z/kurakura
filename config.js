@@ -1,6 +1,6 @@
 // config.js
 window.APP_CONFIG = {
-  BASE_URL: "https://script.google.com/macros/s/AKfycbzeD9VlAz.../exec", // <-- paste URL webapp kau (yang /exec)
+  BASE_URL: "https://script.google.com/macros/s/AKfycbzeD9VIaDzvbtllYJSWuk7duqEMCdDfXJE8zakhe_S_-5h4cQe9180RaEh77fDuq5IheQ/exec", // <-- paste URL webapp kau (yang /exec)
   API_KEY: "PPF-KEY-2026-FAIZAL-SECRET", // <-- API key yang sama dalam Script Properties
   TOKEN_KEY: "kk_token"
 };
