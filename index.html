@@ -5,23 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Kura Kura Hijau</title>
 
-  <!-- Tailwind (ok kekal) -->
+  <!-- Tailwind (optional: kalau page lain masih guna class Tailwind) -->
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- Theme (WAJIB untuk semua page) -->
-  <link rel="stylesheet" href="./theme.css" />
+  <!-- ✅ THEME GLOBAL (WAJIB guna <link>, BUKAN <script>) -->
+  <link rel="stylesheet" href="./theme.css?v=3" />
 
-  <!-- Global config -->
-  <script src="./config.js"></script>
+  <!-- ✅ CONFIG -->
+  <script src="./config.js?v=3"></script>
 </head>
 
-<body class="kk-body">
-  <!-- Background layer (theme.css yang control) -->
-  <div class="kk-bg"></div>
-
+<body class="stage">
   <!-- Topbar -->
   <header class="kk-topbar">
-    <div class="kk-container kk-topbar-inner">
+    <div class="kk-shell kk-topbar-inner">
       <div class="kk-brand">
         <div class="kk-logo">KK</div>
         <div class="kk-brand-text">
@@ -30,47 +27,45 @@
         </div>
       </div>
 
-      <button id="btnStart" class="kk-btn kk-btn-primary">
+      <button id="btnStart" class="kk-btn">
         Mula Sekarang
       </button>
     </div>
   </header>
 
   <!-- Main -->
-  <main class="kk-container kk-main">
+  <main class="kk-shell kk-main">
     <section class="kk-hero">
-      <h1 class="kk-hero-title">kura kura hijau</h1>
-      <p class="kk-hero-subtitle">Login untuk akses kelas & kuiz.</p>
+      <h1 class="kk-h1">kura kura hijau</h1>
+      <p class="kk-subtitle">Login untuk akses kelas & kuiz.</p>
 
-      <div id="apiStatus" class="kk-chip">
+      <div id="apiStatus" class="kk-pill">
         <span class="kk-dot kk-dot-idle"></span>
         <span>API belum test</span>
       </div>
     </section>
 
     <!-- Card -->
-    <section class="kk-card kk-card-center">
+    <section class="kk-card kk-card-login" id="loginCard">
       <div class="kk-card-title">Login</div>
       <div class="kk-card-desc">Token akan disimpan automatik lepas login.</div>
 
-      <div class="mt-5 space-y-4">
-        <div>
+      <div class="kk-form">
+        <div class="kk-field">
           <label class="kk-label">Email</label>
           <input id="email" class="kk-input" placeholder="nama@pms.edu.my" />
         </div>
 
-        <div>
+        <div class="kk-field">
           <label class="kk-label">Password</label>
           <input id="password" type="password" class="kk-input" placeholder="••••••••" />
         </div>
 
-        <button id="btnLogin" class="kk-btn kk-btn-primary w-full">
-          Login
-        </button>
+        <button id="btnLogin" class="kk-btn kk-btn-block">Login</button>
 
-        <div class="flex items-center justify-between text-sm mt-1">
-          <button id="btnTest" class="kk-link">Test API</button>
-          <button id="btnReset" class="kk-link-muted">Buang token (reset)</button>
+        <div class="kk-row">
+          <button id="btnTest" class="kk-link" type="button">Test API</button>
+          <button id="btnReset" class="kk-link-muted" type="button">Buang token (reset)</button>
         </div>
 
         <div id="msg" class="kk-msg"></div>
@@ -80,23 +75,24 @@
 
   <script>
     const CFG = window.APP_CONFIG || {};
-    const BASE = CFG.BASE_URL || "";
-    const KEY  = CFG.API_KEY || "";
-    const TOKEN_KEY = CFG.TOKEN_KEY || "kk_token";
+    const BASE = (CFG.BASE_URL || "").trim();
+    const KEY  = (CFG.API_KEY  || "").trim();
+    const TOKEN_KEY = (CFG.TOKEN_KEY || "kk_token").trim();
 
     const $ = (id) => document.getElementById(id);
 
     function setMsg(text, ok=true) {
       const el = $("msg");
       el.textContent = text || "";
-      el.className = ok ? "kk-msg kk-msg-ok" : "kk-msg kk-msg-bad";
+      el.className = ok ? "kk-msg kk-msg-ok" : "kk-msg kk-msg-err";
     }
 
     function setApiStatus(ok, text) {
       const el = $("apiStatus");
-      const dot = el.querySelector("span");
+      const dot = el.querySelector(".kk-dot");
       const label = el.querySelectorAll("span")[1];
-      dot.className = "kk-dot " + (ok ? "kk-dot-ok" : "kk-dot-bad");
+
+      dot.className = "kk-dot " + (ok ? "kk-dot-ok" : "kk-dot-err");
       label.textContent = text;
     }
 
@@ -125,18 +121,21 @@
 
     async function testApi() {
       try {
-        if (!BASE || !KEY) throw new Error("config.js belum betul (BASE_URL / API_KEY kosong).");
+        if (!BASE || !KEY) {
+          setApiStatus(false, "Config belum lengkap (BASE_URL/API_KEY)");
+          return setMsg("config.js belum betul (BASE_URL / API_KEY kosong).", false);
+        }
         const data = await apiGet("health");
         if (data && data.ok) {
           setApiStatus(true, `API ok ✅ (${data.time || "no time"})`);
           setMsg("API boleh access.", true);
         } else {
           setApiStatus(false, "API error ❌");
-          setMsg(data.error || "API error", false);
+          setMsg(data?.error || "API error", false);
         }
       } catch (e) {
         setApiStatus(false, "API error ❌");
-        setMsg(String(e.message || e), false);
+        setMsg(String(e?.message || e), false);
       }
     }
 
@@ -157,25 +156,28 @@
 
       try {
         const data = await apiPost("login", { email, password });
+
         if (!data || !data.ok || !data.token) {
-          return setMsg(data.error || data.message || "Login gagal.", false);
+          return setMsg(data?.error || data?.message || "Login gagal.", false);
         }
 
         localStorage.setItem(TOKEN_KEY, data.token);
         window.location.href = "./kelas.html";
       } catch (e) {
-        setMsg(String(e.message || e), false);
+        setMsg(String(e?.message || e), false);
       }
     }
 
     $("btnTest").addEventListener("click", testApi);
     $("btnReset").addEventListener("click", resetToken);
     $("btnLogin").addEventListener("click", doLogin);
+
     $("btnStart").addEventListener("click", () => {
       $("email").focus();
-      window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+      document.getElementById("loginCard").scrollIntoView({ behavior: "smooth", block: "center" });
     });
 
+    // auto test
     testApi();
   </script>
 </body>
