@@ -3,121 +3,118 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Kura Kura Hijau</title>
+  <title>kura kura hijau</title>
 
-  <!-- Tailwind -->
+  <!-- Tailwind (utility only, layout still controlled by theme.css) -->
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- Theme & Config -->
-  <link rel="stylesheet" href="/kurakura/theme.css?v=11" />
-  <script src="/kurakura/config.js?v=11"></script>
-
-  <!-- 🔐 FIX LAYERING (PALING PENTING) -->
-  <style>
-    /* Angkat semua content ke atas background animation */
-    header,
-    main {
-      position: relative;
-      z-index: 10;
-    }
-  </style>
+  <!-- Global theme -->
+  <link rel="stylesheet" href="./theme.css" />
+  <script src="./config.js"></script>
 </head>
 
-<body class="stage">
+<body>
+  <!-- ===== STAGE (animated background) ===== -->
+  <div class="stage">
 
-  <!-- Topbar -->
-  <header class="topbar">
-    <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <div class="w-9 h-9 rounded-xl bg-emerald-600 text-white grid place-items-center font-bold">KK</div>
-        <div class="leading-tight">
-          <div class="font-semibold">kura kura hijau</div>
-          <div class="text-xs text-slate-500">Portal</div>
-        </div>
-      </div>
-
-      <button id="btnStart" class="btn-primary">
-        Mula Sekarang
-      </button>
-    </div>
-  </header>
-
-  <!-- Main -->
-  <main class="max-w-5xl mx-auto px-4 py-16">
-    <div class="text-center">
-      <h1 class="text-5xl md:text-6xl font-extrabold text-emerald-900">
-        kura kura hijau
-      </h1>
-      <p class="mt-4 text-slate-700">
-        Login untuk akses kelas & kuiz.
-      </p>
-
-      <div id="apiStatus"
-           class="mt-6 inline-flex items-center gap-2 px-4 py-2 rounded-xl
-                  bg-white/80 border border-white/60 text-sm shadow-sm">
-        <span class="w-2 h-2 rounded-full bg-slate-300"></span>
-        <span>API belum test</span>
-      </div>
-    </div>
-
-    <!-- Login Card -->
-    <div class="mt-10 max-w-md mx-auto card">
-      <div class="font-bold text-lg">Login</div>
-      <div class="text-sm text-slate-600 mt-1">
-        Token akan disimpan automatik lepas login.
-      </div>
-
-      <div class="mt-4 space-y-3">
-        <div>
-          <label class="text-sm font-semibold">Email</label>
-          <input id="email"
-            class="mt-1 w-full px-3 py-2 rounded-xl border border-slate-200
-                   focus:outline-none focus:ring-2 focus:ring-emerald-200 bg-white/90"
-            placeholder="nama@pms.edu.my" />
+    <!-- ===== TOPBAR ===== -->
+    <header class="topbar">
+      <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-emerald-600 text-white grid place-items-center font-bold">
+            KK
+          </div>
+          <div class="leading-tight">
+            <div class="font-semibold">kura kura hijau</div>
+            <div class="text-xs text-slate-500">Portal</div>
+          </div>
         </div>
 
-        <div>
-          <label class="text-sm font-semibold">Password</label>
-          <input id="password" type="password"
-            class="mt-1 w-full px-3 py-2 rounded-xl border border-slate-200
-                   focus:outline-none focus:ring-2 focus:ring-emerald-200 bg-white/90"
-            placeholder="••••••••" />
-        </div>
-
-        <button id="btnLogin" class="btn-primary w-full">
-          Login
+        <button id="btnStart" class="btn-primary">
+          Mula Sekarang
         </button>
-
-        <div class="flex items-center justify-between text-sm mt-2">
-          <button id="btnTest" class="text-emerald-700 font-semibold hover:underline">
-            Test API
-          </button>
-          <button id="btnReset" class="text-slate-600 hover:underline">
-            Buang token (reset)
-          </button>
-        </div>
-
-        <div id="msg" class="mt-3 text-sm"></div>
       </div>
-    </div>
-  </main>
+    </header>
 
+    <!-- ===== MAIN ===== -->
+    <main class="max-w-5xl mx-auto px-4 py-20">
+
+      <!-- Hero -->
+      <section class="text-center mb-12">
+        <h1 class="text-5xl md:text-6xl font-extrabold text-emerald-900">
+          kura kura hijau
+        </h1>
+        <p class="mt-4 text-slate-600">
+          Login untuk akses kelas & kuiz.
+        </p>
+
+        <div id="apiStatus"
+          class="mt-6 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/80 border border-white/60 text-sm shadow">
+          <span class="w-2 h-2 rounded-full bg-slate-300"></span>
+          <span>API belum test</span>
+        </div>
+      </section>
+
+      <!-- Login Card -->
+      <section class="max-w-md mx-auto">
+        <div class="card">
+          <div class="font-bold text-lg">Login</div>
+          <div class="text-sm text-slate-500 mt-1">
+            Token akan disimpan automatik lepas login.
+          </div>
+
+          <div class="mt-5 space-y-4">
+            <div>
+              <label class="text-sm font-semibold">Email</label>
+              <input id="email"
+                class="mt-1 w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-200"
+                placeholder="nama@pms.edu.my" />
+            </div>
+
+            <div>
+              <label class="text-sm font-semibold">Password</label>
+              <input id="password" type="password"
+                class="mt-1 w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-200"
+                placeholder="••••••••" />
+            </div>
+
+            <button id="btnLogin" class="btn-primary w-full">
+              Login
+            </button>
+
+            <div class="flex items-center justify-between text-sm">
+              <button id="btnTest" class="text-emerald-700 font-semibold hover:underline">
+                Test API
+              </button>
+              <button id="btnReset" class="text-slate-600 hover:underline">
+                Buang token (reset)
+              </button>
+            </div>
+
+            <div id="msg" class="text-sm"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- ===== SCRIPT ===== -->
   <script>
     const CFG = window.APP_CONFIG || {};
-    const BASE = (CFG.BASE_URL || "").trim();
-    const KEY  = (CFG.API_KEY || "").trim();
+    const BASE = CFG.BASE_URL || "";
+    const KEY  = CFG.API_KEY || "";
     const TOKEN_KEY = CFG.TOKEN_KEY || "kk_token";
 
     const $ = (id) => document.getElementById(id);
 
-    function setMsg(text, ok=true) {
+    function setMsg(text, ok=true){
       $("msg").textContent = text || "";
       $("msg").className = ok
-        ? "mt-3 text-sm text-emerald-700"
-        : "mt-3 text-sm text-rose-700";
+        ? "text-sm text-emerald-700"
+        : "text-sm text-rose-700";
     }
 
-    function setApiStatus(ok, text) {
+    function setApiStatus(ok, text){
       const el = $("apiStatus");
       const dot = el.querySelector("span");
       const label = el.querySelectorAll("span")[1];
@@ -125,7 +122,7 @@
       label.textContent = text;
     }
 
-    async function apiGet(action) {
+    async function apiGet(action){
       const url = new URL(BASE);
       url.searchParams.set("action", action);
       url.searchParams.set("key", KEY);
@@ -133,60 +130,64 @@
       return res.json();
     }
 
-    async function apiPost(action, body={}) {
+    async function apiPost(action, body){
       const url = new URL(BASE);
       url.searchParams.set("action", action);
       url.searchParams.set("key", KEY);
       const res = await fetch(url.toString(), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body)
+        body: JSON.stringify(body || {})
       });
       return res.json();
     }
 
-    async function testApi() {
-      try {
+    async function testApi(){
+      try{
         const data = await apiGet("health");
-        if (data?.ok) {
-          setApiStatus(true, `API ok ✅ (${data.time})`);
-          setMsg("API boleh access.");
-        } else {
-          setApiStatus(false, "API error ❌");
+        if(data?.ok){
+          setApiStatus(true, `API ok (${data.time})`);
+          setMsg("API boleh access.", true);
+        }else{
+          throw new Error(data?.error || "API error");
         }
-      } catch (e) {
-        setApiStatus(false, "API error ❌");
+      }catch(e){
+        setApiStatus(false, "API error");
         setMsg(e.message, false);
       }
     }
 
-    async function doLogin() {
+    function resetToken(){
+      localStorage.removeItem(TOKEN_KEY);
+      setMsg("Token dibuang. Sila login semula.", true);
+    }
+
+    async function doLogin(){
       const email = $("email").value.trim();
       const password = $("password").value;
 
-      if (!email || !password) {
+      if(!email || !password){
         return setMsg("Email & password diperlukan.", false);
       }
 
       setMsg("Logging in...");
-
-      const data = await apiPost("login", { email, password });
-      if (!data?.ok || !data.token) {
-        return setMsg(data?.error || "Login gagal.", false);
+      try{
+        const data = await apiPost("login", { email, password });
+        if(!data?.token) throw new Error(data?.error || "Login gagal");
+        localStorage.setItem(TOKEN_KEY, data.token);
+        window.location.href = "./kelas.html";
+      }catch(e){
+        setMsg(e.message, false);
       }
-
-      localStorage.setItem(TOKEN_KEY, data.token);
-      window.location.href = "/kurakura/kelas.html";
     }
 
-    $("btnLogin").onclick = doLogin;
     $("btnTest").onclick = testApi;
-    $("btnReset").onclick = () => {
-      localStorage.removeItem(TOKEN_KEY);
-      setMsg("Token dibuang.");
-    };
-    $("btnStart").onclick = () =>
+    $("btnReset").onclick = resetToken;
+    $("btnLogin").onclick = doLogin;
+    $("btnStart").onclick = () => {
+      $("email").focus();
       window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+    };
 
     testApi();
   </script>
