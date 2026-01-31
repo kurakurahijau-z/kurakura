@@ -5,147 +5,77 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Kura Kura Hijau</title>
 
+  <!-- Tailwind (ok kekal) -->
   <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Theme (WAJIB untuk semua page) -->
+  <link rel="stylesheet" href="./theme.css" />
+
+  <!-- Global config -->
   <script src="./config.js"></script>
-
-  <style>
-    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
-
-    /* ====== BACKGROUND “WOW” (jelas bertukar warna) ====== */
-    .stage {
-      min-height: 100vh;
-      position: relative;
-      overflow: hidden;
-      background: #ecfdf5; /* fallback */
-    }
-
-    /* Layer utama: gradient yang bergerak */
-    .stage::before {
-      content: "";
-      position: absolute;
-      inset: -30%;
-      background:
-        radial-gradient(1000px 600px at 15% 20%, rgba(16,185,129,.55), transparent 55%),
-        radial-gradient(900px 520px at 85% 25%, rgba(59,130,246,.45), transparent 55%),
-        radial-gradient(900px 520px at 55% 90%, rgba(250,204,21,.40), transparent 55%),
-        linear-gradient(120deg,
-          rgba(236,253,245,1),
-          rgba(240,249,255,1),
-          rgba(254,249,195,1),
-          rgba(220,252,231,1)
-        );
-      background-size: 220% 220%;
-      animation: moveBg 6s ease-in-out infinite alternate;
-      transform: translateZ(0);
-      filter: saturate(1.2) contrast(1.05);
-    }
-
-    /* Layer kedua: hue-rotate bagi warna betul-betul “bertukar” */
-    .stage::after {
-      content: "";
-      position: absolute;
-      inset: -30%;
-      background:
-        radial-gradient(700px 420px at 20% 75%, rgba(20,184,166,.45), transparent 55%),
-        radial-gradient(700px 420px at 80% 70%, rgba(99,102,241,.35), transparent 55%),
-        radial-gradient(700px 420px at 55% 30%, rgba(244,63,94,.18), transparent 55%);
-      background-size: 200% 200%;
-      animation: hueShift 5.5s linear infinite, moveBg2 7s ease-in-out infinite alternate;
-      mix-blend-mode: soft-light;
-      opacity: .85;
-      transform: translateZ(0);
-      pointer-events: none;
-    }
-
-    @keyframes moveBg {
-      0%   { background-position: 0% 0%; }
-      50%  { background-position: 70% 20%; }
-      100% { background-position: 100% 80%; }
-    }
-    @keyframes moveBg2 {
-      0%   { background-position: 20% 80%; }
-      50%  { background-position: 80% 40%; }
-      100% { background-position: 30% 10%; }
-    }
-    @keyframes hueShift {
-      0%   { filter: hue-rotate(0deg) saturate(1.25); }
-      50%  { filter: hue-rotate(140deg) saturate(1.35); }
-      100% { filter: hue-rotate(280deg) saturate(1.25); }
-    }
-
-    /* Kalau user guna Reduce Motion, kita bagi still cantik tapi tak bergerak */
-    @media (prefers-reduced-motion: reduce) {
-      .stage::before, .stage::after { animation: none !important; }
-    }
-  </style>
 </head>
 
-<body class="stage text-slate-900">
+<body class="kk-body">
+  <!-- Background layer (theme.css yang control) -->
+  <div class="kk-bg"></div>
 
   <!-- Topbar -->
-  <header class="sticky top-0 z-10 bg-white/70 backdrop-blur border-b border-white/50">
-    <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <div class="w-9 h-9 rounded-xl bg-emerald-600 text-white grid place-items-center font-bold">KK</div>
-        <div class="leading-tight">
-          <div class="font-semibold">kura kura hijau</div>
-          <div class="text-xs text-slate-600">Portal</div>
+  <header class="kk-topbar">
+    <div class="kk-container kk-topbar-inner">
+      <div class="kk-brand">
+        <div class="kk-logo">KK</div>
+        <div class="kk-brand-text">
+          <div class="kk-brand-title">kura kura hijau</div>
+          <div class="kk-brand-sub">Portal</div>
         </div>
       </div>
 
-      <button id="btnStart"
-        class="px-4 py-2 rounded-xl bg-emerald-600 text-white font-semibold hover:bg-emerald-700">
+      <button id="btnStart" class="kk-btn kk-btn-primary">
         Mula Sekarang
       </button>
     </div>
   </header>
 
   <!-- Main -->
-  <main class="max-w-5xl mx-auto px-4 py-16 relative z-10">
-    <div class="text-center">
-      <h1 class="text-5xl md:text-6xl font-extrabold text-emerald-950">kura kura hijau</h1>
-      <p class="mt-4 text-slate-800/80">Login untuk akses kelas & kuiz.</p>
+  <main class="kk-container kk-main">
+    <section class="kk-hero">
+      <h1 class="kk-hero-title">kura kura hijau</h1>
+      <p class="kk-hero-subtitle">Login untuk akses kelas & kuiz.</p>
 
-      <div id="apiStatus"
-        class="mt-6 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/80 border border-white/60 text-sm shadow-sm">
-        <span class="w-2 h-2 rounded-full bg-slate-300"></span>
+      <div id="apiStatus" class="kk-chip">
+        <span class="kk-dot kk-dot-idle"></span>
         <span>API belum test</span>
       </div>
-    </div>
+    </section>
 
     <!-- Card -->
-    <div class="mt-10 max-w-md mx-auto bg-white/85 rounded-2xl shadow-xl border border-white/60 p-6 backdrop-blur">
-      <div class="font-bold text-lg">Login</div>
-      <div class="text-sm text-slate-700 mt-1">Token akan disimpan automatik lepas login.</div>
+    <section class="kk-card kk-card-center">
+      <div class="kk-card-title">Login</div>
+      <div class="kk-card-desc">Token akan disimpan automatik lepas login.</div>
 
-      <div class="mt-4 space-y-3">
+      <div class="mt-5 space-y-4">
         <div>
-          <label class="text-sm font-semibold">Email</label>
-          <input id="email"
-            class="mt-1 w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-200 bg-white/95"
-            placeholder="nama@pms.edu.my" />
+          <label class="kk-label">Email</label>
+          <input id="email" class="kk-input" placeholder="nama@pms.edu.my" />
         </div>
 
         <div>
-          <label class="text-sm font-semibold">Password</label>
-          <input id="password" type="password"
-            class="mt-1 w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-200 bg-white/95"
-            placeholder="••••••••" />
+          <label class="kk-label">Password</label>
+          <input id="password" type="password" class="kk-input" placeholder="••••••••" />
         </div>
 
-        <button id="btnLogin"
-          class="w-full px-4 py-2 rounded-xl bg-emerald-600 text-white font-semibold hover:bg-emerald-700">
+        <button id="btnLogin" class="kk-btn kk-btn-primary w-full">
           Login
         </button>
 
-        <div class="flex items-center justify-between text-sm mt-2">
-          <button id="btnTest" class="text-emerald-900 font-semibold hover:underline">Test API</button>
-          <button id="btnReset" class="text-slate-800 hover:underline">Buang token (reset)</button>
+        <div class="flex items-center justify-between text-sm mt-1">
+          <button id="btnTest" class="kk-link">Test API</button>
+          <button id="btnReset" class="kk-link-muted">Buang token (reset)</button>
         </div>
 
-        <div id="msg" class="mt-3 text-sm"></div>
+        <div id="msg" class="kk-msg"></div>
       </div>
-    </div>
+    </section>
   </main>
 
   <script>
@@ -157,15 +87,16 @@
     const $ = (id) => document.getElementById(id);
 
     function setMsg(text, ok=true) {
-      $("msg").textContent = text || "";
-      $("msg").className = ok ? "mt-3 text-sm text-emerald-900" : "mt-3 text-sm text-rose-700";
+      const el = $("msg");
+      el.textContent = text || "";
+      el.className = ok ? "kk-msg kk-msg-ok" : "kk-msg kk-msg-bad";
     }
 
     function setApiStatus(ok, text) {
       const el = $("apiStatus");
       const dot = el.querySelector("span");
       const label = el.querySelectorAll("span")[1];
-      dot.className = "w-2 h-2 rounded-full " + (ok ? "bg-emerald-500" : "bg-rose-500");
+      dot.className = "kk-dot " + (ok ? "kk-dot-ok" : "kk-dot-bad");
       label.textContent = text;
     }
 
@@ -194,9 +125,10 @@
 
     async function testApi() {
       try {
+        if (!BASE || !KEY) throw new Error("config.js belum betul (BASE_URL / API_KEY kosong).");
         const data = await apiGet("health");
         if (data && data.ok) {
-          setApiStatus(true, `API ok ✅ (${data.time || "ok"})`);
+          setApiStatus(true, `API ok ✅ (${data.time || "no time"})`);
           setMsg("API boleh access.", true);
         } else {
           setApiStatus(false, "API error ❌");
@@ -228,6 +160,7 @@
         if (!data || !data.ok || !data.token) {
           return setMsg(data.error || data.message || "Login gagal.", false);
         }
+
         localStorage.setItem(TOKEN_KEY, data.token);
         window.location.href = "./kelas.html";
       } catch (e) {
@@ -245,6 +178,5 @@
 
     testApi();
   </script>
-
 </body>
 </html>
