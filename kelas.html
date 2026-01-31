@@ -33,6 +33,7 @@
         <h1 class="text-6xl font-extrabold tracking-tight text-emerald-900">Senarai Kelas</h1>
         <p class="mt-3 text-slate-700">Kelas yang tersedia untuk akaun anda.</p>
         <div id="status" class="mt-4 text-sm font-semibold text-red-600"></div>
+        <div id="debug" class="mt-2 text-xs text-slate-400"></div>
       </div>
 
       <div class="grid md:grid-cols-2 gap-6">
@@ -41,7 +42,7 @@
             <div class="text-xl font-bold">Kelas Aktif</div>
             <button id="refreshBtn" class="text-emerald-700 font-semibold hover:underline">Refresh</button>
           </div>
-          <div id="kelasList" class="mt-4 text-slate-700 text-sm">Loading kelas...</div>
+          <div id="kelasList" class="mt-4 text-slate-700 text-sm">Loading kelas.</div>
         </div>
 
         <div class="card">
@@ -69,24 +70,24 @@
   </div>
 
   <script>
+    // ---------- CONFIG ----------
     const CFG = window.APP_CONFIG || {};
-    const BASE_URL = CFG.BASE_URL || "";
-    const API_KEY = CFG.API_KEY || "";
-    const TOKEN_KEY = CFG.TOKEN_KEY || "kk_token";
+    const BASE = (CFG.BASE_URL || "").trim();
+    const KEY  = (CFG.API_KEY || "").trim();
+    const TOKEN_KEY = (CFG.TOKEN_KEY || "kk_token").trim();
 
-    function qs(obj) {
-      const p = new URLSearchParams();
-      Object.entries(obj || {}).forEach(([k,v]) => {
-        if (v !== undefined && v !== null && String(v).length) p.set(k, v);
-      });
-      return p.toString();
+    const $ = (id) => document.getElementById(id);
+
+    function setStatus(msg="") { $("status").textContent = msg; }
+    function setDebug(msg="")  { $("debug").textContent = msg; }
+
+    function setAksiMsg(msg="", type="info") {
+      const el = $("aksiMsg");
+      el.textContent = msg || "";
+      el.className = "mt-4 text-sm " + (type==="err" ? "text-red-600" : type==="ok" ? "text-emerald-700" : "text-slate-700");
     }
 
-    function apiUrl(action, extraParams) {
-      const q = qs({ action, key: API_KEY, ...(extraParams||{}) });
-      return `${BASE_URL}?${q}`;
-    }
-
+    // ---------- TOKEN ----------
     function cleanToken(t) {
       if (!t) return "";
       t = String(t).trim();
@@ -98,68 +99,79 @@
     function getToken() {
       return cleanToken(localStorage.getItem(TOKEN_KEY));
     }
+
     function clearToken() {
       localStorage.removeItem(TOKEN_KEY);
+      // buang legacy key kalau ada
+      localStorage.removeItem("kkh_token");
+      localStorage.removeItem("kkh_user");
     }
 
-    function setStatus(msg) {
-      document.getElementById("status").textContent = msg || "";
-    }
-    function setAksiMsg(msg, type="info") {
-      const el = document.getElementById("aksiMsg");
-      el.textContent = msg || "";
-      el.className = "mt-4 text-sm " + (type==="err" ? "text-red-600" : type==="ok" ? "text-emerald-700" : "text-slate-700");
-    }
-
-    async function apiGet(action, params) {
-      const token = getToken();
-      const url = apiUrl(action, { token, ...(params||{}) });
-      const r = await fetch(url);
-      return await r.json();
+    // ---------- API HELPERS ----------
+    function buildUrl(action, params={}) {
+      if (!BASE) throw new Error("BASE_URL kosong. Semak config.js.");
+      const url = new URL(BASE);
+      url.searchParams.set("action", action);
+      if (KEY) url.searchParams.set("key", KEY);
+      Object.entries(params).forEach(([k,v]) => {
+        if (v !== undefined && v !== null && String(v).length) url.searchParams.set(k, v);
+      });
+      return url.toString();
     }
 
-    async function apiPost(action, body) {
-      const token = getToken();
-      const url = apiUrl(action, { token });
-      const r = await fetch(url, {
+    async function apiGet(action, params={}) {
+      const res = await fetch(buildUrl(action, params), { method: "GET" });
+      return await res.json();
+    }
+
+    async function apiPost(action, body={}, params={}) {
+      const res = await fetch(buildUrl(action, params), {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify(body || {})
       });
-      return await r.json();
+      return await res.json();
     }
 
-    // --------- main flow ----------
+    // ---------- MAIN ----------
     let ME = null;
 
-    async function validateMe() {
-      if (!BASE_URL || !API_KEY) {
+    async function loadMe() {
+      if (!BASE || !KEY) {
         setStatus("config.js belum betul (BASE_URL / API_KEY).");
-        return false;
+        return null;
       }
 
       const token = getToken();
       if (!token) {
         window.location.href = "./index.html";
-        return false;
+        return null;
       }
 
       try {
-        const j = await apiGet("me");
-        if (!j.ok) throw new Error(j.error || j.message || "Token invalid");
-        ME = j.user;
-        return true;
+        const j = await apiGet("me", { token });
+        if (!j || !j.ok) throw new Error(j.error || j.message || "Token invalid");
+        return j.user;
       } catch (e) {
-        // ini part paling penting untuk error "Invalid token format"
+        // ini memang untuk kes "Invalid token format"
         clearToken();
         setStatus("Token rosak / invalid. Aku clear token. Sila login semula.");
         setTimeout(() => window.location.href = "./index.html", 900);
-        return false;
+        return null;
       }
     }
 
+    function escapeHtml(s) {
+      return String(s || "")
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
     function renderList(items, modeLabel) {
-      const wrap = document.getElementById("kelasList");
+      const wrap = $("kelasList");
       if (!items || !items.length) {
         wrap.innerHTML = `<div class="text-slate-600">Tiada kelas (${modeLabel}).</div>`;
         return;
@@ -176,69 +188,68 @@
       `).join("");
     }
 
-    function escapeHtml(s) {
-      return String(s || "")
-        .replaceAll("&","&amp;")
-        .replaceAll("<","&lt;")
-        .replaceAll(">","&gt;")
-        .replaceAll('"',"&quot;")
-        .replaceAll("'","&#039;");
-    }
-
     async function loadKelas() {
       setStatus("");
-      document.getElementById("kelasList").textContent = "Loading kelas...";
       setAksiMsg("");
+      $("kelasList").textContent = "Loading kelas...";
 
       if (!ME) return;
 
-      // toggle UI by role
-      const isAdmin = ME.isAdmin === true || String(ME.role||"").toLowerCase()==="admin";
-      document.getElementById("aksiStudent").classList.toggle("hidden", isAdmin);
-      document.getElementById("aksiAdmin").classList.toggle("hidden", !isAdmin);
+      const isAdmin = (ME.isAdmin === true) || String(ME.role || "").toLowerCase() === "admin";
+      $("aksiStudent").classList.toggle("hidden", isAdmin);
+      $("aksiAdmin").classList.toggle("hidden", !isAdmin);
 
       try {
+        const token = getToken();
         if (isAdmin) {
-          const j = await apiGet("listClasses");
+          const j = await apiGet("listClasses", { token });
           if (!j.ok) throw new Error(j.error || j.message || "listClasses failed");
           renderList(j.classes || [], "admin:listClasses");
         } else {
-          const j = await apiGet("myEnrollments");
+          const j = await apiGet("myEnrollments", { token });
           if (!j.ok) throw new Error(j.error || j.message || "myEnrollments failed");
-          // myEnrollments dah siap ada className/year/semester
           renderList(j.enrollments || [], "student:myEnrollments");
         }
       } catch (e) {
         setStatus(String(e.message || e));
-        document.getElementById("kelasList").textContent = "Gagal load kelas.";
+        $("kelasList").textContent = "Gagal load kelas.";
       }
     }
 
     async function joinKelas() {
       setAksiMsg("");
-      const code = document.getElementById("classCode").value.trim();
+      const code = $("classCode").value.trim();
       if (!code) return setAksiMsg("Masukkan class code dulu.", "err");
 
       try {
-        const j = await apiPost("enroll", { classCode: code });
-        if (!j.ok) throw new Error(j.error || j.message || "Enroll failed");
-        setAksiMsg("Join berjaya. Aku refresh senarai.", "ok");
+        const token = getToken();
+        const j = await apiPost("joinClass", { classCode: code }, { token });
+        if (!j || !j.ok) return setAksiMsg(j.error || j.message || "Join gagal.", "err");
+        setAksiMsg("Join berjaya ✅", "ok");
+        $("classCode").value = "";
         await loadKelas();
       } catch (e) {
-        setAksiMsg(String(e.message || e), "err");
+        setAksiMsg("Failed to fetch (network/CORS).", "err");
       }
     }
 
-    document.getElementById("refreshBtn").addEventListener("click", loadKelas);
-    document.getElementById("joinBtn").addEventListener("click", joinKelas);
-    document.getElementById("logoutBtn").addEventListener("click", () => {
+    function logout() {
       clearToken();
       window.location.href = "./index.html";
-    });
+    }
 
-    (async () => {
-      const ok = await validateMe();
-      if (ok) await loadKelas();
+    // ---------- INIT ----------
+    $("logoutBtn").addEventListener("click", logout);
+    $("refreshBtn").addEventListener("click", loadKelas);
+    $("joinBtn").addEventListener("click", joinKelas);
+
+    (async function init(){
+      setDebug(`BASE=${BASE ? "ok" : "missing"} | TOKEN_KEY=${TOKEN_KEY}`);
+      ME = await loadMe();
+      if (!ME) return;
+
+      setStatus("Token ok ✅");
+      await loadKelas();
     })();
   </script>
 </body>
