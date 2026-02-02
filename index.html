@@ -7,66 +7,197 @@
 
   <!-- Global styles -->
   <link rel="stylesheet" href="styles.css" />
+
+  <style>
+    /* Landing-only tweaks (still respects your global theme) */
+    .kk-wrap{
+      min-height:100vh;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      gap:22px;
+      padding: 24px 16px;
+    }
+
+    .kk-title{
+      margin:0;
+      font-size: clamp(3.2rem, 7vw, 4.6rem);
+      font-weight: 900;
+      letter-spacing: .01em;
+      line-height: 1.03;
+      color: var(--kk-text);
+      text-shadow:
+        0 1px 0 rgba(255,255,255,.35),
+        0 10px 26px rgba(2,6,23,.10);
+    }
+    /* Make it feel “strong” without being loud */
+    .kk-title .accent{
+      color: var(--kk-emerald-dark);
+    }
+
+    .kk-sub{
+      margin:0;
+      max-width: 560px;
+      color: var(--kk-muted);
+      font-size: 0.98rem;
+      opacity: .0; /* no subtitle as requested */
+      height: 0;
+      overflow: hidden;
+    }
+
+    .kk-grid{
+      width: 100%;
+      max-width: 760px;
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+      margin-top: 6px;
+    }
+
+    @media (min-width: 900px){
+      .kk-grid{
+        grid-template-columns: 1fr 1fr; /* side-by-side on desktop */
+        gap: 16px;
+      }
+    }
+
+    .kk-link{
+      text-decoration:none;
+      color: inherit;
+      display:block;
+    }
+
+    .kk-card{
+      border-radius: 20px;
+      padding: 22px 22px;
+      background: rgba(255,255,255,.72);
+      border: 1px solid rgba(255,255,255,.55);
+      box-shadow:
+        0 18px 40px rgba(2,6,23,.10),
+        0 1px 0 rgba(255,255,255,.55) inset;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      transition: transform .12s ease, box-shadow .18s ease, border-color .18s ease;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* subtle futuristic highlight line (quiet, not neon) */
+    .kk-card::before{
+      content:"";
+      position:absolute;
+      inset:-40%;
+      background:
+        radial-gradient(520px 220px at 20% 20%, rgba(5,150,105,.22), transparent 55%),
+        radial-gradient(520px 220px at 85% 35%, rgba(14,165,233,.16), transparent 58%);
+      opacity:.65;
+      pointer-events:none;
+      transform: rotate(10deg);
+    }
+
+    .kk-card:hover{
+      transform: translateY(-3px);
+      border-color: rgba(255,255,255,.75);
+      box-shadow:
+        0 22px 55px rgba(2,6,23,.14),
+        0 1px 0 rgba(255,255,255,.65) inset;
+    }
+
+    .kk-card:active{
+      transform: translateY(-1px);
+    }
+
+    .kk-card-inner{
+      position:relative;
+      z-index: 2;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 12px;
+    }
+
+    .kk-label{
+      font-size: 1.15rem;
+      font-weight: 850;
+      letter-spacing: .01em;
+      color: #0b1220;
+    }
+
+    .kk-hint{
+      font-size: .92rem;
+      color: var(--kk-muted);
+      opacity: .85;
+      margin-top: 6px;
+      text-align:left;
+    }
+
+    .kk-pill{
+      font-size: .78rem;
+      font-weight: 800;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(5,150,105,.22);
+      background: rgba(5,150,105,.10);
+      color: var(--kk-emerald-dark);
+      white-space: nowrap;
+    }
+
+    .kk-pill.blue{
+      border: 1px solid rgba(14,165,233,.22);
+      background: rgba(14,165,233,.10);
+      color: #075985;
+    }
+
+    /* small footer */
+    .kk-foot{
+      margin-top: 6px;
+      font-size: .85rem;
+      color: rgba(51,65,85,.85);
+    }
+  </style>
 </head>
 
 <body class="stage">
-  <main style="
-    min-height:100vh;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    gap:28px;
-    text-align:center;
-  ">
-
-    <!-- Title -->
-    <h1 style="
-      font-size:clamp(2.4rem, 6vw, 3.4rem);
-      font-weight:800;
-      letter-spacing:.02em;
-      margin:0;
-    ">
-      kura kura hijau
+  <main class="kk-wrap">
+    <h1 class="kk-title">
+      <span class="accent">kura kura</span> hijau
     </h1>
 
-    <!-- Choice cards -->
-    <section style="
-      display:flex;
-      flex-direction:column;
-      gap:16px;
-      width:100%;
-      max-width:320px;
-    ">
+    <!-- no subtitle (kept hidden) -->
+    <p class="kk-sub">.</p>
 
+    <section class="kk-grid" aria-label="Pilih laluan">
       <!-- Pelajar -->
-      <a href="pelajar/"
-         style="text-decoration:none;">
-        <div class="card" style="
-          cursor:pointer;
-          transition:transform .12s ease, box-shadow .12s ease;
-        "
-        onmouseover="this.style.transform='translateY(-2px)'"
-        onmouseout="this.style.transform='translateY(0)'">
-          <strong style="font-size:1.1rem;">Pelajar</strong>
+      <a class="kk-link" href="pelajar/">
+        <div class="kk-card" role="button" aria-label="Pelajar">
+          <div class="kk-card-inner">
+            <div style="text-align:left;">
+              <div class="kk-label">Pelajar</div>
+              <div class="kk-hint">Nota, kuiz, kelas & akses pembelajaran</div>
+            </div>
+            <div class="kk-pill">Portal</div>
+          </div>
         </div>
       </a>
 
       <!-- Bukan Pelajar -->
-      <a href="bukan-pelajar/"
-         style="text-decoration:none;">
-        <div class="card" style="
-          cursor:pointer;
-          transition:transform .12s ease, box-shadow .12s ease;
-        "
-        onmouseover="this.style.transform='translateY(-2px)'"
-        onmouseout="this.style.transform='translateY(0)'">
-          <strong style="font-size:1.1rem;">Bukan Pelajar</strong>
+      <a class="kk-link" href="bukan-pelajar/">
+        <div class="kk-card" role="button" aria-label="Bukan Pelajar">
+          <div class="kk-card-inner">
+            <div style="text-align:left;">
+              <div class="kk-label">Bukan Pelajar</div>
+              <div class="kk-hint">Portfolio, inovasi, KPI & rekod peribadi</div>
+            </div>
+            <div class="kk-pill blue">Ruang</div>
+          </div>
         </div>
       </a>
-
     </section>
 
+    <div class="kk-foot"> </div>
   </main>
 </body>
 </html>
