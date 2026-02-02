@@ -1,25 +1,72 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ms">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>kura kura hijau</title>
-  <link rel="stylesheet" href="./styles.css" />
+
+  <!-- Global styles -->
+  <link rel="stylesheet" href="styles.css" />
 </head>
+
 <body class="stage">
-  <main class="landing">
-    <div class="landing-inner">
-      <h1 class="kk-title">kura kura hijau</h1>
+  <main style="
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:28px;
+    text-align:center;
+  ">
 
-      <a class="card choice" href="./pelajar/login.html" aria-label="Masuk Pelajar">
-        <div class="choice-label">Pelajar</div>
+    <!-- Title -->
+    <h1 style="
+      font-size:clamp(2.4rem, 6vw, 3.4rem);
+      font-weight:800;
+      letter-spacing:.02em;
+      margin:0;
+    ">
+      kura kura hijau
+    </h1>
+
+    <!-- Choice cards -->
+    <section style="
+      display:flex;
+      flex-direction:column;
+      gap:16px;
+      width:100%;
+      max-width:320px;
+    ">
+
+      <!-- Pelajar -->
+      <a href="pelajar/"
+         style="text-decoration:none;">
+        <div class="card" style="
+          cursor:pointer;
+          transition:transform .12s ease, box-shadow .12s ease;
+        "
+        onmouseover="this.style.transform='translateY(-2px)'"
+        onmouseout="this.style.transform='translateY(0)'">
+          <strong style="font-size:1.1rem;">Pelajar</strong>
+        </div>
       </a>
 
-      <a class="card choice" href="./bukan-pelajar/index.html" aria-label="Masuk Bukan Pelajar">
-        <div class="choice-label">Bukan Pelajar</div>
+      <!-- Bukan Pelajar -->
+      <a href="bukan-pelajar/"
+         style="text-decoration:none;">
+        <div class="card" style="
+          cursor:pointer;
+          transition:transform .12s ease, box-shadow .12s ease;
+        "
+        onmouseover="this.style.transform='translateY(-2px)'"
+        onmouseout="this.style.transform='translateY(0)'">
+          <strong style="font-size:1.1rem;">Bukan Pelajar</strong>
+        </div>
       </a>
-    </div>
+
+    </section>
+
   </main>
 </body>
 </html>
-
