@@ -1,7 +1,8 @@
+// config.js
 window.APP_CONFIG = {
   // PASTE URL WEB APP /exec KAT SINI (bukan /dev)
-  BASE_URL: "PASTE_URL_EXEC_KAT_SINI",
+  // contoh: "https://script.google.com/macros/s/XXXXXX/exec"
+  BASE_URL: "https://script.google.com/macros/s/AKfycbybvP8q-qNNsVvjbG-MR0KJRmx5qks21gAU_cwJrhJLfF0Vg8HsdD3Avs1Rmz5MUHEo/exec",
 
-  // optional: kalau kau ada protect token storage etc.
   APP_NAME: "kura kura hijau"
 };
