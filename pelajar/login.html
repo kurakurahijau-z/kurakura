@@ -6,7 +6,6 @@
   <title>Login Pelajar</title>
 
   <link rel="stylesheet" href="../styles.css" />
-  <script src="../config.js"></script>
 
   <style>
     .wrap{
@@ -14,187 +13,259 @@
       display:flex;
       align-items:center;
       justify-content:center;
-      padding: 24px 14px;
+      padding: 26px 16px;
     }
-    .card{
-      width: min(420px, 92vw);
+    .cardx{
+      width: min(520px, 92vw);
     }
     .title{
-      margin: 0 0 6px;
-      font-size: 28px;
-      font-weight: 900;
+      margin: 0 0 4px;
+      font-size: 34px;
       letter-spacing: -0.02em;
+      font-weight: 900;
     }
-    .muted{ color: var(--kk-muted); margin: 0 0 16px; }
-    .field{ display:grid; gap:8px; margin: 12px 0; }
-    label{ font-weight: 700; font-size: 14px; }
+    .sub{
+      margin: 0 0 18px;
+      color: var(--kk-muted);
+      font-weight: 600;
+    }
+    label{
+      display:block;
+      margin: 12px 0 6px;
+      font-weight: 800;
+    }
     input{
-      padding: 10px 12px;
+      width:100%;
+      box-sizing:border-box;
+      padding: 12px 12px;
       border-radius: 12px;
-      border: 1px solid rgba(2,6,23,.15);
+      border: 1px solid rgba(2,6,23,.12);
       outline: none;
-      background: rgba(255,255,255,.85);
+      background: rgba(255,255,255,.75);
     }
     input:focus{
-      border-color: rgba(5,150,105,.55);
-      box-shadow: 0 0 0 3px rgba(5,150,105,.15);
+      border-color: rgba(5,150,105,.45);
+      box-shadow: 0 0 0 4px rgba(5,150,105,.12);
     }
-    .row{ display:flex; gap:10px; align-items:center; justify-content:space-between; margin-top: 14px; }
-    .btn-primary{ width: 100%; }
-    .err{
-      display:none;
+    .row{
+      display:flex;
+      gap: 10px;
+      align-items:center;
+      margin-top: 14px;
+    }
+    .btn{
+      width:100%;
+      padding: 12px 14px;
+      border-radius: 14px;
+      font-weight: 900;
+    }
+    .msg{
       margin-top: 12px;
       padding: 10px 12px;
       border-radius: 12px;
-      border: 1px solid rgba(239,68,68,.35);
-      background: rgba(239,68,68,.08);
-      color: #991b1b;
+      display:none;
       font-weight: 700;
-      font-size: 14px;
     }
-    .ok{
-      display:none;
-      margin-top: 12px;
-      padding: 10px 12px;
-      border-radius: 12px;
-      border: 1px solid rgba(34,197,94,.35);
-      background: rgba(34,197,94,.08);
+    .msg.err{
+      display:block;
+      border: 1px solid rgba(220,38,38,.25);
+      background: rgba(220,38,38,.08);
+      color: #991b1b;
+    }
+    .msg.ok{
+      display:block;
+      border: 1px solid rgba(5,150,105,.25);
+      background: rgba(5,150,105,.10);
       color: #065f46;
-      font-weight: 800;
-      font-size: 14px;
     }
-    .mini{
+    .tiny{
+      margin-top: 10px;
       font-size: 12px;
       color: rgba(15,23,42,.65);
-      margin-top: 12px;
-      line-height: 1.35;
     }
-    .mini code{
-      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-      font-size: 12px;
+    .tiny code{
+      font-weight: 800;
       background: rgba(2,6,23,.06);
       padding: 2px 6px;
       border-radius: 8px;
     }
+    .linkback{
+      display:inline-block;
+      margin-top: 14px;
+      color: rgba(15,23,42,.75);
+      font-weight: 800;
+      text-decoration:none;
+    }
+    .linkback:hover{ text-decoration: underline; }
   </style>
 </head>
 
 <body class="stage">
   <main class="wrap">
-    <div class="card">
+    <section class="card cardx">
       <h1 class="title">Login Pelajar</h1>
-      <p class="muted">Masuk untuk akses kelas, nota & kuiz.</p>
+      <p class="sub">Masuk untuk akses kelas, nota &amp; kuiz.</p>
 
-      <div class="field">
-        <label for="email">Email</label>
-        <input id="email" autocomplete="username" placeholder="contoh: ali@student.com" />
+      <div id="msg" class="msg"></div>
+
+      <label for="email">Email</label>
+      <input id="email" type="email" placeholder="contoh: ali@student.com" autocomplete="username" />
+
+      <label for="password">Password</label>
+      <input id="password" type="password" placeholder="••••••••" autocomplete="current-password" />
+
+      <div class="row">
+        <button id="btnLogin" class="btn-primary btn" type="button">Log Masuk</button>
       </div>
 
-      <div class="field">
-        <label for="password">Password</label>
-        <input id="password" type="password" autocomplete="current-password" placeholder="••••••••" />
+      <div class="tiny">
+        Tip Mac: buka Console <code>⌥⌘J</code>
       </div>
 
-      <button id="btn" class="btn-primary">Log Masuk</button>
-
-      <div id="ok" class="ok"></div>
-      <div id="err" class="err"></div>
-
-      <div class="mini">
-        Debug (kalau perlu): buka Console Mac <code>⌥⌘J</code> dan taip <code>window.APP_CONFIG</code>.
-      </div>
-    </div>
+      <a class="linkback" href="../index.html">← balik</a>
+    </section>
   </main>
 
   <script>
+    // =============================
+    // CONFIG — WAJIB BETUL
+    // =============================
+    // 1) Letak URL /exec kau kat sini (yang ping tadi)
+    const BASE_URL = "https://script.google.com/macros/s/AKfycbybvP8q-qNNsVvjbG-MR0KJRmx5qks21gAU_cwJrhJLfF0Vg8HsdD3Avs1Rmz5MUHEo/exec";
+
+    // 2) Lepas login success, backend akan redirect balik ke URL ini
+    //    Kita set sebagai current page (pelajar/login.html)
+    function currentPageUrl_(){
+      return window.location.origin + window.location.pathname;
+    }
+
+    // =============================
+    // UI helpers
+    // =============================
     const $ = (id) => document.getElementById(id);
-    const errBox = $("err");
-    const okBox = $("ok");
-    const btn = $("btn");
+    const msgEl = $("msg");
 
-    function showErr(msg){
-      okBox.style.display = "none";
-      errBox.textContent = msg || "Login gagal.";
-      errBox.style.display = "block";
+    function showErr(t){
+      msgEl.className = "msg err";
+      msgEl.textContent = t;
+      msgEl.style.display = "block";
     }
-    function showOk(msg){
-      errBox.style.display = "none";
-      okBox.textContent = msg || "Berjaya.";
-      okBox.style.display = "block";
+    function showOk(t){
+      msgEl.className = "msg ok";
+      msgEl.textContent = t;
+      msgEl.style.display = "block";
     }
-
-    function baseUrl(){
-      const u = window.APP_CONFIG && window.APP_CONFIG.BASE_URL;
-      return (u || "").trim();
+    function clearMsg(){
+      msgEl.style.display = "none";
+      msgEl.textContent = "";
+      msgEl.className = "msg";
     }
 
-    async function apiLogin(email, password){
-      const url = baseUrl();
-      if(!url || url.includes("PASTE_URL_EXEC_KAT_SINI")){
-        throw new Error("BASE_URL belum betul. Sila update config.js dengan URL /exec Apps Script.");
-      }
+    // =============================
+    // TOKEN STORAGE
+    // =============================
+    function saveSession_(payload){
+      // payload: {token, userId, role, name}
+      localStorage.setItem("kk_token", payload.token || "");
+      localStorage.setItem("kk_userId", payload.userId || "");
+      localStorage.setItem("kk_role", payload.role || "");
+      localStorage.setItem("kk_name", payload.name || "");
+      localStorage.setItem("kk_loginAt", new Date().toISOString());
+    }
 
-      // Apps Script WebApp biasanya terima POST JSON
-      const res = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "login", email, password })
+    function gotoDashboard_(){
+      // pelajar dashboard
+      window.location.href = "dashboard.html";
+    }
+
+    // =============================
+    // READ HASH FROM REDIRECT
+    // Apps Script will redirect back:
+    // pelajar/login.html#token=...&role=student&name=...
+    // or #err=...
+    // =============================
+    function parseHash_(){
+      const h = (window.location.hash || "").replace(/^#/, "").trim();
+      if(!h) return {};
+      const obj = {};
+      h.split("&").forEach(pair => {
+        const [k, v] = pair.split("=");
+        if(!k) return;
+        obj[decodeURIComponent(k)] = decodeURIComponent(v || "");
       });
-
-      // Kadang Apps Script return text, jadi kita parse selamat
-      const txt = await res.text();
-      let data;
-      try { data = JSON.parse(txt); }
-      catch(e){ throw new Error("API balas bukan JSON: " + txt.slice(0,120)); }
-
-      if(!data || data.ok !== true){
-        throw new Error((data && (data.error || data.message)) || "Login gagal.");
-      }
-      return data;
+      return obj;
     }
 
-    async function onLogin(){
-      errBox.style.display = "none";
-      okBox.style.display = "none";
+    function clearHash_(){
+      // remove hash without reloading
+      history.replaceState(null, "", window.location.pathname);
+    }
+
+    // =============================
+    // LOGIN — redirect flow (NO fetch)
+    // =============================
+    function doLogin_(){
+      clearMsg();
+
+      if(!BASE_URL || BASE_URL.includes("PASTE_URL_EXEC_KAT_SINI")){
+        showErr("BASE_URL belum set. Paste URL /exec dulu.");
+        return;
+      }
 
       const email = $("email").value.trim();
-      const password = $("password").value;
+      const password = $("password").value.trim();
 
       if(!email || !password){
         showErr("Isi email & password dulu.");
         return;
       }
 
-      btn.disabled = true;
-      btn.textContent = "Sedang log masuk...";
+      const redirect = currentPageUrl_();
 
-      try{
-        const out = await apiLogin(email, password);
+      // Redirect to Apps Script:
+      // ?action=login&email=...&password=...&redirect=...
+      const url = BASE_URL
+        + "?action=login"
+        + "&email=" + encodeURIComponent(email)
+        + "&password=" + encodeURIComponent(password)
+        + "&redirect=" + encodeURIComponent(redirect);
 
-        // Simpan token + profile
-        if(out.token) localStorage.setItem("kk_token", out.token);
-        if(out.me) localStorage.setItem("kk_me", JSON.stringify(out.me));
-
-        showOk("Login berjaya. Redirect...");
-        setTimeout(() => {
-          window.location.href = "dashboard.html";
-        }, 450);
-
-      }catch(e){
-        showErr(e.message || String(e));
-      }finally{
-        btn.disabled = false;
-        btn.textContent = "Log Masuk";
-      }
+      // go (top-level navigation => bypass CORS)
+      window.location.href = url;
     }
 
-    btn.addEventListener("click", onLogin);
-    $("password").addEventListener("keydown", (e) => {
-      if(e.key === "Enter") onLogin();
-    });
+    // =============================
+    // INIT
+    // =============================
+    (function init(){
+      // 1) handle redirect result
+      const data = parseHash_();
+      if(data.err){
+        showErr(data.err);
+        clearHash_();
+        return;
+      }
+      if(data.token){
+        saveSession_(data);
+        showOk("Login berjaya. Redirect ke dashboard...");
+        clearHash_();
+        setTimeout(gotoDashboard_, 450);
+        return;
+      }
 
-    // Quick console hint
-    console.log("APP_CONFIG:", window.APP_CONFIG);
+      // 2) attach actions
+      $("btnLogin").addEventListener("click", doLogin_);
+      $("password").addEventListener("keydown", (e) => {
+        if(e.key === "Enter") doLogin_();
+      });
+
+      // 3) if already logged in, go dashboard
+      const existing = localStorage.getItem("kk_token");
+      if(existing){
+        // optional: terus masuk
+        // gotoDashboard_();
+      }
+    })();
   </script>
 </body>
 </html>
