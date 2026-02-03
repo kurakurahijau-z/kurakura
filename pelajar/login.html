@@ -1,23 +1,200 @@
 <!DOCTYPE html>
 <html lang="ms">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Login Pelajar</title>
-  <link rel="stylesheet" href="../styles.css">
+
+  <link rel="stylesheet" href="../styles.css" />
+  <script src="../config.js"></script>
+
+  <style>
+    .wrap{
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: 24px 14px;
+    }
+    .card{
+      width: min(420px, 92vw);
+    }
+    .title{
+      margin: 0 0 6px;
+      font-size: 28px;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+    }
+    .muted{ color: var(--kk-muted); margin: 0 0 16px; }
+    .field{ display:grid; gap:8px; margin: 12px 0; }
+    label{ font-weight: 700; font-size: 14px; }
+    input{
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(2,6,23,.15);
+      outline: none;
+      background: rgba(255,255,255,.85);
+    }
+    input:focus{
+      border-color: rgba(5,150,105,.55);
+      box-shadow: 0 0 0 3px rgba(5,150,105,.15);
+    }
+    .row{ display:flex; gap:10px; align-items:center; justify-content:space-between; margin-top: 14px; }
+    .btn-primary{ width: 100%; }
+    .err{
+      display:none;
+      margin-top: 12px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(239,68,68,.35);
+      background: rgba(239,68,68,.08);
+      color: #991b1b;
+      font-weight: 700;
+      font-size: 14px;
+    }
+    .ok{
+      display:none;
+      margin-top: 12px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(34,197,94,.35);
+      background: rgba(34,197,94,.08);
+      color: #065f46;
+      font-weight: 800;
+      font-size: 14px;
+    }
+    .mini{
+      font-size: 12px;
+      color: rgba(15,23,42,.65);
+      margin-top: 12px;
+      line-height: 1.35;
+    }
+    .mini code{
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 12px;
+      background: rgba(2,6,23,.06);
+      padding: 2px 6px;
+      border-radius: 8px;
+    }
+  </style>
 </head>
+
 <body class="stage">
+  <main class="wrap">
+    <div class="card">
+      <h1 class="title">Login Pelajar</h1>
+      <p class="muted">Masuk untuk akses kelas, nota & kuiz.</p>
 
-<main style="min-height:100vh;display:flex;align-items:center;justify-content:center;">
-  <div class="card">
-    <h1>Login Pelajar</h1>
-    <p>(akan sambung API login)</p>
+      <div class="field">
+        <label for="email">Email</label>
+        <input id="email" autocomplete="username" placeholder="contoh: ali@student.com" />
+      </div>
 
-    <input placeholder="Email"><br><br>
-    <input type="password" placeholder="Password"><br><br>
+      <div class="field">
+        <label for="password">Password</label>
+        <input id="password" type="password" autocomplete="current-password" placeholder="••••••••" />
+      </div>
 
-    <button class="btn-primary">Log Masuk</button>
-  </div>
-</main>
+      <button id="btn" class="btn-primary">Log Masuk</button>
 
+      <div id="ok" class="ok"></div>
+      <div id="err" class="err"></div>
+
+      <div class="mini">
+        Debug (kalau perlu): buka Console Mac <code>⌥⌘J</code> dan taip <code>window.APP_CONFIG</code>.
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const errBox = $("err");
+    const okBox = $("ok");
+    const btn = $("btn");
+
+    function showErr(msg){
+      okBox.style.display = "none";
+      errBox.textContent = msg || "Login gagal.";
+      errBox.style.display = "block";
+    }
+    function showOk(msg){
+      errBox.style.display = "none";
+      okBox.textContent = msg || "Berjaya.";
+      okBox.style.display = "block";
+    }
+
+    function baseUrl(){
+      const u = window.APP_CONFIG && window.APP_CONFIG.BASE_URL;
+      return (u || "").trim();
+    }
+
+    async function apiLogin(email, password){
+      const url = baseUrl();
+      if(!url || url.includes("PASTE_URL_EXEC_KAT_SINI")){
+        throw new Error("BASE_URL belum betul. Sila update config.js dengan URL /exec Apps Script.");
+      }
+
+      // Apps Script WebApp biasanya terima POST JSON
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "login", email, password })
+      });
+
+      // Kadang Apps Script return text, jadi kita parse selamat
+      const txt = await res.text();
+      let data;
+      try { data = JSON.parse(txt); }
+      catch(e){ throw new Error("API balas bukan JSON: " + txt.slice(0,120)); }
+
+      if(!data || data.ok !== true){
+        throw new Error((data && (data.error || data.message)) || "Login gagal.");
+      }
+      return data;
+    }
+
+    async function onLogin(){
+      errBox.style.display = "none";
+      okBox.style.display = "none";
+
+      const email = $("email").value.trim();
+      const password = $("password").value;
+
+      if(!email || !password){
+        showErr("Isi email & password dulu.");
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = "Sedang log masuk...";
+
+      try{
+        const out = await apiLogin(email, password);
+
+        // Simpan token + profile
+        if(out.token) localStorage.setItem("kk_token", out.token);
+        if(out.me) localStorage.setItem("kk_me", JSON.stringify(out.me));
+
+        showOk("Login berjaya. Redirect...");
+        setTimeout(() => {
+          window.location.href = "dashboard.html";
+        }, 450);
+
+      }catch(e){
+        showErr(e.message || String(e));
+      }finally{
+        btn.disabled = false;
+        btn.textContent = "Log Masuk";
+      }
+    }
+
+    btn.addEventListener("click", onLogin);
+    $("password").addEventListener("keydown", (e) => {
+      if(e.key === "Enter") onLogin();
+    });
+
+    // Quick console hint
+    console.log("APP_CONFIG:", window.APP_CONFIG);
+  </script>
 </body>
 </html>
