@@ -12,7 +12,6 @@
   <script src="../config.js"></script>
 
   <style>
-    /* page layout */
     .wrap{
       min-height:100vh;
       display:flex;
@@ -108,6 +107,19 @@
       border: 1px solid rgba(15,23,42,.18);
       background: rgba(255,255,255,.55);
     }
+    .forgot{
+      margin-top: 10px;
+      text-align:right;
+    }
+    .forgot a{
+      font-size: 13px;
+      font-weight: 800;
+      color: #059669;
+      text-decoration:none;
+    }
+    .forgot a:hover{
+      text-decoration:underline;
+    }
   </style>
 </head>
 
@@ -120,10 +132,19 @@
       <div id="msg" class="msg"></div>
 
       <label for="email">Email</label>
-      <input id="email" class="input" type="email" placeholder="contoh: ali@student.com" autocomplete="username" />
+      <input id="email" class="input" type="email"
+        placeholder="contoh: ali@student.com"
+        autocomplete="username" />
 
       <label for="password">Password</label>
-      <input id="password" class="input" type="password" placeholder="Password" autocomplete="current-password" />
+      <input id="password" class="input" type="password"
+        placeholder="Password"
+        autocomplete="current-password" />
+
+      <!-- 🔹 LUPA PASSWORD (EDIT KECIL NO.3) -->
+      <div class="forgot">
+        <a href="./reset.html">Lupa password?</a>
+      </div>
 
       <button id="btnLogin" class="btn-primary btn">Log Masuk</button>
 
@@ -135,7 +156,6 @@
   </main>
 
   <script>
-    // ===== helpers =====
     const $ = (id) => document.getElementById(id);
 
     function showMsg(type, text){
@@ -145,16 +165,14 @@
     }
 
     function getBaseUrl(){
-      // allow either APP_CONFIG or window.APP_CONFIG (your screenshots show APP_CONFIG exists)
-      const cfg = window.APP_CONFIG || window.APP_CONFIG;
+      const cfg = window.APP_CONFIG;
       if (!cfg || !cfg.BASE_URL) return null;
       return cfg.BASE_URL;
     }
 
-    // POST as x-www-form-urlencoded (simple request => usually no CORS preflight)
     async function apiPost(params){
       const BASE_URL = getBaseUrl();
-      if (!BASE_URL) throw new Error("APP_CONFIG.BASE_URL tak wujud. Semak config.js");
+      if (!BASE_URL) throw new Error("APP_CONFIG.BASE_URL tak wujud");
 
       const body = new URLSearchParams();
       Object.entries(params).forEach(([k,v]) => body.append(k, v ?? ""));
@@ -166,11 +184,8 @@
 
       const text = await res.text();
       try { return JSON.parse(text); }
-      catch(e){ return { ok:false, message:"Invalid JSON from server", raw:text }; }
+      catch(e){ return { ok:false, message:"Invalid JSON", raw:text }; }
     }
-
-    // ===== page init =====
-    console.log("APP_CONFIG:", window.APP_CONFIG);
 
     $("btnLogin").addEventListener("click", async () => {
       const email = $("email").value.trim();
@@ -198,17 +213,15 @@
           return;
         }
 
-        // simpan token + user
         if (data.token) localStorage.setItem("kk_token", data.token);
         if (data.user)  localStorage.setItem("kk_user", JSON.stringify(data.user));
 
         showMsg("ok", "Login berjaya. Redirect...");
-
-        // redirect student dashboard
         window.location.href = "./dashboard.html";
+
       }catch(err){
         console.error(err);
-        showMsg("err", "Fetch gagal. Check Console error (URL / CORS).");
+        showMsg("err", "Fetch gagal. Check Console.");
         $("btnLogin").disabled = false;
         $("btnLogin").textContent = "Log Masuk";
       }
