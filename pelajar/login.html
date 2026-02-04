@@ -7,7 +7,6 @@
 
   <!-- global theme -->
   <link rel="stylesheet" href="../styles.css" />
-
   <!-- config (WAJIB) -->
   <script src="../config.js"></script>
 
@@ -19,9 +18,7 @@
       justify-content:center;
       padding: 26px 16px;
     }
-    .box{
-      width: min(520px, 92vw);
-    }
+    .box{ width: min(520px, 92vw); }
     .title{
       margin:0 0 6px;
       font-size: 42px;
@@ -53,10 +50,8 @@
       border-color: rgba(5,150,105,.55);
       box-shadow: 0 0 0 4px rgba(5,150,105,.14);
     }
-    .btn{
-      width:100%;
-      margin-top: 16px;
-    }
+    .btn{ width:100%; margin-top: 16px; }
+
     .msg{
       margin-top: 12px;
       padding: 10px 12px;
@@ -76,12 +71,14 @@
       border: 1px solid rgba(239,68,68,.22);
       color: #991b1b;
     }
+
     .row{
       display:flex;
       justify-content:space-between;
       align-items:center;
       margin-top: 14px;
       gap: 10px;
+      flex-wrap: wrap;
     }
     .back{
       display:inline-flex;
@@ -93,6 +90,7 @@
       opacity:.9;
     }
     .back:hover{ opacity:1; }
+
     .tiny{
       font-size: 12px;
       color: var(--kk-muted);
@@ -107,19 +105,22 @@
       border: 1px solid rgba(15,23,42,.18);
       background: rgba(255,255,255,.55);
     }
-    .forgot{
+
+    /* links bawah button */
+    .links{
       margin-top: 10px;
-      text-align:right;
+      display:flex;
+      justify-content:space-between;
+      gap: 10px;
+      flex-wrap: wrap;
     }
-    .forgot a{
+    .links a{
       font-size: 13px;
-      font-weight: 800;
+      font-weight: 900;
       color: #059669;
       text-decoration:none;
     }
-    .forgot a:hover{
-      text-decoration:underline;
-    }
+    .links a:hover{ text-decoration:underline; }
   </style>
 </head>
 
@@ -141,12 +142,13 @@
         placeholder="Password"
         autocomplete="current-password" />
 
-      <!-- 🔹 LUPA PASSWORD (EDIT KECIL NO.3) -->
-      <div class="forgot">
-        <a href="./reset.html">Lupa password?</a>
-      </div>
-
       <button id="btnLogin" class="btn-primary btn">Log Masuk</button>
+
+      <!-- ✅ 2 link penting -->
+      <div class="links">
+        <a href="./register.html">Daftar akaun baru</a>
+        <a href="./reset-password.html">Lupa password?</a>
+      </div>
 
       <div class="row">
         <a class="back" href="../index.html">← balik</a>
@@ -162,6 +164,7 @@
       const el = $("msg");
       el.className = "msg " + (type === "ok" ? "ok" : "err");
       el.textContent = text;
+      el.style.display = "block";
     }
 
     function getBaseUrl(){
@@ -177,11 +180,7 @@
       const body = new URLSearchParams();
       Object.entries(params).forEach(([k,v]) => body.append(k, v ?? ""));
 
-      const res = await fetch(BASE_URL, {
-        method: "POST",
-        body
-      });
-
+      const res = await fetch(BASE_URL, { method:"POST", body });
       const text = await res.text();
       try { return JSON.parse(text); }
       catch(e){ return { ok:false, message:"Invalid JSON", raw:text }; }
