@@ -1,62 +1,15 @@
 <!DOCTYPE html>
 <html lang="ms">
 <head>
-<meta charset="UTF-8">
-<title>Reset Password • kura kura hijau</title>
-<link rel="stylesheet" href="../styles.css">
-<script src="../config.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reset Password</title>
+  <meta http-equiv="refresh" content="0; url=./reset-password.html">
+  <script>
+    // fallback kalau meta refresh blocked
+    window.location.replace("./reset-password.html");
+  </script>
 </head>
-
-<body class="stage">
-<div class="card" style="max-width:420px;margin:80px auto;">
-  <h2>Reset Password</h2>
-
-  <div id="msg" class="msg" style="display:none"></div>
-
-  <input id="email" placeholder="Email pelajar">
-  <input id="sid" placeholder="No Pendaftaran">
-  <input id="pass" type="password" placeholder="Password baru">
-
-  <button onclick="reset()">Reset Password</button>
-  <p><a href="./login.html">← Kembali ke Login</a></p>
-</div>
-
-<script>
-const BASE_URL = APP_CONFIG.BASE_URL;
-const msg = document.getElementById("msg");
-
-function show(ok,text){
-  msg.style.display="block";
-  msg.className = ok?"msg ok":"msg err";
-  msg.textContent=text;
-}
-
-async function reset(){
-  const email = emailEl().value.trim();
-  const studentId = sidEl().value.trim();
-  const newPassword = passEl().value;
-
-  const body = new URLSearchParams({
-    email, studentId, newPassword
-  });
-
-  const res = await fetch(`${BASE_URL}?action=resetPassword`,{
-    method:"POST", body
-  });
-
-  const out = await res.json();
-
-  if(out.ok){
-    show(true,"Password berjaya ditukar. Sila login.");
-    setTimeout(()=>location.href="./login.html",1500);
-  }else{
-    show(false,out.message);
-  }
-}
-
-const emailEl=()=>document.getElementById("email");
-const sidEl=()=>document.getElementById("sid");
-const passEl=()=>document.getElementById("pass");
-</script>
+<body>
 </body>
 </html>
