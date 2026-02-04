@@ -1,17 +1,18 @@
-<!-- PASTE TERUS → pelajar/kelas.html -->
 <!DOCTYPE html>
 <html lang="ms">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Kelas • kura kura hijau</title>
+  <title>Dashboard Pelajar • kura kura hijau</title>
 
   <link rel="stylesheet" href="../styles.css" />
   <script src="../config.js"></script>
 
   <style>
-    .page{ min-height:100vh; padding: 18px 16px 40px; }
-
+    .page{
+      min-height:100vh;
+      padding: 18px 16px 40px;
+    }
     .top{
       position: sticky;
       top: 0;
@@ -37,17 +38,16 @@
     }
     .brand h1{
       margin:0;
-      font-size: 20px;
+      font-size: 22px;
       letter-spacing: -0.02em;
       line-height: 1.1;
-      font-weight: 950;
     }
     .brand .sub{
       margin:0;
       color:#334155;
-      font-weight:800;
+      font-weight:700;
       font-size: 13px;
-      opacity:.9;
+      opacity: .9;
     }
 
     .btn{
@@ -59,17 +59,17 @@
       background: #059669;
       color: #fff;
       box-shadow: 0 8px 18px rgba(5,150,105,.18);
-      transition: transform .08s ease, background .15s ease, box-shadow .15s ease;
     }
     .btn:hover{ background:#047857; }
-    .btn:active{ transform: translateY(1px); }
     .btn.ghost{
       background: rgba(255,255,255,.75);
       color:#0f172a;
       border: 1px solid rgba(15,23,42,.10);
       box-shadow: 0 10px 30px rgba(2,6,23,.06);
     }
-    .btn.ghost:hover{ background: rgba(255,255,255,.90); }
+    .btn.ghost:hover{
+      background: rgba(255,255,255,.90);
+    }
 
     .container{
       max-width: 1100px;
@@ -111,7 +111,7 @@
       grid-template-columns: 1fr;
     }
     @media(min-width: 900px){
-      .grid{ grid-template-columns: 1fr 1fr; }
+      .grid{ grid-template-columns: 1.1fr .9fr; }
     }
 
     .section-title{
@@ -121,6 +121,50 @@
       letter-spacing: -.01em;
     }
 
+    .class-list{
+      display:grid;
+      gap: 12px;
+      grid-template-columns: 1fr;
+    }
+    @media(min-width: 900px){
+      .class-list{
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .class-card{
+      border-radius: 18px;
+      padding: 14px;
+      background: rgba(255,255,255,.68);
+      border: 1px solid rgba(15,23,42,.08);
+      box-shadow: 0 14px 34px rgba(2,6,23,.08);
+      display:flex;
+      flex-direction:column;
+      gap: 8px;
+      cursor: pointer;
+      transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+    }
+    .class-card:hover{
+      transform: translateY(-2px);
+      border-color: rgba(5,150,105,.25);
+      box-shadow: 0 18px 40px rgba(2,6,23,.10);
+    }
+    .class-card:active{
+      transform: translateY(-1px);
+    }
+    .class-card .title{
+      font-weight: 950;
+      font-size: 16px;
+      margin:0;
+      color:#0f172a;
+    }
+    .class-card .meta{
+      margin:0;
+      color:#334155;
+      font-weight: 800;
+      font-size: 13px;
+      opacity: .9;
+    }
     .pill{
       display:inline-flex;
       align-items:center;
@@ -135,47 +179,16 @@
       width: fit-content;
     }
 
-    .muted{
-      margin:0;
+    .placeholder{
       color:#334155;
       font-weight: 800;
-      opacity: .92;
-      line-height: 1.55;
+      opacity: .9;
+      line-height: 1.5;
     }
-
-    .list{
-      display:grid;
-      gap: 10px;
-      margin-top: 10px;
-    }
-    .item{
-      border-radius: 16px;
-      padding: 12px;
-      background: rgba(255,255,255,.68);
-      border: 1px solid rgba(15,23,42,.08);
-      box-shadow: 0 14px 34px rgba(2,6,23,.06);
-    }
-    .item .t{
-      margin:0;
-      font-weight: 950;
-      font-size: 14px;
-      color:#0f172a;
-    }
-    .item .d{
-      margin:6px 0 0;
-      font-weight: 800;
-      font-size: 12px;
-      color:#334155;
-      opacity:.92;
-    }
-
-    .code{
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-      font-size: 12px;
+    code{
+      background: rgba(2,6,23,.06);
       padding: 2px 8px;
       border-radius: 999px;
-      border: 1px solid rgba(15,23,42,.14);
-      background: rgba(255,255,255,.55);
       font-weight: 900;
     }
   </style>
@@ -185,12 +198,12 @@
   <header class="top">
     <div class="top-inner">
       <div class="brand">
-        <h1 id="title">Kelas</h1>
-        <p class="sub" id="sub">Loading...</p>
+        <h1>Dashboard Pelajar</h1>
+        <p class="sub" id="who">Loading...</p>
       </div>
 
       <div style="display:flex; gap:10px; align-items:center;">
-        <button class="btn ghost" id="btnBack" type="button">← Dashboard</button>
+        <button class="btn ghost" id="btnRefresh" type="button">Refresh</button>
         <button class="btn" id="btnLogout" type="button">Logout</button>
       </div>
     </div>
@@ -200,81 +213,47 @@
     <div class="container">
       <div id="msg" class="msg"></div>
 
-      <section class="card">
-        <h2 class="section-title">Info Kelas</h2>
-        <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
-          <span class="pill">classId: <span class="code" id="classIdPill">-</span></span>
-          <span class="pill">classCode: <span class="code" id="classCodePill">-</span></span>
-        </div>
-        <p class="muted" style="margin-top:10px;">
-          Kat bawah ni kita sediakan tempat untuk <b>Nota</b> & <b>Kuiz</b>.
-          Buat masa ni page ni confirmkan dulu: token ok + enrollment ok + kelas betul.
-        </p>
-      </section>
-
       <div class="grid">
+        <!-- LEFT: Classes -->
         <section class="card">
-          <h2 class="section-title">Nota</h2>
-          <p class="muted">
-            Next step: kita tambah API untuk list nota ikut kelas / subject.
-            Lepas tu student nampak nota yang “released” sahaja.
+          <h2 class="section-title">Kelas saya</h2>
+          <div id="classes" class="class-list"></div>
+          <p class="placeholder" id="classesHint" style="margin:10px 0 0;">
+            Kalau kosong, maksudnya student belum enroll apa-apa kelas (atau API belum bagi data).
           </p>
-          <div class="list" id="notesList">
-            <div class="item">
-              <p class="t">Placeholder Nota</p>
-              <p class="d">Lepas API siap, sini akan jadi list nota.</p>
-            </div>
-          </div>
         </section>
 
+        <!-- RIGHT: Notes/Quiz placeholder -->
         <section class="card">
-          <h2 class="section-title">Kuiz</h2>
-          <p class="muted">
-            Next step: list kuiz ikut kelas. Kalau status <b>open</b> baru link muncul / boleh klik.
+          <h2 class="section-title">Nota & Kuiz</h2>
+          <p class="placeholder" style="margin:0;">
+            Bahagian ni kita hidupkan lepas kelas dah confirm jalan.
+            <br><br>
+            Debug cepat (Mac): <code>⌥⌘J</code> → tengok Console.
+            <br>
+            Token: <code>localStorage.getItem("kk_token")</code>
           </p>
-          <div class="list" id="quizList">
-            <div class="item">
-              <p class="t">Placeholder Kuiz</p>
-              <p class="d">Lepas API siap, sini akan jadi list kuiz (open/closed).</p>
-            </div>
-          </div>
         </section>
       </div>
     </div>
   </main>
 
   <script>
-    const $ = (id)=>document.getElementById(id);
+    const BASE_URL = window.APP_CONFIG && window.APP_CONFIG.BASE_URL ? window.APP_CONFIG.BASE_URL : "";
+    const msgEl = document.getElementById("msg");
+    const whoEl = document.getElementById("who");
+    const classesEl = document.getElementById("classes");
+    const classesHint = document.getElementById("classesHint");
 
     function showMsg(type, text){
-      const el = $("msg");
-      el.className = "msg " + (type === "ok" ? "ok" : "err");
-      el.textContent = text;
-      el.style.display = "block";
+      msgEl.className = "msg " + (type === "ok" ? "ok" : "err");
+      msgEl.textContent = text;
+      msgEl.style.display = "block";
     }
     function clearMsg(){
-      const el = $("msg");
-      el.style.display = "none";
-      el.textContent = "";
-      el.className = "msg";
-    }
-
-    function getBaseUrl(){
-      const cfg = window.APP_CONFIG;
-      return (cfg && cfg.BASE_URL) ? cfg.BASE_URL : null;
-    }
-
-    async function apiPost(params){
-      const BASE_URL = getBaseUrl();
-      if(!BASE_URL) throw new Error("APP_CONFIG.BASE_URL tak wujud. Semak config.js");
-
-      const body = new URLSearchParams();
-      Object.entries(params).forEach(([k,v]) => body.append(k, v ?? ""));
-
-      const res = await fetch(BASE_URL, { method:"POST", body });
-      const text = await res.text();
-      try{ return JSON.parse(text); }
-      catch(e){ return { ok:false, message:"Invalid JSON from server", raw:text }; }
+      msgEl.style.display = "none";
+      msgEl.textContent = "";
+      msgEl.className = "msg";
     }
 
     function readUser(){
@@ -286,75 +265,121 @@
       }
     }
 
-    function q(name){
-      return new URLSearchParams(location.search).get(name) || "";
+    async function apiPost(action, params){
+      if(!BASE_URL) return { ok:false, message:"APP_CONFIG.BASE_URL tak wujud. Semak config.js" };
+
+      const body = new URLSearchParams();
+      Object.entries(params || {}).forEach(([k,v]) => body.append(k, v ?? ""));
+
+      const res = await fetch(`${BASE_URL}?action=${encodeURIComponent(action)}`, {
+        method: "POST",
+        body
+      });
+
+      const text = await res.text();
+      try { return JSON.parse(text); }
+      catch(e){ return { ok:false, message:"Response bukan JSON", raw:text }; }
     }
 
-    async function boot(){
+    function escapeHtml(s){
+      return String(s ?? "")
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    function renderClasses(list){
+      classesEl.innerHTML = "";
+
+      if(!Array.isArray(list) || list.length === 0){
+        classesHint.style.display = "block";
+        return;
+      }
+      classesHint.style.display = "none";
+
+      list.forEach(c => {
+        // Backend kau return: { classId, title, desc }
+        const title = c.title || c.className || c.name || "Kelas";
+        const desc  = c.desc  || c.classCode || c.description || "";
+        const classId = c.classId || c.id || "";
+
+        const card = document.createElement("div");
+        card.className = "class-card";
+
+        card.innerHTML = `
+          <p class="title">${escapeHtml(title)}</p>
+          <p class="meta">${escapeHtml(desc)}</p>
+          <span class="pill">Klik untuk masuk</span>
+        `;
+
+        card.addEventListener("click", () => {
+          if(!classId){
+            showMsg("err", "classId kosong. Check data Classes/Enrollments.");
+            return;
+          }
+          window.location.href = `./kelas.html?classId=${encodeURIComponent(classId)}`;
+        });
+
+        classesEl.appendChild(card);
+      });
+    }
+
+    async function loadDashboard(){
       clearMsg();
+
+      if(!BASE_URL){
+        showMsg("err", "APP_CONFIG.BASE_URL tak wujud. Semak config.js");
+        return;
+      }
 
       const token = localStorage.getItem("kk_token") || "";
       const user = readUser();
 
-      if(!token){
-        location.href = "./login.html";
+      // Kalau tak login, balik login page
+      if(!token && !user){
+        window.location.href = "./login.html";
         return;
       }
 
-      const classId = q("classId").trim();
-      if(!classId){
-        showMsg("err", "classId tak wujud dalam URL. Balik dashboard.");
-        return;
+      const displayName = user?.name || user?.email || "Pelajar";
+      whoEl.textContent = `Hi, ${displayName}`;
+
+      // API backend kau: action=listMyClasses (token) atau (userId)
+      let out = null;
+
+      if(token){
+        out = await apiPost("listMyClasses", { token });
       }
 
-      $("classIdPill").textContent = classId;
-
-      // verify token -> me
-      const me = await apiPost({ action:"me", token });
-      if(!me || !me.ok){
-        showMsg("err", me?.message || "Token invalid. Sila login semula.");
-        localStorage.removeItem("kk_token");
-        localStorage.removeItem("kk_user");
-        setTimeout(()=> location.href="./login.html", 600);
-        return;
-      }
-
-      const displayName = me.user?.name || me.user?.email || "Pelajar";
-      $("sub").textContent = `Hi, ${displayName}`;
-
-      // load my classes, find this class
-      const out = await apiPost({ action:"listMyClasses", token });
       if(!out || !out.ok){
-        showMsg("err", out?.message || "Tak dapat load kelas. Check API.");
+        const userId = user?.userId || user?.id || "";
+        if(userId){
+          out = await apiPost("listMyClasses", { userId });
+        }
+      }
+
+      if(!out || !out.ok){
+        console.error("listMyClasses failed:", out);
+        showMsg("err", out?.message || "Tak dapat load kelas. Check Console.");
+        renderClasses([]);
         return;
       }
 
-      const list = Array.isArray(out.classes) ? out.classes : [];
-      const cls = list.find(x => String(x.classId || "").trim() === classId);
-
-      if(!cls){
-        // enrollment guard: user tak enroll kelas ni
-        $("title").textContent = "Akses ditolak";
-        $("classCodePill").textContent = "-";
-        showMsg("err", "Kau belum enroll kelas ni (atau classId salah). Balik dashboard & join guna kod.");
-        return;
-      }
-
-      // show class info
-      $("title").textContent = cls.title ? cls.title : "Kelas";
-      $("classCodePill").textContent = cls.desc ? cls.desc : "-";
-
-      showMsg("ok", "Kelas ok. Enrollment ok. Next: hidupkan Nota & Kuiz.");
+      renderClasses(out.classes || []);
+      showMsg("ok", "Kelas berjaya dimuatkan. Klik satu kelas untuk masuk.");
     }
 
-    $("btnBack").addEventListener("click", ()=> location.href = "./dashboard.html");
-    $("btnLogout").addEventListener("click", ()=>{
+    document.getElementById("btnLogout").addEventListener("click", () => {
       localStorage.removeItem("kk_token");
       localStorage.removeItem("kk_user");
-      location.href = "./login.html";
+      window.location.href = "./login.html";
     });
 
-    boot();
+    document.getElementById("btnRefresh").addEventListener("click", loadDashboard);
+
+    loadDashboard();
   </script>
 </body>
 </html>
