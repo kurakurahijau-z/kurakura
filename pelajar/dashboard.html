@@ -9,38 +9,67 @@
   <script src="../config.js"></script>
 
   <style>
-    .page{ min-height:100vh; padding: 18px 16px 40px; }
+    .page{
+      min-height:100vh;
+      padding: 18px 16px 40px;
+    }
     .top{
-      position: sticky; top: 0; z-index: 20;
+      position: sticky;
+      top: 0;
+      z-index: 20;
       background: rgba(255,255,255,.75);
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
       border-bottom: 1px solid rgba(255,255,255,.50);
     }
     .top-inner{
-      max-width: 1100px; margin: 0 auto; padding: 14px 8px;
-      display:flex; align-items:center; justify-content:space-between; gap: 12px;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 14px 8px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 12px;
     }
-    .brand{ display:flex; flex-direction:column; gap: 4px; }
-    .brand h1{ margin:0; font-size: 22px; letter-spacing: -0.02em; line-height: 1.1; }
-    .brand .sub{ margin:0; color:#334155; font-weight:700; font-size: 13px; opacity: .9; }
+    .brand{
+      display:flex;
+      flex-direction:column;
+      gap: 4px;
+    }
+    .brand h1{
+      margin:0;
+      font-size: 22px;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+    }
+    .brand .sub{
+      margin:0;
+      color:#334155;
+      font-weight:700;
+      font-size: 13px;
+      opacity: .9;
+    }
 
     .btn{
-      border: 0; cursor: pointer;
-      padding: 10px 14px; border-radius: 14px; font-weight: 900;
-      background: #059669; color: #fff;
+      border: 0;
+      cursor: pointer;
+      padding: 10px 14px;
+      border-radius: 14px;
+      font-weight: 900;
+      background: #059669;
+      color: #fff;
       box-shadow: 0 8px 18px rgba(5,150,105,.18);
     }
     .btn:hover{ background:#047857; }
-    .btn:disabled{ opacity:.6; cursor:not-allowed; }
-
     .btn.ghost{
       background: rgba(255,255,255,.75);
       color:#0f172a;
       border: 1px solid rgba(15,23,42,.10);
       box-shadow: 0 10px 30px rgba(2,6,23,.06);
     }
-    .btn.ghost:hover{ background: rgba(255,255,255,.90); }
+    .btn.ghost:hover{
+      background: rgba(255,255,255,.90);
+    }
 
     .container{
       max-width: 1100px;
@@ -98,7 +127,9 @@
       grid-template-columns: 1fr;
     }
     @media(min-width: 900px){
-      .class-list{ grid-template-columns: 1fr 1fr; }
+      .class-list{
+        grid-template-columns: 1fr 1fr;
+      }
     }
 
     .class-card{
@@ -110,6 +141,16 @@
       display:flex;
       flex-direction:column;
       gap: 8px;
+      cursor: pointer;
+      transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+    }
+    .class-card:hover{
+      transform: translateY(-2px);
+      border-color: rgba(5,150,105,.25);
+      box-shadow: 0 18px 40px rgba(2,6,23,.10);
+    }
+    .class-card:active{
+      transform: translateY(-1px);
     }
     .class-card .title{
       font-weight: 950;
@@ -144,31 +185,6 @@
       opacity: .9;
       line-height: 1.5;
     }
-
-    .join{
-      display:flex;
-      gap:10px;
-      align-items:center;
-      flex-wrap:wrap;
-      margin-bottom: 12px;
-    }
-    .input{
-      flex: 1;
-      min-width: 220px;
-      box-sizing:border-box;
-      padding: 12px 12px;
-      border-radius: 14px;
-      border: 1px solid rgba(15,23,42,.16);
-      background: rgba(255,255,255,.70);
-      outline: none;
-      font-size: 14px;
-      font-weight: 800;
-    }
-    .input:focus{
-      border-color: rgba(5,150,105,.55);
-      box-shadow: 0 0 0 4px rgba(5,150,105,.14);
-    }
-
     code{
       background: rgba(2,6,23,.06);
       padding: 2px 8px;
@@ -201,15 +217,7 @@
         <!-- LEFT: Classes -->
         <section class="card">
           <h2 class="section-title">Kelas saya</h2>
-
-          <!-- JOIN CLASS -->
-          <div class="join">
-            <input id="classCode" class="input" placeholder="Masukkan kod kelas (contoh: PMS-7917)" />
-            <button id="btnJoin" class="btn" type="button">Join</button>
-          </div>
-
           <div id="classes" class="class-list"></div>
-
           <p class="placeholder" id="classesHint" style="margin:10px 0 0;">
             Kalau kosong, maksudnya student belum enroll apa-apa kelas (atau API belum bagi data).
           </p>
@@ -257,39 +265,20 @@
       }
     }
 
-    async function postForm(action, data){
-      const url = `${BASE_URL}?action=${encodeURIComponent(action)}`;
-      const body = new URLSearchParams(data);
-      const res = await fetch(url, { method:"POST", body });
-      const text = await res.text();
-      try{ return JSON.parse(text); }
-      catch(e){ return { ok:false, message:"Response bukan JSON", raw:text }; }
-    }
+    async function apiPost(action, params){
+      if(!BASE_URL) return { ok:false, message:"APP_CONFIG.BASE_URL tak wujud. Semak config.js" };
 
-    function renderClasses(list){
-      classesEl.innerHTML = "";
-      if(!Array.isArray(list) || list.length === 0){
-        classesHint.style.display = "block";
-        return;
-      }
-      classesHint.style.display = "none";
+      const body = new URLSearchParams();
+      Object.entries(params || {}).forEach(([k,v]) => body.append(k, v ?? ""));
 
-      list.forEach(c => {
-        const title = c.title || c.name || "Kelas";
-        const desc  = c.desc || c.description || "";
-        const classId = c.classId || c.id || "";
-
-        const card = document.createElement("div");
-        card.className = "class-card";
-
-        card.innerHTML = `
-          <p class="title">${escapeHtml(title)}</p>
-          <p class="meta">${escapeHtml(desc)}</p>
-          <span class="pill">classId: ${escapeHtml(classId)}</span>
-        `;
-
-        classesEl.appendChild(card);
+      const res = await fetch(`${BASE_URL}?action=${encodeURIComponent(action)}`, {
+        method: "POST",
+        body
       });
+
+      const text = await res.text();
+      try { return JSON.parse(text); }
+      catch(e){ return { ok:false, message:"Response bukan JSON", raw:text }; }
     }
 
     function escapeHtml(s){
@@ -299,6 +288,42 @@
         .replaceAll(">","&gt;")
         .replaceAll('"',"&quot;")
         .replaceAll("'","&#039;");
+    }
+
+    function renderClasses(list){
+      classesEl.innerHTML = "";
+
+      if(!Array.isArray(list) || list.length === 0){
+        classesHint.style.display = "block";
+        return;
+      }
+      classesHint.style.display = "none";
+
+      list.forEach(c => {
+        // Backend kau return: { classId, title, desc }
+        const title = c.title || c.className || c.name || "Kelas";
+        const desc  = c.desc  || c.classCode || c.description || "";
+        const classId = c.classId || c.id || "";
+
+        const card = document.createElement("div");
+        card.className = "class-card";
+
+        card.innerHTML = `
+          <p class="title">${escapeHtml(title)}</p>
+          <p class="meta">${escapeHtml(desc)}</p>
+          <span class="pill">Klik untuk masuk</span>
+        `;
+
+        card.addEventListener("click", () => {
+          if(!classId){
+            showMsg("err", "classId kosong. Check data Classes/Enrollments.");
+            return;
+          }
+          window.location.href = `./kelas.html?classId=${encodeURIComponent(classId)}`;
+        });
+
+        classesEl.appendChild(card);
+      });
     }
 
     async function loadDashboard(){
@@ -312,6 +337,7 @@
       const token = localStorage.getItem("kk_token") || "";
       const user = readUser();
 
+      // Kalau tak login, balik login page
       if(!token && !user){
         window.location.href = "./login.html";
         return;
@@ -320,16 +346,17 @@
       const displayName = user?.name || user?.email || "Pelajar";
       whoEl.textContent = `Hi, ${displayName}`;
 
+      // API backend kau: action=listMyClasses (token) atau (userId)
       let out = null;
 
       if(token){
-        out = await postForm("listMyClasses", { token });
+        out = await apiPost("listMyClasses", { token });
       }
 
       if(!out || !out.ok){
         const userId = user?.userId || user?.id || "";
         if(userId){
-          out = await postForm("listMyClasses", { userId });
+          out = await apiPost("listMyClasses", { userId });
         }
       }
 
@@ -341,53 +368,8 @@
       }
 
       renderClasses(out.classes || []);
-      showMsg("ok", "Kelas berjaya dimuatkan.");
+      showMsg("ok", "Kelas berjaya dimuatkan. Klik satu kelas untuk masuk.");
     }
-
-    // JOIN CLASS
-    document.getElementById("btnJoin").addEventListener("click", async () => {
-      clearMsg();
-
-      const token = localStorage.getItem("kk_token") || "";
-      if(!token){
-        showMsg("err","Token tak wujud. Sila login semula.");
-        window.location.href = "./login.html";
-        return;
-      }
-
-      const classCode = (document.getElementById("classCode").value || "").trim();
-      if(!classCode){
-        showMsg("err","Masukkan kod kelas dulu.");
-        return;
-      }
-
-      const btn = document.getElementById("btnJoin");
-      btn.disabled = true;
-      btn.textContent = "Joining...";
-
-      try{
-        const out = await postForm("joinClass", { token, classCode });
-
-        if(!out || !out.ok){
-          showMsg("err", out?.message || "Join gagal.");
-          console.error("joinClass failed:", out);
-          btn.disabled = false;
-          btn.textContent = "Join";
-          return;
-        }
-
-        showMsg("ok", out.message || "Berjaya join kelas.");
-        document.getElementById("classCode").value = "";
-
-        await loadDashboard();
-      }catch(e){
-        console.error(e);
-        showMsg("err","Fetch gagal. Check Console.");
-      }finally{
-        btn.disabled = false;
-        btn.textContent = "Join";
-      }
-    });
 
     document.getElementById("btnLogout").addEventListener("click", () => {
       localStorage.removeItem("kk_token");
