@@ -1,4 +1,3 @@
-<!-- PASTE TERUS → pelajar/kelas.html -->
 <!DOCTYPE html>
 <html lang="ms">
 <head>
@@ -34,20 +33,27 @@
       display:flex;
       flex-direction:column;
       gap: 4px;
+      min-width: 0;
     }
     .brand h1{
       margin:0;
-      font-size: 20px;
+      font-size: 22px;
       letter-spacing: -0.02em;
       line-height: 1.1;
-      font-weight: 950;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 720px;
     }
     .brand .sub{
       margin:0;
       color:#334155;
       font-weight:800;
       font-size: 13px;
-      opacity:.9;
+      opacity: .9;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .btn{
@@ -59,10 +65,13 @@
       background: #059669;
       color: #fff;
       box-shadow: 0 8px 18px rgba(5,150,105,.18);
-      transition: transform .08s ease, background .15s ease, box-shadow .15s ease;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      white-space:nowrap;
     }
     .btn:hover{ background:#047857; }
-    .btn:active{ transform: translateY(1px); }
     .btn.ghost{
       background: rgba(255,255,255,.75);
       color:#0f172a;
@@ -121,6 +130,12 @@
       letter-spacing: -.01em;
     }
 
+    .pills{
+      display:flex;
+      flex-wrap:wrap;
+      gap: 10px;
+      margin: 10px 0 6px;
+    }
     .pill{
       display:inline-flex;
       align-items:center;
@@ -135,47 +150,64 @@
       width: fit-content;
     }
 
-    .muted{
-      margin:0;
+    .placeholder{
       color:#334155;
       font-weight: 800;
-      opacity: .92;
-      line-height: 1.55;
+      opacity: .9;
+      line-height: 1.5;
+      margin:0;
     }
 
+    /* NOTES LIST */
     .list{
       display:grid;
-      gap: 10px;
-      margin-top: 10px;
+      gap: 12px;
+      grid-template-columns: 1fr;
     }
     .item{
-      border-radius: 16px;
-      padding: 12px;
+      border-radius: 18px;
+      padding: 14px;
       background: rgba(255,255,255,.68);
       border: 1px solid rgba(15,23,42,.08);
-      box-shadow: 0 14px 34px rgba(2,6,23,.06);
+      box-shadow: 0 14px 34px rgba(2,6,23,.08);
+      display:flex;
+      flex-direction:column;
+      gap: 8px;
     }
-    .item .t{
-      margin:0;
+    .item .title{
       font-weight: 950;
-      font-size: 14px;
+      font-size: 15px;
+      margin:0;
       color:#0f172a;
     }
-    .item .d{
-      margin:6px 0 0;
+    .item .meta{
+      margin:0;
+      color:#334155;
       font-weight: 800;
       font-size: 12px;
-      color:#334155;
-      opacity:.92;
+      opacity: .9;
+    }
+    .item .actions{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:flex-end;
+      margin-top: 6px;
+    }
+    .btn.small{
+      padding: 9px 12px;
+      border-radius: 12px;
+      font-size: 13px;
+      box-shadow: 0 10px 26px rgba(2,6,23,.08);
+    }
+    .btn.small.ghost{
+      box-shadow: 0 10px 26px rgba(2,6,23,.06);
     }
 
-    .code{
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-      font-size: 12px;
+    code{
+      background: rgba(2,6,23,.06);
       padding: 2px 8px;
       border-radius: 999px;
-      border: 1px solid rgba(15,23,42,.14);
-      background: rgba(255,255,255,.55);
       font-weight: 900;
     }
   </style>
@@ -185,12 +217,12 @@
   <header class="top">
     <div class="top-inner">
       <div class="brand">
-        <h1 id="title">Kelas</h1>
-        <p class="sub" id="sub">Loading...</p>
+        <h1 id="classTitle">Kelas</h1>
+        <p class="sub" id="who">Loading...</p>
       </div>
 
       <div style="display:flex; gap:10px; align-items:center;">
-        <button class="btn ghost" id="btnBack" type="button">← Dashboard</button>
+        <a class="btn ghost" href="./dashboard.html">← Dashboard</a>
         <button class="btn" id="btnLogout" type="button">Logout</button>
       </div>
     </div>
@@ -202,79 +234,70 @@
 
       <section class="card">
         <h2 class="section-title">Info Kelas</h2>
-        <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
-          <span class="pill">classId: <span class="code" id="classIdPill">-</span></span>
-          <span class="pill">classCode: <span class="code" id="classCodePill">-</span></span>
+
+        <div class="pills">
+          <span class="pill">classId: <span id="pillClassId">-</span></span>
+          <span class="pill">classCode: <span id="pillClassCode">-</span></span>
         </div>
-        <p class="muted" style="margin-top:10px;">
-          Kat bawah ni kita sediakan tempat untuk <b>Nota</b> & <b>Kuiz</b>.
-          Buat masa ni page ni confirmkan dulu: token ok + enrollment ok + kelas betul.
+
+        <p class="placeholder">
+          Kat bawah ni kita hidupkan list <b>Nota</b> ikut kelas/subject (releaseStatus = <code>released</code> sahaja).
+          Kuiz kita hidupkan lepas ni.
         </p>
       </section>
 
       <div class="grid">
+        <!-- NOTES -->
         <section class="card">
           <h2 class="section-title">Nota</h2>
-          <p class="muted">
-            Next step: kita tambah API untuk list nota ikut kelas / subject.
-            Lepas tu student nampak nota yang “released” sahaja.
-          </p>
-          <div class="list" id="notesList">
-            <div class="item">
-              <p class="t">Placeholder Nota</p>
-              <p class="d">Lepas API siap, sini akan jadi list nota.</p>
-            </div>
+
+          <div id="notesMsg" class="placeholder" style="margin-bottom:10px;">
+            Loading nota...
           </div>
+
+          <div id="notesList" class="list"></div>
         </section>
 
+        <!-- QUIZ placeholder -->
         <section class="card">
           <h2 class="section-title">Kuiz</h2>
-          <p class="muted">
-            Next step: list kuiz ikut kelas. Kalau status <b>open</b> baru link muncul / boleh klik.
+          <p class="placeholder">
+            Next step: list kuiz ikut kelas. Kalau status open baru link muncul / boleh klik.
+            <br><br>
+            Debug cepat (Mac): <code>⌥⌘J</code> → Console
+            <br>
+            Token: <code>localStorage.getItem("kk_token")</code>
           </p>
-          <div class="list" id="quizList">
-            <div class="item">
-              <p class="t">Placeholder Kuiz</p>
-              <p class="d">Lepas API siap, sini akan jadi list kuiz (open/closed).</p>
-            </div>
-          </div>
         </section>
       </div>
     </div>
   </main>
 
   <script>
-    const $ = (id)=>document.getElementById(id);
+    const BASE_URL = window.APP_CONFIG && window.APP_CONFIG.BASE_URL ? window.APP_CONFIG.BASE_URL : "";
+    const msgEl = document.getElementById("msg");
+    const whoEl = document.getElementById("who");
+
+    const classTitleEl = document.getElementById("classTitle");
+    const pillClassIdEl = document.getElementById("pillClassId");
+    const pillClassCodeEl = document.getElementById("pillClassCode");
+
+    const notesMsgEl = document.getElementById("notesMsg");
+    const notesListEl = document.getElementById("notesList");
 
     function showMsg(type, text){
-      const el = $("msg");
-      el.className = "msg " + (type === "ok" ? "ok" : "err");
-      el.textContent = text;
-      el.style.display = "block";
+      msgEl.className = "msg " + (type === "ok" ? "ok" : "err");
+      msgEl.textContent = text;
+      msgEl.style.display = "block";
     }
     function clearMsg(){
-      const el = $("msg");
-      el.style.display = "none";
-      el.textContent = "";
-      el.className = "msg";
+      msgEl.style.display = "none";
+      msgEl.textContent = "";
+      msgEl.className = "msg";
     }
 
-    function getBaseUrl(){
-      const cfg = window.APP_CONFIG;
-      return (cfg && cfg.BASE_URL) ? cfg.BASE_URL : null;
-    }
-
-    async function apiPost(params){
-      const BASE_URL = getBaseUrl();
-      if(!BASE_URL) throw new Error("APP_CONFIG.BASE_URL tak wujud. Semak config.js");
-
-      const body = new URLSearchParams();
-      Object.entries(params).forEach(([k,v]) => body.append(k, v ?? ""));
-
-      const res = await fetch(BASE_URL, { method:"POST", body });
-      const text = await res.text();
-      try{ return JSON.parse(text); }
-      catch(e){ return { ok:false, message:"Invalid JSON from server", raw:text }; }
+    function qs(name){
+      return new URLSearchParams(location.search).get(name) || "";
     }
 
     function readUser(){
@@ -286,75 +309,109 @@
       }
     }
 
-    function q(name){
-      return new URLSearchParams(location.search).get(name) || "";
+    async function apiPost(params){
+      if(!BASE_URL) throw new Error("APP_CONFIG.BASE_URL tak wujud. Semak config.js");
+      const body = new URLSearchParams();
+      Object.entries(params).forEach(([k,v]) => body.append(k, v ?? ""));
+      const res = await fetch(BASE_URL, { method:"POST", body });
+      const text = await res.text();
+      try{ return JSON.parse(text); }
+      catch(e){ return { ok:false, message:"Response bukan JSON", raw:text }; }
     }
 
-    async function boot(){
+    function escapeHtml(s){
+      return String(s ?? "")
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    function renderNotes(notes, classId){
+      notesListEl.innerHTML = "";
+
+      if(!Array.isArray(notes) || notes.length === 0){
+        notesMsgEl.textContent = "Tiada nota released lagi untuk kelas ni.";
+        return;
+      }
+
+      notesMsgEl.textContent = "";
+
+      notes.forEach(n => {
+        const noteId = n.noteId || "";
+        const title = n.title || "Nota";
+        const subjectId = n.subjectId || "";
+        const releasedAt = n.releasedAt || "";
+
+        const item = document.createElement("div");
+        item.className = "item";
+
+        item.innerHTML = `
+          <p class="title">${escapeHtml(title)}</p>
+          <p class="meta">
+            subjectId: <code>${escapeHtml(subjectId)}</code>
+            ${releasedAt ? ` • releasedAt: ${escapeHtml(releasedAt)}` : ``}
+          </p>
+          <div class="actions">
+            <a class="btn small ghost" href="${escapeHtml(n.contentLink || "#")}" target="_blank" rel="noopener">Buka link</a>
+            <a class="btn small" href="./nota.html?noteId=${encodeURIComponent(noteId)}&classId=${encodeURIComponent(classId)}">Buka dalam portal</a>
+          </div>
+        `;
+
+        notesListEl.appendChild(item);
+      });
+    }
+
+    async function load(){
       clearMsg();
 
       const token = localStorage.getItem("kk_token") || "";
       const user = readUser();
-
-      if(!token){
+      if(!token && !user){
         location.href = "./login.html";
         return;
       }
 
-      const classId = q("classId").trim();
+      whoEl.textContent = `Hi, ${user?.name || user?.email || "Pelajar"}`;
+
+      const classId = qs("classId");
+      const classCode = qs("classCode");     // optional (kalau kau nak pass)
+      const className = qs("className");     // optional (kalau kau nak pass)
+
       if(!classId){
-        showMsg("err", "classId tak wujud dalam URL. Balik dashboard.");
+        showMsg("err", "classId tak ada pada URL. Contoh: kelas.html?classId=XXXX");
+        notesMsgEl.textContent = "Tak boleh load nota tanpa classId.";
         return;
       }
 
-      $("classIdPill").textContent = classId;
+      pillClassIdEl.textContent = classId;
+      pillClassCodeEl.textContent = classCode || "—";
+      classTitleEl.textContent = className ? `Kelas ${className}` : "Kelas";
 
-      // verify token -> me
-      const me = await apiPost({ action:"me", token });
-      if(!me || !me.ok){
-        showMsg("err", me?.message || "Token invalid. Sila login semula.");
-        localStorage.removeItem("kk_token");
-        localStorage.removeItem("kk_user");
-        setTimeout(()=> location.href="./login.html", 600);
-        return;
-      }
+      // call listNotes aligned dengan Notes sheet kau
+      notesMsgEl.textContent = "Loading nota...";
+      const out = await apiPost({ action:"listNotes", token, classId });
 
-      const displayName = me.user?.name || me.user?.email || "Pelajar";
-      $("sub").textContent = `Hi, ${displayName}`;
-
-      // load my classes, find this class
-      const out = await apiPost({ action:"listMyClasses", token });
       if(!out || !out.ok){
-        showMsg("err", out?.message || "Tak dapat load kelas. Check API.");
+        console.error("listNotes failed:", out);
+        showMsg("err", out?.message || "Tak dapat load nota. Check Console.");
+        notesMsgEl.textContent = "Gagal load nota.";
+        renderNotes([], classId);
         return;
       }
 
-      const list = Array.isArray(out.classes) ? out.classes : [];
-      const cls = list.find(x => String(x.classId || "").trim() === classId);
-
-      if(!cls){
-        // enrollment guard: user tak enroll kelas ni
-        $("title").textContent = "Akses ditolak";
-        $("classCodePill").textContent = "-";
-        showMsg("err", "Kau belum enroll kelas ni (atau classId salah). Balik dashboard & join guna kod.");
-        return;
-      }
-
-      // show class info
-      $("title").textContent = cls.title ? cls.title : "Kelas";
-      $("classCodePill").textContent = cls.desc ? cls.desc : "-";
-
-      showMsg("ok", "Kelas ok. Enrollment ok. Next: hidupkan Nota & Kuiz.");
+      renderNotes(out.notes || [], classId);
+      showMsg("ok", "Kelas ok. Enrollment ok. Nota dimuatkan.");
     }
 
-    $("btnBack").addEventListener("click", ()=> location.href = "./dashboard.html");
-    $("btnLogout").addEventListener("click", ()=>{
+    document.getElementById("btnLogout").addEventListener("click", () => {
       localStorage.removeItem("kk_token");
       localStorage.removeItem("kk_user");
       location.href = "./login.html";
     });
 
-    boot();
+    load();
   </script>
 </body>
 </html>
