@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Login Pelajar</title>
+  <title>Log Masuk • kura kura hijau</title>
 
   <!-- global theme -->
-  <link rel="stylesheet" href="../styles.css" />
+  <link rel="stylesheet" href="./styles.css" />
   <!-- config (WAJIB) -->
-  <script src="../config.js"></script>
+  <script src="./config.js"></script>
 
   <style>
     .wrap{
@@ -29,11 +29,11 @@
     .sub{
       margin:0 0 18px;
       color: var(--kk-muted);
-      font-weight: 600;
+      font-weight: 650;
     }
     label{
       display:block;
-      font-weight: 800;
+      font-weight: 850;
       margin: 14px 0 8px;
     }
     .input{
@@ -56,7 +56,7 @@
       margin-top: 12px;
       padding: 10px 12px;
       border-radius: 12px;
-      font-weight: 800;
+      font-weight: 850;
       display:none;
     }
     .msg.ok{
@@ -72,6 +72,21 @@
       color: #991b1b;
     }
 
+    .links{
+      margin-top: 14px;
+      display:flex;
+      justify-content:space-between;
+      gap: 10px;
+      flex-wrap:wrap;
+      font-weight: 800;
+    }
+    .links a{
+      color: var(--kk-text);
+      opacity:.9;
+      text-decoration:none;
+    }
+    .links a:hover{ opacity:1; text-decoration:underline; }
+
     .row{
       display:flex;
       justify-content:space-between;
@@ -86,7 +101,7 @@
       gap: 8px;
       text-decoration:none;
       color: var(--kk-text);
-      font-weight: 800;
+      font-weight: 850;
       opacity:.9;
     }
     .back:hover{ opacity:1; }
@@ -94,7 +109,7 @@
     .tiny{
       font-size: 12px;
       color: var(--kk-muted);
-      font-weight: 700;
+      font-weight: 750;
       opacity:.85;
     }
     .kbd{
@@ -104,47 +119,27 @@
       border-radius: 8px;
       border: 1px solid rgba(15,23,42,.18);
       background: rgba(255,255,255,.55);
-    }
-
-    /* links bawah button */
-    .links{
-      margin-top: 10px;
-      display:flex;
-      justify-content:space-between;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-    .links a{
-      font-size: 13px;
       font-weight: 900;
-      color: #059669;
-      text-decoration:none;
     }
-    .links a:hover{ text-decoration:underline; }
   </style>
 </head>
 
 <body class="stage">
   <main class="wrap">
     <section class="card box">
-      <h1 class="title">Login Pelajar</h1>
-      <p class="sub">Masuk untuk akses kelas, nota & kuiz.</p>
+      <h1 class="title">Log Masuk</h1>
+      <p class="sub">Satu pintu masuk untuk <b>admin</b> & <b>pelajar</b>. Lepas login, sistem auto hantar ikut role.</p>
 
       <div id="msg" class="msg"></div>
 
       <label for="email">Email</label>
-      <input id="email" class="input" type="email"
-        placeholder="contoh: ali@student.com"
-        autocomplete="username" />
+      <input id="email" class="input" type="email" placeholder="contoh: ali@student.com" autocomplete="username" />
 
       <label for="password">Password</label>
-      <input id="password" class="input" type="password"
-        placeholder="Password"
-        autocomplete="current-password" />
+      <input id="password" class="input" type="password" placeholder="Password" autocomplete="current-password" />
 
-      <button id="btnLogin" class="btn-primary btn">Log Masuk</button>
+      <button id="btnLogin" class="btn-primary btn" type="button">Log Masuk</button>
 
-      <!-- ✅ 2 link penting -->
       <div class="links">
         <a href="./register.html">Daftar akaun baru</a>
         <a href="./reset-password.html">Lupa password?</a>
@@ -166,16 +161,21 @@
       el.textContent = text;
       el.style.display = "block";
     }
+    function clearMsg(){
+      const el = $("msg");
+      el.className = "msg";
+      el.textContent = "";
+      el.style.display = "none";
+    }
 
     function getBaseUrl(){
       const cfg = window.APP_CONFIG;
-      if (!cfg || !cfg.BASE_URL) return null;
-      return cfg.BASE_URL;
+      return (cfg && cfg.BASE_URL) ? cfg.BASE_URL : null;
     }
 
     async function apiPost(params){
       const BASE_URL = getBaseUrl();
-      if (!BASE_URL) throw new Error("APP_CONFIG.BASE_URL tak wujud");
+      if (!BASE_URL) throw new Error("APP_CONFIG.BASE_URL tak wujud. Semak config.js");
 
       const body = new URLSearchParams();
       Object.entries(params).forEach(([k,v]) => body.append(k, v ?? ""));
@@ -183,20 +183,76 @@
       const res = await fetch(BASE_URL, { method:"POST", body });
       const text = await res.text();
       try { return JSON.parse(text); }
-      catch(e){ return { ok:false, message:"Invalid JSON", raw:text }; }
+      catch(e){ return { ok:false, message:"Response bukan JSON", raw:text }; }
+    }
+
+    function readUser(){
+      try{
+        const raw = localStorage.getItem("kk_user");
+        return raw ? JSON.parse(raw) : null;
+      }catch(e){
+        return null;
+      }
+    }
+
+    function isAdminUser(user){
+      if(!user) return false;
+      const role = String(user.role || "").toLowerCase();
+      const isAdmin =
+        user.isAdmin === true ||
+        String(user.isAdmin || "").toLowerCase() === "true" ||
+        role === "admin";
+      return !!isAdmin;
+    }
+
+    function goByRole(user){
+      if (isAdminUser(user)){
+        window.location.replace("../admin/dashboard.html");
+      } else {
+        window.location.replace("./dashboard.html");
+      }
+    }
+
+    // ✅ Auto-redirect kalau user dah ada token (tak payah ingat URL)
+    async function tryAutoRedirect(){
+      const token = localStorage.getItem("kk_token") || "";
+      const user = readUser();
+
+      if(!token) return; // tak ada token, biar login normal
+
+      // cuba verify token & ambil user terkini dari backend
+      try{
+        const me = await apiPost({ action:"me", token });
+        if(me && me.ok && me.user){
+          localStorage.setItem("kk_user", JSON.stringify(me.user));
+          showMsg("ok", "Sesi masih aktif. Sekejap ya, aku hantar ke dashboard…");
+          setTimeout(()=> goByRole(me.user), 450);
+          return;
+        }
+      }catch(e){
+        // ignore -> jatuh ke login manual
+      }
+
+      // fallback kalau backend down tapi local user ada
+      if(user){
+        showMsg("ok", "Sesi masih ada. Sekejap ya, aku hantar ke dashboard…");
+        setTimeout(()=> goByRole(user), 450);
+      }
     }
 
     $("btnLogin").addEventListener("click", async () => {
+      clearMsg();
+
       const email = $("email").value.trim();
       const password = $("password").value;
 
       if (!email || !password){
-        showMsg("err", "Isi email & password dulu.");
+        showMsg("err", "Isi email dan password dulu.");
         return;
       }
 
       $("btnLogin").disabled = true;
-      $("btnLogin").textContent = "Log masuk...";
+      $("btnLogin").textContent = "Log masuk…";
 
       try{
         const data = await apiPost({
@@ -215,16 +271,25 @@
         if (data.token) localStorage.setItem("kk_token", data.token);
         if (data.user)  localStorage.setItem("kk_user", JSON.stringify(data.user));
 
-        showMsg("ok", "Login berjaya. Redirect...");
-        window.location.href = "./dashboard.html";
+        showMsg("ok", "Login berjaya. Redirect ikut role…");
+        setTimeout(()=> goByRole(data.user || null), 450);
 
       }catch(err){
         console.error(err);
-        showMsg("err", "Fetch gagal. Check Console.");
+        showMsg("err", "Tak dapat connect server. Check Console.");
         $("btnLogin").disabled = false;
         $("btnLogin").textContent = "Log Masuk";
       }
     });
+
+    // enter key = login
+    ["email","password"].forEach(id=>{
+      $(id).addEventListener("keydown", (e)=>{
+        if(e.key === "Enter") $("btnLogin").click();
+      });
+    });
+
+    tryAutoRedirect();
   </script>
 </body>
 </html>
