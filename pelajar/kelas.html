@@ -1,4 +1,3 @@
-<!-- pelajar/kelas.html -->
 <!DOCTYPE html>
 <html lang="ms">
 <head>
@@ -69,12 +68,12 @@
     <div class="top-inner">
       <div class="brand">
         <h1 id="title">Kelas</h1>
-        <p class="sub" id="sub">Loading...</p>
+        <p class="sub" id="sub">Memuatkan...</p>
       </div>
 
       <div style="display:flex; gap:10px; align-items:center;">
         <button class="btn ghost" id="btnBack" type="button">← Dashboard</button>
-        <button class="btn" id="btnLogout" type="button">Logout</button>
+        <button class="btn" id="btnLogout" type="button">Keluar</button>
       </div>
     </div>
   </header>
@@ -84,26 +83,26 @@
       <div id="msg" class="msg"></div>
 
       <section class="card">
-        <h2 class="section-title">Maklumat Kelas</h2>
+        <h2 class="section-title">Maklumat kelas</h2>
         <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
           <span class="pill">classId: <span class="code" id="classIdPill">-</span></span>
           <span class="pill">classCode: <span class="code" id="classCodePill">-</span></span>
         </div>
         <p class="muted" style="margin-top:10px;">
-          Di bawah ialah senarai <b>Nota</b> dan <b>Kuiz</b> untuk kelas ini.
+          Di bawah ialah senarai <b>Nota</b> (released sahaja) dan <b>Kuiz</b> mengikut kelas ini.
         </p>
       </section>
 
       <div class="grid">
         <section class="card">
           <h2 class="section-title">Nota</h2>
-          <p class="muted">Nota yang tersedia untuk kelas ini akan dipaparkan di bawah.</p>
+          <p class="muted">Dipaparkan jika <b>releaseStatus = released</b> dan <b>isActive = TRUE</b>.</p>
           <div class="list" id="notesList"></div>
         </section>
 
         <section class="card">
           <h2 class="section-title">Kuiz</h2>
-          <p class="muted">Kuiz yang dibuka boleh dijawab melalui pautan.</p>
+          <p class="muted">Dipaparkan jika <b>isActive = TRUE</b>. Status <b>closed</b> akan dikunci.</p>
           <div class="list" id="quizList"></div>
         </section>
       </div>
@@ -141,7 +140,7 @@
       const res = await fetch(BASE_URL, { method:"POST", body });
       const text = await res.text();
       try{ return JSON.parse(text); }
-      catch(e){ return { ok:false, message:"Invalid JSON from server", raw:text }; }
+      catch(e){ return { ok:false, message:"Response bukan JSON", raw:text }; }
     }
 
     function q(name){
@@ -164,8 +163,8 @@
       if(!Array.isArray(list) || list.length === 0){
         el.innerHTML = `
           <div class="item">
-            <p class="t">Tiada nota buat masa ini</p>
-            <p class="d">Jika pensyarah sudah kongsikan nota, ia akan dipaparkan di sini.</p>
+            <p class="t">Tiada nota</p>
+            <p class="d">Nota akan muncul selepas pensyarah “release” nota untuk kelas ini.</p>
           </div>
         `;
         return;
@@ -183,20 +182,21 @@
 
         card.innerHTML = `
           <p class="t">${title}</p>
-          <p class="d"><b>Subject:</b> <span class="code">${subjectId}</span> • <b>Tarikh:</b> ${releasedAt}</p>
+          <p class="d"><b>subjectId:</b> <span class="code">${subjectId}</span> • <b>releasedAt:</b> ${releasedAt}</p>
           <div class="actions">
-            <button class="btnSmall btnPrimary" type="button">Buka Nota</button>
+            <button class="btnSmall btnLink" type="button">Buka pautan</button>
+            <button class="btnSmall btnPrimary" type="button">Lihat dalam portal</button>
           </div>
         `;
 
-        const btnOpen = card.querySelector(".btnPrimary");
-        btnOpen.addEventListener("click", ()=>{
-          if(!link){
-            alert("Pautan nota belum ditetapkan.");
-            return;
-          }
-          // ikut request kau: baca/akses di link (tab baru), bukan jawab dalam portal
+        card.querySelector(".btnLink").addEventListener("click", ()=>{
+          if(!link){ alert("contentLink kosong dalam sheet Notes."); return; }
           window.open(link, "_blank", "noopener");
+        });
+
+        card.querySelector(".btnPrimary").addEventListener("click", ()=>{
+          if(!noteId){ alert("noteId kosong dalam data."); return; }
+          location.href = `./nota.html?noteId=${noteId}&classId=${encodeURIComponent(classId)}`;
         });
 
         el.appendChild(card);
@@ -210,8 +210,8 @@
       if(!Array.isArray(list) || list.length === 0){
         el.innerHTML = `
           <div class="item">
-            <p class="t">Tiada kuiz buat masa ini</p>
-            <p class="d">Kuiz akan dipaparkan apabila telah dibuka oleh pensyarah.</p>
+            <p class="t">Tiada kuiz</p>
+            <p class="d">Kuiz akan dipaparkan apabila pensyarah aktifkan kuiz untuk kelas ini.</p>
           </div>
         `;
         return;
@@ -232,25 +232,21 @@
             <p class="t" style="margin:0;">${title}</p>
             <span class="statusPill">
               <span class="dot ${isOpen ? "" : "closed"}"></span>
-              ${isOpen ? "Dibuka" : "Ditutup"}
+              ${isOpen ? "open" : "closed"}
             </span>
           </div>
-          <p class="d"><b>Subject:</b> <span class="code">${subjectId}</span></p>
+          <p class="d"><b>subjectId:</b> <span class="code">${subjectId}</span></p>
           <div class="actions">
             <button class="btnSmall ${isOpen ? "btnPrimary" : "btnDisabled"}" type="button" ${isOpen ? "" : "disabled"}>
-              ${isOpen ? "Buka Kuiz" : "Dikunci"}
+              ${isOpen ? "Buka kuiz" : "Dikunci"}
             </button>
           </div>
         `;
 
-        const btn = card.querySelector("button");
-        btn.addEventListener("click", ()=>{
+        card.querySelector("button").addEventListener("click", ()=>{
           if(!isOpen) return;
-          if(!link){
-            alert("Pautan kuiz belum ditetapkan.");
-            return;
-          }
-          // jawab terus di Google Form / link (tab baru)
+          if(!link){ alert("quizLink kosong dalam sheet Quizzes."); return; }
+          // ✅ ikut request kau: jawab dekat link (Google Form), bukan dalam portal
           window.open(link, "_blank", "noopener");
         });
 
@@ -269,7 +265,7 @@
 
       const classId = q("classId").trim();
       if(!classId){
-        showMsg("err", "Maklumat kelas tidak lengkap. Sila kembali ke Dashboard.");
+        showMsg("err", "Ralat: classId tiada dalam URL. Sila kembali ke dashboard.");
         return;
       }
 
@@ -278,10 +274,10 @@
       // 1) verify token -> me
       const me = await apiPost({ action:"me", token });
       if(!me || !me.ok){
-        showMsg("err", me?.message || "Sesi tamat. Sila login semula.");
+        showMsg("err", me?.message || "Sesi tamat. Sila log masuk semula.");
         localStorage.removeItem("kk_token");
         localStorage.removeItem("kk_user");
-        setTimeout(()=> location.href="./login.html", 600);
+        setTimeout(()=> location.href="./login.html", 700);
         return;
       }
       const displayName = me.user?.name || me.user?.email || "Pelajar";
@@ -290,7 +286,7 @@
       // 2) get class info
       const cls = await apiPost({ action:"getClass", token, classId });
       if(!cls || !cls.ok){
-        showMsg("err", cls?.message || "Tak dapat load kelas.");
+        showMsg("err", cls?.message || "Tidak dapat memuatkan maklumat kelas.");
         return;
       }
 
@@ -300,24 +296,24 @@
       // 3) list notes
       const notes = await apiPost({ action:"listNotesForClass", token, classId });
       if(!notes || !notes.ok){
-        showMsg("err", notes?.message || "Tak dapat load nota.");
+        showMsg("err", notes?.message || "Tidak dapat memuatkan nota.");
         renderNotes([], classId);
         renderQuizzes([]);
         return;
       }
       renderNotes(notes.notes || [], classId);
 
-      // 4) list quizzes (optional: kalau backend belum ada, page tak pecah)
+      // 4) list quizzes (optional)
       const quizzes = await apiPost({ action:"listQuizzesForClass", token, classId });
       if(!quizzes || !quizzes.ok){
         console.warn("listQuizzesForClass failed:", quizzes);
         renderQuizzes([]);
-        showMsg("ok", "Kelas berjaya dimuatkan. Nota tersedia. (Kuiz akan dipaparkan bila diaktifkan).");
+        showMsg("ok", "Kelas dan nota berjaya dimuatkan. (Kuiz belum diaktifkan di backend)");
         return;
       }
-      renderQuizzes(quizzes.quizzes || []);
 
-      showMsg("ok", "Kelas berjaya dimuatkan. Nota dan kuiz tersedia di bawah.");
+      renderQuizzes(quizzes.quizzes || []);
+      showMsg("ok", "Kelas, nota dan kuiz berjaya dimuatkan.");
     }
 
     $("btnBack").addEventListener("click", ()=> location.href = "./dashboard.html");
