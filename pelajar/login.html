@@ -1,162 +1,224 @@
 <!DOCTYPE html>
 <html lang="ms">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Log Masuk • kura kura hijau</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Log Masuk • kura kura hijau</title>
 
-<script src="../config.js"></script>
+  <link rel="stylesheet" href="../styles.css" />
+  <script src="../config.js"></script>
 
-<style>
-body{
-  margin:0;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont;
-  min-height:100vh;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background: linear-gradient(135deg,#cfe8dd,#e6e8c7);
-}
+  <style>
+    .wrap{
+      min-height:100vh;
+      display:grid;
+      place-items:center;
+      padding:24px 16px;
+    }
+    .card{
+      width: min(520px, 100%);
+      background: rgba(255,255,255,.85);
+      border: 1px solid rgba(255,255,255,.55);
+      border-radius: 18px;
+      box-shadow: 0 18px 50px rgba(2, 6, 23, .12);
+      padding: 20px;
+    }
+    h1{ margin:0; font-size:34px; letter-spacing:-0.02em; }
+    .sub{ margin: 6px 0 0; color:#334155; font-weight:800; opacity:.92; line-height:1.45; }
 
-.box{
-  width:380px;
-  background:#fff;
-  padding:30px;
-  border-radius:18px;
-  box-shadow:0 20px 50px rgba(0,0,0,.1);
-}
+    .msg{ display:none; padding:10px 12px; border-radius: 14px; font-weight: 900; margin: 14px 0; }
+    .msg.err{ display:block; background: rgba(239,68,68,.10); border: 1px solid rgba(239,68,68,.28); color: #991b1b; }
+    .msg.ok{ display:block; background: rgba(34,197,94,.10); border: 1px solid rgba(34,197,94,.28); color: #065f46; }
 
-h1{
-  margin:0 0 10px;
-  text-align:center;
-}
-
-.sub{
-  text-align:center;
-  font-size:14px;
-  margin-bottom:20px;
-  color:#555;
-}
-
-label{
-  font-weight:600;
-  font-size:14px;
-}
-
-input{
-  width:100%;
-  padding:10px;
-  margin:6px 0 14px;
-  border-radius:8px;
-  border:1px solid #ccc;
-}
-
-button{
-  width:100%;
-  padding:12px;
-  border:0;
-  border-radius:10px;
-  background:#059669;
-  color:#fff;
-  font-weight:700;
-  cursor:pointer;
-}
-
-button:hover{
-  background:#047857;
-}
-
-.msg{
-  margin-bottom:15px;
-  padding:10px;
-  border-radius:8px;
-  font-weight:600;
-  display:none;
-}
-
-.msg.err{
-  background:#fee2e2;
-  color:#991b1b;
-}
-
-.msg.ok{
-  background:#dcfce7;
-  color:#065f46;
-}
-</style>
-</head>
-
-<body>
-
-<div class="box">
-<h1>Log Masuk</h1>
-<div class="sub">
-Satu pintu masuk untuk admin & pelajar
-</div>
-
-<div id="msg" class="msg"></div>
-
-<form id="form">
-<label>Email</label>
-<input type="email" id="email" required>
-
-<label>Password</label>
-<input type="password" id="password" required>
-
-<button type="submit">Log Masuk</button>
-</form>
-</div>
-
-<script>
-const BASE_URL = window.APP_CONFIG?.BASE_URL || "";
-const msgEl = document.getElementById("msg");
-
-function showMsg(type,text){
-  msgEl.className="msg "+type;
-  msgEl.textContent=text;
-  msgEl.style.display="block";
-}
-
-async function apiPost(params){
-  const body=new URLSearchParams();
-  Object.entries(params).forEach(([k,v])=>body.append(k,v));
-  const res=await fetch(BASE_URL,{method:"POST",body});
-  const text=await res.text();
-  return JSON.parse(text);
-}
-
-function goByRole(role){
-  if(role==="admin"){
-    location.href="../admin/dashboard.html";
-  }else{
-    location.href="./dashboard.html";
-  }
-}
-
-document.getElementById("form").addEventListener("submit",async(e)=>{
-  e.preventDefault();
-  msgEl.style.display="none";
-
-  const email=document.getElementById("email").value.trim();
-  const password=document.getElementById("password").value;
-
-  try{
-    const out=await apiPost({action:"login",email,password});
-    if(!out.ok){
-      showMsg("err",out.message||"Login gagal");
-      return;
+    label{ display:block; font-weight: 950; margin-top: 12px; }
+    input{
+      width:100%;
+      margin-top:6px;
+      padding: 12px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(15,23,42,.14);
+      background: rgba(255,255,255,.75);
+      font-weight: 800;
+      outline: none;
+    }
+    input:focus{
+      border-color: rgba(5,150,105,.40);
+      box-shadow: 0 0 0 4px rgba(5,150,105,.10);
     }
 
-    localStorage.setItem("kk_token",out.token);
-    localStorage.setItem("kk_user",JSON.stringify(out.user));
+    .btn{
+      width:100%;
+      margin-top: 14px;
+      border:0;
+      cursor:pointer;
+      padding: 12px 14px;
+      border-radius: 14px;
+      font-weight: 950;
+      background: #059669;
+      color:#fff;
+      box-shadow: 0 10px 26px rgba(5,150,105,.18);
+    }
+    .btn:hover{ background:#047857; }
+    .btn:disabled{ opacity:.65; cursor:not-allowed; }
 
-    goByRole(out.user.role);
+    .row{
+      margin-top: 12px;
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+      color:#334155;
+      font-weight: 900;
+      font-size: 13px;
+    }
+    a{ color:#0f172a; text-decoration:none; }
+    a:hover{ text-decoration: underline; }
 
-  }catch(err){
-    showMsg("err","Tak dapat connect server");
-  }
-});
-</script>
+    .hint{
+      margin-top: 14px;
+      font-size: 12px;
+      color:#334155;
+      font-weight: 800;
+      opacity: .9;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .kbd{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding: 2px 8px;
+      border-radius: 10px;
+      border: 1px solid rgba(15,23,42,.14);
+      background: rgba(255,255,255,.60);
+      font-weight: 950;
+    }
+  </style>
+</head>
 
+<body class="stage">
+  <div class="wrap">
+    <div class="card">
+      <h1>Log Masuk</h1>
+      <p class="sub">
+        Satu pintu masuk untuk <b>admin</b> & <b>pelajar</b>. Selepas login, sistem akan hantar automatik ikut peranan.
+      </p>
+
+      <div id="msg" class="msg"></div>
+
+      <form id="formLogin" autocomplete="on">
+        <label for="email">Email</label>
+        <input id="email" type="email" placeholder="contoh: nama@domain.com" required />
+
+        <label for="password">Password</label>
+        <input id="password" type="password" placeholder="••••••••" required />
+
+        <button class="btn" id="btnLogin" type="submit">Log Masuk</button>
+
+        <div class="row">
+          <a href="./register.html">Daftar akaun baru</a>
+          <a href="./reset.html">Lupa password?</a>
+        </div>
+
+        <div class="hint">
+          <span>Tip Mac: buka Console</span>
+          <span class="kbd">⌥⌘J</span>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const BASE_URL = window.APP_CONFIG && window.APP_CONFIG.BASE_URL ? window.APP_CONFIG.BASE_URL : "";
+
+    const $ = (id) => document.getElementById(id);
+
+    function showMsg(type, text){
+      const el = $("msg");
+      el.className = "msg " + (type === "ok" ? "ok" : "err");
+      el.textContent = text;
+      el.style.display = "block";
+    }
+    function clearMsg(){
+      const el = $("msg");
+      el.style.display = "none";
+      el.textContent = "";
+      el.className = "msg";
+    }
+
+    async function apiPost(params){
+      if(!BASE_URL){
+        return { ok:false, message:"APP_CONFIG.BASE_URL belum set. Semak config.js" };
+      }
+
+      const body = new URLSearchParams();
+      Object.entries(params || {}).forEach(([k,v]) => body.append(k, v ?? ""));
+
+      const res = await fetch(BASE_URL, { method:"POST", body });
+      const text = await res.text();
+      try { return JSON.parse(text); }
+      catch(e){ return { ok:false, message:"Response bukan JSON", raw:text }; }
+    }
+
+    function redirectByRole(user){
+      const role = String(user?.role || user?.isAdmin || "").toLowerCase();
+
+      // support beberapa format: role="admin" / isAdmin=true
+      const isAdmin =
+        role === "admin" ||
+        role === "true" ||
+        user?.isAdmin === true;
+
+      if(isAdmin){
+        window.location.href = "../admin/dashboard.html";
+      }else{
+        window.location.href = "./dashboard.html";
+      }
+    }
+
+    $("formLogin").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      clearMsg();
+
+      const email = $("email").value.trim();
+      const password = $("password").value;
+
+      if(!email || !password){
+        showMsg("err", "Sila isi email dan password.");
+        return;
+      }
+
+      $("btnLogin").disabled = true;
+      $("btnLogin").textContent = "Sedang login...";
+
+      try{
+        const data = await apiPost({ action:"login", email, password });
+
+        if(!data || !data.ok){
+          showMsg("err", data?.message || "Login gagal. Sila cuba lagi.");
+          $("btnLogin").disabled = false;
+          $("btnLogin").textContent = "Log Masuk";
+          return;
+        }
+
+        if (data.token) localStorage.setItem("kk_token", data.token);
+        if (data.user)  localStorage.setItem("kk_user", JSON.stringify(data.user));
+
+        showMsg("ok", "Login berjaya. Sedang bawa masuk...");
+
+        // ✅ auto redirect ikut role
+        redirectByRole(data.user);
+
+      }catch(err){
+        console.error(err);
+        showMsg("err", "Tidak dapat menghubungi server. Semak internet / config.js dan cuba lagi.");
+        $("btnLogin").disabled = false;
+        $("btnLogin").textContent = "Log Masuk";
+      }
+    });
+  </script>
 </body>
 </html>
