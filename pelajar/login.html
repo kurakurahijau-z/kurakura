@@ -1,157 +1,162 @@
 <!DOCTYPE html>
 <html lang="ms">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Log Masuk • kura kura hijau</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Log Masuk • kura kura hijau</title>
 
-  <link rel="stylesheet" href="../styles.css" />
-  <script src="../config.js"></script>
+<script src="../config.js"></script>
 
-  <style>
-    .wrap{ min-height:100vh; display:flex; align-items:center; justify-content:center; padding: 26px 16px; }
-    .box{ width: min(520px, 100%); background: rgba(255,255,255,.86); border: 1px solid rgba(255,255,255,.60); border-radius: 22px; box-shadow: 0 20px 60px rgba(2,6,23,.12); padding: 26px; }
-    h1{ margin:0; font-size: 44px; letter-spacing: -0.03em; text-align:center; }
-    .sub{ margin: 8px 0 0; text-align:center; color:#334155; font-weight:800; opacity:.9; line-height:1.5; }
-    label{ display:block; margin: 16px 0 8px; font-weight:900; }
-    input{ width:100%; padding: 12px 14px; border-radius: 14px; border:1px solid rgba(15,23,42,.14); background: rgba(255,255,255,.70); outline:none; font-weight:800; }
-    input:focus{ border-color: rgba(5,150,105,.35); box-shadow: 0 0 0 4px rgba(5,150,105,.10); }
-    .btn{ width:100%; margin-top: 16px; border:0; cursor:pointer; padding: 12px 14px; border-radius: 14px; font-weight: 950; background:#059669; color:#fff; box-shadow: 0 10px 24px rgba(5,150,105,.18); }
-    .btn:hover{ background:#047857; }
-    .row{ display:flex; justify-content:space-between; gap:12px; margin-top: 14px; align-items:center; flex-wrap:wrap; }
-    a{ font-weight:900; color:#0f172a; text-decoration:none; }
-    a:hover{ text-decoration: underline; }
-    .msg{ display:none; margin-top: 14px; padding: 10px 12px; border-radius: 14px; font-weight: 950; }
-    .msg.err{ display:block; background: rgba(239,68,68,.10); border: 1px solid rgba(239,68,68,.28); color:#991b1b; }
-    .msg.ok{ display:block; background: rgba(34,197,94,.10); border: 1px solid rgba(34,197,94,.28); color:#065f46; }
-    .tiny{ font-size: 12px; color:#475569; font-weight:800; opacity:.9; }
-    .kbd{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; font-size:12px; padding:2px 8px; border-radius:999px; border:1px solid rgba(15,23,42,.14); background: rgba(255,255,255,.65); font-weight:900; }
-  </style>
+<style>
+body{
+  margin:0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont;
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background: linear-gradient(135deg,#cfe8dd,#e6e8c7);
+}
+
+.box{
+  width:380px;
+  background:#fff;
+  padding:30px;
+  border-radius:18px;
+  box-shadow:0 20px 50px rgba(0,0,0,.1);
+}
+
+h1{
+  margin:0 0 10px;
+  text-align:center;
+}
+
+.sub{
+  text-align:center;
+  font-size:14px;
+  margin-bottom:20px;
+  color:#555;
+}
+
+label{
+  font-weight:600;
+  font-size:14px;
+}
+
+input{
+  width:100%;
+  padding:10px;
+  margin:6px 0 14px;
+  border-radius:8px;
+  border:1px solid #ccc;
+}
+
+button{
+  width:100%;
+  padding:12px;
+  border:0;
+  border-radius:10px;
+  background:#059669;
+  color:#fff;
+  font-weight:700;
+  cursor:pointer;
+}
+
+button:hover{
+  background:#047857;
+}
+
+.msg{
+  margin-bottom:15px;
+  padding:10px;
+  border-radius:8px;
+  font-weight:600;
+  display:none;
+}
+
+.msg.err{
+  background:#fee2e2;
+  color:#991b1b;
+}
+
+.msg.ok{
+  background:#dcfce7;
+  color:#065f46;
+}
+</style>
 </head>
 
-<body class="stage">
-  <div class="wrap">
-    <div class="box">
-      <h1>Log Masuk</h1>
-      <p class="sub">Satu pintu masuk untuk admin & pelajar. Lepas login, sistem auto-hantar ikut role.</p>
+<body>
 
-      <div id="msg" class="msg"></div>
+<div class="box">
+<h1>Log Masuk</h1>
+<div class="sub">
+Satu pintu masuk untuk admin & pelajar
+</div>
 
-      <form id="form">
-        <label for="email">Email</label>
-        <input id="email" type="email" autocomplete="username" required placeholder="contoh: ali@student.com" />
+<div id="msg" class="msg"></div>
 
-        <label for="password">Password</label>
-        <input id="password" type="password" autocomplete="current-password" required placeholder="••••••••" />
+<form id="form">
+<label>Email</label>
+<input type="email" id="email" required>
 
-        <button class="btn" type="submit" id="btnSubmit">Log Masuk</button>
-      </form>
+<label>Password</label>
+<input type="password" id="password" required>
 
-      <div class="row">
-        <a href="./register.html">Daftar akaun baru</a>
-        <a href="./reset.html">Lupa password?</a>
-      </div>
+<button type="submit">Log Masuk</button>
+</form>
+</div>
 
-      <div class="row" style="margin-top:8px;">
-        <a href="./index.html">← balik</a>
-        <span class="tiny">Tip Mac: buka Console <span class="kbd">⌥⌘J</span></span>
-      </div>
-    </div>
-  </div>
+<script>
+const BASE_URL = window.APP_CONFIG?.BASE_URL || "";
+const msgEl = document.getElementById("msg");
 
-  <script>
-    const BASE_URL = window.APP_CONFIG && window.APP_CONFIG.BASE_URL ? window.APP_CONFIG.BASE_URL : "";
+function showMsg(type,text){
+  msgEl.className="msg "+type;
+  msgEl.textContent=text;
+  msgEl.style.display="block";
+}
 
-    const msgEl = document.getElementById("msg");
-    const form = document.getElementById("form");
-    const btnSubmit = document.getElementById("btnSubmit");
+async function apiPost(params){
+  const body=new URLSearchParams();
+  Object.entries(params).forEach(([k,v])=>body.append(k,v));
+  const res=await fetch(BASE_URL,{method:"POST",body});
+  const text=await res.text();
+  return JSON.parse(text);
+}
 
-    function showMsg(type, text){
-      msgEl.className = "msg " + (type === "ok" ? "ok" : "err");
-      msgEl.textContent = text;
-      msgEl.style.display = "block";
-    }
-    function clearMsg(){
-      msgEl.style.display = "none";
-      msgEl.textContent = "";
-      msgEl.className = "msg";
-    }
+function goByRole(role){
+  if(role==="admin"){
+    location.href="../admin/dashboard.html";
+  }else{
+    location.href="./dashboard.html";
+  }
+}
 
-    async function apiPost(params){
-      if(!BASE_URL) throw new Error("APP_CONFIG.BASE_URL tak wujud. Semak config.js");
+document.getElementById("form").addEventListener("submit",async(e)=>{
+  e.preventDefault();
+  msgEl.style.display="none";
 
-      const body = new URLSearchParams();
-      Object.entries(params || {}).forEach(([k,v]) => body.append(k, v ?? ""));
+  const email=document.getElementById("email").value.trim();
+  const password=document.getElementById("password").value;
 
-      const res = await fetch(BASE_URL, { method:"POST", body });
-      const text = await res.text();
-      try { return JSON.parse(text); }
-      catch(e){ return { ok:false, message:"Response bukan JSON", raw:text }; }
-    }
-
-    function goByRole(role){
-      const r = String(role || "").toLowerCase();
-      if(r === "admin") location.href = "../admin/dashboard.html";
-      else location.href = "./dashboard.html";
+  try{
+    const out=await apiPost({action:"login",email,password});
+    if(!out.ok){
+      showMsg("err",out.message||"Login gagal");
+      return;
     }
 
-    // ✅ Auto-skip login kalau token masih valid
-    async function autoRedirectIfLoggedIn(){
-      const token = localStorage.getItem("kk_token") || "";
-      if(!token) return;
+    localStorage.setItem("kk_token",out.token);
+    localStorage.setItem("kk_user",JSON.stringify(out.user));
 
-      try{
-        const me = await apiPost({ action:"me", token });
-        if(me && me.ok){
-          // simpan user terbaru
-          localStorage.setItem("kk_user", JSON.stringify(me.user || {}));
-          goByRole(me.user?.role);
-        }else{
-          // token rosak → clear
-          localStorage.removeItem("kk_token");
-          localStorage.removeItem("kk_user");
-        }
-      }catch(err){
-        // kalau server unreachable, jangan hard block — biar user login manual
-        console.warn("autoRedirect failed:", err);
-      }
-    }
+    goByRole(out.user.role);
 
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      clearMsg();
+  }catch(err){
+    showMsg("err","Tak dapat connect server");
+  }
+});
+</script>
 
-      const email = document.getElementById("email").value.trim();
-      const password = document.getElementById("password").value;
-
-      btnSubmit.disabled = true;
-      btnSubmit.textContent = "Logging in...";
-
-      try{
-        const out = await apiPost({ action:"login", email, password });
-
-        if(!out || !out.ok){
-          showMsg("err", out?.message || "Login gagal. Sila cuba lagi.");
-          return;
-        }
-
-        // simpan session
-        localStorage.setItem("kk_token", out.token || "");
-        localStorage.setItem("kk_user", JSON.stringify(out.user || {}));
-
-        showMsg("ok", "Login berjaya. Redirect...");
-        setTimeout(()=> goByRole(out.user?.role), 300);
-
-      }catch(err){
-        console.error(err);
-        showMsg("err", "Tak dapat connect server. Check Console.");
-      }finally{
-        btnSubmit.disabled = false;
-        btnSubmit.textContent = "Log Masuk";
-      }
-    });
-
-    autoRedirectIfLoggedIn();
-  </script>
 </body>
 </html>
