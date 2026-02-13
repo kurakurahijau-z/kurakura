@@ -12,6 +12,7 @@
     .page{ min-height:100vh; padding: 18px 16px 40px; }
     .top{ position: sticky; top: 0; z-index: 20; background: rgba(255,255,255,.75); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,.50); }
     .top-inner{ max-width: 1100px; margin: 0 auto; padding: 14px 8px; display:flex; align-items:center; justify-content:space-between; gap: 12px; }
+
     .brand{ display:flex; flex-direction:column; gap: 4px; }
     .brand h1{ margin:0; font-size: 22px; letter-spacing: -0.02em; line-height: 1.1; font-weight: 950; }
     .brand .sub{ margin:0; color:#334155; font-weight:800; font-size: 13px; opacity: .9; }
@@ -27,6 +28,7 @@
     .btn.ghost:hover{ background: rgba(255,255,255,.90); }
 
     .container{ max-width: 1100px; margin: 16px auto 0; display:grid; gap: 14px; }
+
     .card{
       background: rgba(255,255,255,.82);
       border: 1px solid rgba(255,255,255,.55);
@@ -35,32 +37,40 @@
       padding: 18px;
     }
 
-    .grid{ display:grid; gap: 14px; grid-template-columns: 1fr; }
-    @media(min-width: 900px){ .grid{ grid-template-columns: 1fr 1fr; } }
-
-    .tile{
-      border-radius: 18px;
-      padding: 14px;
-      background: rgba(255,255,255,.68);
-      border: 1px solid rgba(15,23,42,.08);
-      box-shadow: 0 14px 34px rgba(2,6,23,.08);
-      display:flex;
-      flex-direction:column;
-      gap: 6px;
-      cursor:pointer;
-      transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
-    }
-    .tile:hover{
-      transform: translateY(-2px);
-      border-color: rgba(5,150,105,.25);
-      box-shadow: 0 18px 40px rgba(2,6,23,.10);
-    }
-    .tile .t{ margin:0; font-weight: 950; }
-    .tile .d{ margin:0; color:#334155; font-weight: 800; font-size: 13px; opacity:.92; }
-
     .msg{ display:none; padding: 10px 12px; border-radius: 14px; font-weight: 900; }
     .msg.err{ display:block; background: rgba(239,68,68,.10); border: 1px solid rgba(239,68,68,.28); color: #991b1b; }
     .msg.ok{ display:block; background: rgba(34,197,94,.10); border: 1px solid rgba(34,197,94,.28); color: #065f46; }
+
+    .grid{ display:grid; gap: 14px; grid-template-columns: 1fr; }
+    @media(min-width: 900px){ .grid{ grid-template-columns: 1fr 1fr; } }
+
+    .section-title{ margin: 0 0 10px; font-size: 16px; font-weight: 950; letter-spacing: -.01em; }
+    .muted{ margin:0; color:#334155; font-weight: 800; opacity: .92; line-height: 1.55; }
+
+    .menu{ display:grid; gap: 10px; margin-top: 10px; }
+    .item{
+      border-radius: 16px;
+      padding: 12px;
+      background: rgba(255,255,255,.68);
+      border: 1px solid rgba(15,23,42,.08);
+      box-shadow: 0 14px 34px rgba(2,6,23,.06);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 12px;
+    }
+    .item .t{ margin:0; font-weight: 950; font-size: 14px; color:#0f172a; }
+    .item .d{ margin:6px 0 0; font-weight: 800; font-size: 12px; color:#334155; opacity:.92; }
+    .tag{
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(15,23,42,.12);
+      background: rgba(255,255,255,.65);
+      font-weight: 950;
+      font-size: 12px;
+      color:#0f172a;
+      white-space:nowrap;
+    }
   </style>
 </head>
 
@@ -73,7 +83,7 @@
       </div>
 
       <div style="display:flex; gap:10px; align-items:center;">
-        <button class="btn ghost" id="btnHome" type="button">Portal</button>
+        <button class="btn ghost" id="btnPortal" type="button">Ke portal pelajar</button>
         <button class="btn" id="btnLogout" type="button">Logout</button>
       </div>
     </div>
@@ -83,36 +93,62 @@
     <div class="container">
       <div id="msg" class="msg"></div>
 
-      <section class="card">
-        <p style="margin:0; color:#334155; font-weight:850;">
-          Ini ruang pengurusan: bina kelas, susun subjek, publish nota, dan buka/tutup kuiz.
-        </p>
-      </section>
+      <div class="grid">
+        <section class="card">
+          <h2 class="section-title">Pengurusan</h2>
+          <p class="muted">
+            Ini ruang admin untuk urus kandungan (kelas, subjek, nota & kuiz). Pelajar tak sepatutnya nampak halaman ni.
+          </p>
 
-      <section class="card">
-        <div class="grid">
-          <div class="tile" onclick="location.href='./kelas.html'">
-            <p class="t">Urus Kelas</p>
-            <p class="d">Cipta, kemas kini, padam kelas & class code.</p>
+          <div class="menu">
+            <div class="item">
+              <div>
+                <p class="t">Kelas</p>
+                <p class="d">Bina kelas, kemas info, dan semak kod kelas.</p>
+              </div>
+              <span class="tag">Coming soon</span>
+            </div>
+
+            <div class="item">
+              <div>
+                <p class="t">Subjek</p>
+                <p class="d">Susun subjectId ikut silibus / bab.</p>
+              </div>
+              <span class="tag">Coming soon</span>
+            </div>
+
+            <div class="item">
+              <div>
+                <p class="t">Nota</p>
+                <p class="d">Release/unrelease nota + link bahan.</p>
+              </div>
+              <span class="tag">Coming soon</span>
+            </div>
+
+            <div class="item">
+              <div>
+                <p class="t">Kuiz</p>
+                <p class="d">Buka/tutup kuiz + pautan Google Form.</p>
+              </div>
+              <span class="tag">Coming soon</span>
+            </div>
           </div>
-          <div class="tile" onclick="location.href='./subjek.html'">
-            <p class="t">Urus Subjek</p>
-            <p class="d">Susun subjectId untuk nota & kuiz.</p>
-          </div>
-          <div class="tile" onclick="location.href='./nota.html'">
-            <p class="t">Urus Nota</p>
-            <p class="d">Draft → Released. Control active/inactive.</p>
-          </div>
-          <div class="tile" onclick="location.href='./kuiz.html'">
-            <p class="t">Urus Kuiz</p>
-            <p class="d">Open/Closed, link Google Form, release ikut kelas.</p>
-          </div>
-        </div>
-      </section>
+        </section>
+
+        <section class="card">
+          <h2 class="section-title">Nota ringkas</h2>
+          <p class="muted" style="margin:0;">
+            ✅ Admin login guna halaman login yang sama.<br>
+            ✅ Lepas login, sistem auto-redirect ikut role.<br>
+            ✅ Kalau student cuba buka halaman admin, sistem akan tolak balik.
+          </p>
+        </section>
+      </div>
     </div>
   </main>
 
   <script>
+    const BASE_URL = window.APP_CONFIG && window.APP_CONFIG.BASE_URL ? window.APP_CONFIG.BASE_URL : "";
     const msgEl = document.getElementById("msg");
     const whoEl = document.getElementById("who");
 
@@ -127,17 +163,11 @@
       msgEl.className = "msg";
     }
 
-    function getBaseUrl(){
-      const cfg = window.APP_CONFIG;
-      return (cfg && cfg.BASE_URL) ? cfg.BASE_URL : null;
-    }
-
     async function apiPost(params){
-      const BASE_URL = getBaseUrl();
       if(!BASE_URL) throw new Error("APP_CONFIG.BASE_URL tak wujud. Semak config.js");
 
       const body = new URLSearchParams();
-      Object.entries(params).forEach(([k,v]) => body.append(k, v ?? ""));
+      Object.entries(params || {}).forEach(([k,v]) => body.append(k, v ?? ""));
 
       const res = await fetch(BASE_URL, { method:"POST", body });
       const text = await res.text();
@@ -145,20 +175,12 @@
       catch(e){ return { ok:false, message:"Response bukan JSON", raw:text }; }
     }
 
-    function isAdminUser(user){
-      const role = String(user?.role || "").toLowerCase();
-      const isAdmin =
-        user?.isAdmin === true ||
-        String(user?.isAdmin || "").toLowerCase() === "true" ||
-        role === "admin";
-      return !!isAdmin;
-    }
-
-    async function guard(){
+    async function guardAdmin(){
       clearMsg();
+
       const token = localStorage.getItem("kk_token") || "";
       if(!token){
-        location.replace("../pelajar/login.html");
+        location.href = "../pelajar/login.html";
         return;
       }
 
@@ -166,34 +188,34 @@
       if(!me || !me.ok){
         localStorage.removeItem("kk_token");
         localStorage.removeItem("kk_user");
-        location.replace("../pelajar/login.html");
+        location.href = "../pelajar/login.html";
         return;
       }
 
-      const u = me.user || {};
-      localStorage.setItem("kk_user", JSON.stringify(u));
+      const role = String(me.user?.role || "").toLowerCase();
+      const displayName = me.user?.name || me.user?.email || "Admin";
+      whoEl.textContent = `Hi, ${displayName}`;
 
-      if(!isAdminUser(u)){
-        showMsg("err", "Akses admin tidak dibenarkan untuk akaun ini.");
-        setTimeout(()=> location.replace("../pelajar/dashboard.html"), 650);
+      if(role !== "admin"){
+        showMsg("err", "Akses ditolak. Akaun ini bukan admin.");
+        setTimeout(()=> location.href = "../pelajar/dashboard.html", 700);
         return;
       }
 
-      whoEl.textContent = `Hi, ${u.name || u.email || "Admin"}`;
-      showMsg("ok", "Akses admin aktif.");
+      showMsg("ok", "Akses admin disahkan.");
     }
 
-    document.getElementById("btnLogout").addEventListener("click", ()=>{
+    document.getElementById("btnLogout").addEventListener("click", () => {
       localStorage.removeItem("kk_token");
       localStorage.removeItem("kk_user");
-      location.replace("../pelajar/login.html");
+      location.href = "../pelajar/login.html";
     });
 
-    document.getElementById("btnHome").addEventListener("click", ()=>{
-      location.href = "../index.html";
+    document.getElementById("btnPortal").addEventListener("click", () => {
+      location.href = "../pelajar/dashboard.html";
     });
 
-    guard();
+    guardAdmin();
   </script>
 </body>
 </html>
