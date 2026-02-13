@@ -1,4 +1,3 @@
-<!-- pelajar/dashboard.html -->
 <!DOCTYPE html>
 <html lang="ms">
 <head>
@@ -11,74 +10,58 @@
 
   <style>
     .page{ min-height:100vh; padding: 18px 16px 40px; }
-    .top{ position: sticky; top: 0; z-index: 20; background: rgba(255,255,255,.75); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,.50); }
+    .top{ position: sticky; top: 0; z-index: 20; background: rgba(255,255,255,.75); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,.50); }
     .top-inner{ max-width: 1100px; margin: 0 auto; padding: 14px 8px; display:flex; align-items:center; justify-content:space-between; gap: 12px; }
 
     .brand{ display:flex; flex-direction:column; gap: 4px; }
-    .brand h1{ margin:0; font-size: 22px; letter-spacing: -0.02em; line-height: 1.1; }
+    .brand h1{ margin:0; font-size: 22px; letter-spacing: -0.02em; }
     .brand .sub{ margin:0; color:#334155; font-weight:800; font-size: 13px; opacity: .9; }
 
-    .btn{ border: 0; cursor: pointer; padding: 10px 14px; border-radius: 14px; font-weight: 900; background: #059669; color: #fff; box-shadow: 0 8px 18px rgba(5,150,105,.18); }
+    .btn{ border: 0; cursor: pointer; padding: 10px 14px; border-radius: 14px; font-weight: 900; background: #059669; color: #fff; }
     .btn:hover{ background:#047857; }
-    .btn.ghost{
-      background: rgba(255,255,255,.75);
-      color:#0f172a;
-      border: 1px solid rgba(15,23,42,.10);
-      box-shadow: 0 10px 30px rgba(2,6,23,.06);
-    }
-    .btn.ghost:hover{ background: rgba(255,255,255,.90); }
+    .btn.ghost{ background: rgba(255,255,255,.75); color:#0f172a; border: 1px solid rgba(15,23,42,.10); }
 
     .container{ max-width: 1100px; margin: 16px auto 0; display:grid; gap: 14px; }
-
-    .card{
-      background: rgba(255,255,255,.82);
-      border: 1px solid rgba(255,255,255,.55);
-      border-radius: 18px;
-      box-shadow: 0 10px 30px rgba(2, 6, 23, .10);
-      padding: 18px;
-    }
+    .card{ background: rgba(255,255,255,.85); border-radius: 18px; padding: 18px; }
 
     .msg{ display:none; padding: 10px 12px; border-radius: 14px; font-weight: 900; }
-    .msg.err{ display:block; background: rgba(239,68,68,.10); border: 1px solid rgba(239,68,68,.28); color: #991b1b; }
-    .msg.ok{ display:block; background: rgba(34,197,94,.10); border: 1px solid rgba(34,197,94,.28); color: #065f46; }
+    .msg.ok{ display:block; background: rgba(34,197,94,.12); color: #065f46; }
+    .msg.err{ display:block; background: rgba(239,68,68,.12); color: #991b1b; }
 
     .grid{ display:grid; gap: 14px; grid-template-columns: 1fr; }
-    @media(min-width: 900px){ .grid{ grid-template-columns: 1.15fr .85fr; } }
+    @media(min-width: 900px){ .grid{ grid-template-columns: 1.2fr .8fr; } }
 
-    .section-title{ margin: 0 0 10px; font-size: 16px; font-weight: 950; letter-spacing: -.01em; }
+    .section-title{ margin: 0 0 10px; font-size: 16px; font-weight: 950; }
 
-    .class-list{ display:grid; gap: 12px; grid-template-columns: 1fr; }
+    .class-list{ display:grid; gap: 12px; }
     @media(min-width: 900px){ .class-list{ grid-template-columns: 1fr 1fr; } }
 
     .class-card{
       border-radius: 18px;
       padding: 14px;
-      background: rgba(255,255,255,.68);
+      background: rgba(255,255,255,.75);
       border: 1px solid rgba(15,23,42,.08);
-      box-shadow: 0 14px 34px rgba(2,6,23,.08);
-      display:flex;
-      flex-direction:column;
-      gap: 8px;
       cursor: pointer;
-      transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+      transition: .15s ease;
     }
     .class-card:hover{
       transform: translateY(-2px);
       border-color: rgba(5,150,105,.25);
-      box-shadow: 0 18px 40px rgba(2,6,23,.10);
     }
-    .class-card .title{ font-weight: 950; font-size: 16px; margin:0; color:#0f172a; }
-    .class-card .meta{ margin:0; color:#334155; font-weight: 800; font-size: 13px; opacity: .9; }
+
+    .class-card .title{ font-weight: 950; margin:0; }
+    .class-card .meta{ margin:0; color:#334155; font-weight:800; font-size:13px; }
 
     .pill{
-      display:inline-flex; align-items:center; gap: 8px;
-      padding: 8px 10px; border-radius: 999px;
-      border: 1px solid rgba(5,150,105,.20);
+      display:inline-flex;
+      padding: 6px 10px;
+      border-radius: 999px;
       background: rgba(5,150,105,.08);
-      color:#065f46; font-weight: 950; font-size: 12px;
-      width: fit-content;
+      font-weight: 900;
+      font-size: 12px;
     }
-    .muted{ margin:0; color:#334155; font-weight: 800; opacity: .92; line-height: 1.55; }
+
+    .muted{ color:#475569; font-weight:800; font-size:14px; }
   </style>
 </head>
 
@@ -87,179 +70,108 @@
     <div class="top-inner">
       <div class="brand">
         <h1>Dashboard Pelajar</h1>
-        <p class="sub" id="who">Loading...</p>
+        <p class="sub" id="who">Memuatkan maklumat...</p>
       </div>
 
-      <div style="display:flex; gap:10px; align-items:center;">
-        <button class="btn ghost" id="btnRefresh" type="button">Refresh</button>
-        <button class="btn" id="btnLogout" type="button">Logout</button>
+      <div style="display:flex; gap:10px;">
+        <button class="btn ghost" id="btnRefresh">Segar Semula</button>
+        <button class="btn" id="btnLogout">Log Keluar</button>
       </div>
     </div>
   </header>
 
   <main class="page">
     <div class="container">
+
       <div id="msg" class="msg"></div>
 
       <div class="grid">
+
         <section class="card">
-          <h2 class="section-title">Kelas Saya</h2>
+          <h2 class="section-title">Kelas Berdaftar</h2>
           <div id="classes" class="class-list"></div>
 
-          <p class="muted" id="classesHint" style="margin:10px 0 0;">
-            Belum ada kelas dipaparkan. Jika anda baru enroll, tekan <b>Refresh</b>.
+          <p class="muted" id="classesHint" style="margin-top:12px;">
+            Anda belum berdaftar dalam mana-mana kelas.
           </p>
         </section>
 
         <section class="card">
-          <h2 class="section-title">Panduan</h2>
-          <p class="muted" style="margin:0;">
-            1) Pilih kelas untuk masuk.<br>
-            2) Nota dan kuiz akan dipaparkan mengikut subject.<br>
-            3) Kuiz dibuka melalui pautan (tab baru).
+          <h2 class="section-title">Panduan Penggunaan</h2>
+          <p class="muted">
+            • Klik kelas untuk mengakses nota dan kuiz.<br>
+            • Nota dipaparkan mengikut status "Released".<br>
+            • Kuiz akan dibuka di tab baharu (Google Form).
           </p>
 
-          <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
-            <span class="pill" id="pillCount">Kelas: -</span>
-            <span class="pill">Portal: Pelajar</span>
+          <div style="margin-top:14px;">
+            <span class="pill" id="pillCount">Jumlah Kelas: -</span>
           </div>
         </section>
+
       </div>
     </div>
   </main>
 
   <script>
-    const BASE_URL = window.APP_CONFIG && window.APP_CONFIG.BASE_URL ? window.APP_CONFIG.BASE_URL : "";
+    const BASE_URL = window.APP_CONFIG?.BASE_URL || "";
     const msgEl = document.getElementById("msg");
-    const whoEl = document.getElementById("who");
     const classesEl = document.getElementById("classes");
     const classesHint = document.getElementById("classesHint");
     const pillCount = document.getElementById("pillCount");
+    const whoEl = document.getElementById("who");
 
-    function showMsg(type, text){
-      msgEl.className = "msg " + (type === "ok" ? "ok" : "err");
+    function showMsg(type,text){
+      msgEl.className = "msg " + type;
       msgEl.textContent = text;
       msgEl.style.display = "block";
-    }
-    function clearMsg(){
-      msgEl.style.display = "none";
-      msgEl.textContent = "";
-      msgEl.className = "msg";
-    }
-
-    function readUser(){
-      try{
-        const raw = localStorage.getItem("kk_user");
-        return raw ? JSON.parse(raw) : null;
-      }catch(e){
-        return null;
-      }
-    }
-
-    async function apiPost(action, params){
-      if(!BASE_URL) return { ok:false, message:"APP_CONFIG.BASE_URL tak wujud. Semak config.js" };
-
-      const body = new URLSearchParams();
-      Object.entries(params || {}).forEach(([k,v]) => body.append(k, v ?? ""));
-
-      const res = await fetch(`${BASE_URL}?action=${encodeURIComponent(action)}`, { method: "POST", body });
-      const text = await res.text();
-      try { return JSON.parse(text); }
-      catch(e){ return { ok:false, message:"Response bukan JSON", raw:text }; }
-    }
-
-    function escapeHtml(s){
-      return String(s ?? "")
-        .replaceAll("&","&amp;")
-        .replaceAll("<","&lt;")
-        .replaceAll(">","&gt;")
-        .replaceAll('"',"&quot;")
-        .replaceAll("'","&#039;");
     }
 
     function renderClasses(list){
       classesEl.innerHTML = "";
 
-      if(!Array.isArray(list) || list.length === 0){
+      if(!list || list.length === 0){
         classesHint.style.display = "block";
-        pillCount.textContent = "Kelas: 0";
+        pillCount.textContent = "Jumlah Kelas: 0";
         return;
       }
 
       classesHint.style.display = "none";
-      pillCount.textContent = `Kelas: ${list.length}`;
+      pillCount.textContent = "Jumlah Kelas: " + list.length;
 
-      list.forEach(c => {
-        const title = c.title || c.className || c.name || "Kelas";
-        const desc  = c.desc  || c.classCode || c.description || "";
-        const classId = c.classId || c.id || "";
-
+      list.forEach(c=>{
         const card = document.createElement("div");
-        card.className = "class-card";
+        card.className="class-card";
         card.innerHTML = `
-          <p class="title">${escapeHtml(title)}</p>
-          <p class="meta">${escapeHtml(desc)}</p>
-          <span class="pill">Klik untuk masuk</span>
+          <p class="title">${c.title}</p>
+          <p class="meta">${c.desc || ""}</p>
+          <span class="pill">Klik untuk akses</span>
         `;
-
-        card.addEventListener("click", () => {
-          if(!classId){
-            showMsg("err", "Rekod kelas tidak lengkap. Sila cuba Refresh.");
-            return;
-          }
-          window.location.href = `./kelas.html?classId=${encodeURIComponent(classId)}`;
-        });
-
+        card.onclick=()=>location.href=`./kelas.html?classId=${c.classId}`;
         classesEl.appendChild(card);
       });
     }
 
-    async function loadDashboard(){
-      clearMsg();
+    async function load(){
+      const token = localStorage.getItem("kk_token");
+      if(!token){ location.href="./login.html"; return; }
 
-      const token = localStorage.getItem("kk_token") || "";
-      const user = readUser();
+      const res = await fetch(`${BASE_URL}?action=listMyClasses`,{
+        method:"POST",
+        body:new URLSearchParams({token})
+      });
 
-      if(!token && !user){
-        window.location.href = "./login.html";
+      const out = await res.json();
+      if(!out.ok){
+        showMsg("err", out.message);
         return;
       }
 
-      const displayName = user?.name || user?.email || "Pelajar";
-      whoEl.textContent = `Hi, ${displayName}`;
-
-      let out = null;
-
-      if(token){
-        out = await apiPost("listMyClasses", { token });
-      }
-      if(!out || !out.ok){
-        const userId = user?.userId || user?.id || "";
-        if(userId){
-          out = await apiPost("listMyClasses", { userId });
-        }
-      }
-
-      if(!out || !out.ok){
-        console.error("listMyClasses failed:", out);
-        showMsg("err", out?.message || "Tak dapat load kelas.");
-        renderClasses([]);
-        return;
-      }
-
-      renderClasses(out.classes || []);
-      showMsg("ok", "Kelas berjaya dimuatkan. Sila pilih satu kelas untuk masuk.");
+      renderClasses(out.classes);
+      showMsg("ok","Data kelas berjaya dimuatkan.");
     }
 
-    document.getElementById("btnLogout").addEventListener("click", () => {
-      localStorage.removeItem("kk_token");
-      localStorage.removeItem("kk_user");
-      window.location.href = "./login.html";
-    });
-
-    document.getElementById("btnRefresh").addEventListener("click", loadDashboard);
-
-    loadDashboard();
+    load();
   </script>
 </body>
 </html>
