@@ -1,23 +1,211 @@
 <!DOCTYPE html>
 <html lang="ms">
 <head>
-  <meta charset="UTF-8">
-  <title>Admin Login</title>
-  <link rel="stylesheet" href="../styles.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Log Masuk Admin • kura kura hijau</title>
+
+  <link rel="stylesheet" href="../styles.css" />
+  <script src="../config.js"></script>
+
+  <style>
+    .wrap{
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: 26px 16px;
+    }
+    .box{ width: min(520px, 92vw); }
+    .title{
+      margin:0 0 6px;
+      font-size: 40px;
+      line-height:1.05;
+      letter-spacing:-0.02em;
+      font-weight: 950;
+    }
+    .sub{
+      margin:0 0 18px;
+      color: var(--kk-muted);
+      font-weight: 650;
+      opacity:.95;
+    }
+    label{
+      display:block;
+      font-weight: 850;
+      margin: 14px 0 8px;
+    }
+    .input{
+      width:100%;
+      box-sizing:border-box;
+      padding: 14px 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(15,23,42,0.16);
+      background: rgba(255,255,255,0.70);
+      outline: none;
+      font-size: 15px;
+    }
+    .input:focus{
+      border-color: rgba(5,150,105,0.55);
+      box-shadow: 0 0 0 4px rgba(5,150,105,0.14);
+    }
+    .btn{
+      width:100%;
+      margin-top: 16px;
+      border:0;
+      cursor:pointer;
+      padding: 12px 14px;
+      border-radius: 14px;
+      font-weight: 900;
+      background: var(--kk-emerald);
+      color:#fff;
+      box-shadow: 0 10px 24px rgba(5,150,105,0.16);
+    }
+    .btn:hover{ background: var(--kk-emerald-dark); }
+    .msg{
+      margin-top: 12px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-weight: 850;
+      display:none;
+    }
+    .msg.ok{
+      display:block;
+      background: rgba(34,197,94,0.12);
+      border: 1px solid rgba(34,197,94,0.25);
+      color: #065f46;
+    }
+    .msg.err{
+      display:block;
+      background: rgba(239,68,68,0.10);
+      border: 1px solid rgba(239,68,68,0.22);
+      color: #991b1b;
+    }
+    .row{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-top: 14px;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .back{
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+      text-decoration:none;
+      color: var(--kk-text);
+      font-weight: 850;
+      opacity:.9;
+    }
+    .back:hover{ opacity:1; }
+    .tiny{
+      font-size: 12px;
+      color: var(--kk-muted);
+      font-weight: 700;
+      opacity:.85;
+    }
+  </style>
 </head>
+
 <body class="stage">
+  <main class="wrap">
+    <section class="box">
+      <div class="card">
+        <h1 class="title">Admin</h1>
+        <p class="sub">Log masuk untuk pengurusan kelas, nota dan kuiz.</p>
 
-<main style="min-height:100vh;display:flex;align-items:center;justify-content:center;">
-  <div class="card">
-    <h1>Admin</h1>
-    <p>Log masuk pengurusan</p>
+        <div id="msg" class="msg"></div>
 
-    <input placeholder="Email"><br><br>
-    <input type="password" placeholder="Password"><br><br>
+        <label for="email">Email</label>
+        <input id="email" class="input" type="email" placeholder="contoh: admin@pms.edu.my" autocomplete="username" />
 
-    <button class="btn-primary">Log Masuk</button>
-  </div>
-</main>
+        <label for="password">Kata laluan</label>
+        <input id="password" class="input" type="password" placeholder="••••••••" autocomplete="current-password" />
 
+        <button id="btnLogin" class="btn" type="button">Log Masuk</button>
+
+        <div class="row">
+          <a class="back" href="../index.html">← Kembali</a>
+          <div class="tiny">Tip: kalau gagal, semak `config.js` (BASE_URL) & role dalam sheet Users.</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+
+    function showMsg(type, text){
+      const el = $("msg");
+      el.className = "msg " + (type === "ok" ? "ok" : "err");
+      el.textContent = text;
+      el.style.display = "block";
+    }
+
+    function getBaseUrl(){
+      const cfg = window.APP_CONFIG;
+      return (cfg && cfg.BASE_URL) ? cfg.BASE_URL : null;
+    }
+
+    async function apiPost(params){
+      const BASE_URL = getBaseUrl();
+      if (!BASE_URL) throw new Error("APP_CONFIG.BASE_URL tak wujud. Semak config.js");
+
+      const body = new URLSearchParams();
+      Object.entries(params).forEach(([k,v]) => body.append(k, v ?? ""));
+
+      const res = await fetch(BASE_URL, { method:"POST", body });
+      const text = await res.text();
+      try { return JSON.parse(text); }
+      catch(e){ return { ok:false, message:"Response bukan JSON", raw:text }; }
+    }
+
+    $("btnLogin").addEventListener("click", async () => {
+      const email = $("email").value.trim();
+      const password = $("password").value;
+
+      if (!email || !password){
+        showMsg("err", "Sila isi email dan kata laluan.");
+        return;
+      }
+
+      $("btnLogin").disabled = true;
+      $("btnLogin").textContent = "Sedang log masuk...";
+
+      try{
+        const data = await apiPost({ action:"login", email, password });
+
+        if (!data || !data.ok){
+          showMsg("err", data?.message || "Log masuk gagal.");
+          $("btnLogin").disabled = false;
+          $("btnLogin").textContent = "Log Masuk";
+          return;
+        }
+
+        // simpan token & user macam pelajar
+        if (data.token) localStorage.setItem("kk_token", data.token);
+        if (data.user)  localStorage.setItem("kk_user", JSON.stringify(data.user));
+
+        // ✅ verify role admin
+        const role = String(data.user?.role || "").toLowerCase();
+        if (role !== "admin"){
+          showMsg("err", "Akaun ini bukan admin. Sila guna portal yang betul.");
+          $("btnLogin").disabled = false;
+          $("btnLogin").textContent = "Log Masuk";
+          return;
+        }
+
+        showMsg("ok", "Log masuk berjaya. Membuka dashboard...");
+        window.location.href = "./dashboard.html";
+
+      }catch(err){
+        console.error(err);
+        showMsg("err", "Ralat rangkaian. Sila cuba semula.");
+        $("btnLogin").disabled = false;
+        $("btnLogin").textContent = "Log Masuk";
+      }
+    });
+  </script>
 </body>
 </html>
