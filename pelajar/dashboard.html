@@ -1,3 +1,4 @@
+<!-- pelajar/dashboard.html -->
 <!DOCTYPE html>
 <html lang="ms">
 <head>
@@ -102,25 +103,25 @@
 
       <div class="grid">
         <section class="card">
-          <h2 class="section-title">Kelas saya</h2>
+          <h2 class="section-title">Kelas Saya</h2>
           <div id="classes" class="class-list"></div>
 
           <p class="muted" id="classesHint" style="margin:10px 0 0;">
-            Kalau kosong, maksudnya belum enroll kelas lagi.
+            Belum ada kelas dipaparkan. Jika anda baru enroll, tekan <b>Refresh</b>.
           </p>
         </section>
 
         <section class="card">
-          <h2 class="section-title">Panduan ringkas</h2>
+          <h2 class="section-title">Panduan</h2>
           <p class="muted" style="margin:0;">
-            1) Klik kelas untuk masuk.<br>
-            2) Dalam kelas, ada Nota & Kuiz ikut subject.<br>
-            3) Kuiz akan buka di tab baru (Google Form).
+            1) Pilih kelas untuk masuk.<br>
+            2) Nota dan kuiz akan dipaparkan mengikut subject.<br>
+            3) Kuiz dibuka melalui pautan (tab baru).
           </p>
 
           <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
             <span class="pill" id="pillCount">Kelas: -</span>
-            <span class="pill">Status: active</span>
+            <span class="pill">Portal: Pelajar</span>
           </div>
         </section>
       </div>
@@ -184,6 +185,7 @@
         pillCount.textContent = "Kelas: 0";
         return;
       }
+
       classesHint.style.display = "none";
       pillCount.textContent = `Kelas: ${list.length}`;
 
@@ -202,7 +204,7 @@
 
         card.addEventListener("click", () => {
           if(!classId){
-            showMsg("err", "classId kosong. Check data Classes/Enrollments.");
+            showMsg("err", "Rekod kelas tidak lengkap. Sila cuba Refresh.");
             return;
           }
           window.location.href = `./kelas.html?classId=${encodeURIComponent(classId)}`;
@@ -246,7 +248,7 @@
       }
 
       renderClasses(out.classes || []);
-      showMsg("ok", "Kelas berjaya dimuatkan. Klik satu kelas untuk masuk.");
+      showMsg("ok", "Kelas berjaya dimuatkan. Sila pilih satu kelas untuk masuk.");
     }
 
     document.getElementById("btnLogout").addEventListener("click", () => {
