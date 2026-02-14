@@ -96,41 +96,32 @@
         <section class="card">
           <h2 class="section-title">Pengurusan</h2>
           <p class="muted">
-            Ini ruang admin untuk urus kandungan: <b>kelas</b>, <b>subjek</b>, <b>nota</b>, dan <b>kuiz</b>.
-            Akses pelajar akan disekat daripada halaman admin.
+            Ini ruang admin untuk urus kandungan: <b>nota</b> dan <b>kuiz</b> ikut kelas/subject.
           </p>
 
           <div class="list" style="margin-top:12px;">
             <div class="item">
               <div>
-                <p class="t">Kelas</p>
-                <p class="d">Bina kelas, kemas info, dan semak kod kelas.</p>
-              </div>
-              <span class="chip">Coming soon</span>
-            </div>
-
-            <div class="item">
-              <div>
-                <p class="t">Subjek</p>
-                <p class="d">Susun subjectId ikut silibus / bab.</p>
-              </div>
-              <span class="chip">Coming soon</span>
-            </div>
-
-            <div class="item">
-              <div>
                 <p class="t">Nota</p>
-                <p class="d">Release/unrelease nota dan pautkan bahan.</p>
+                <p class="d">Tambah / edit nota, dan release/unrelease.</p>
               </div>
-              <span class="chip">Coming soon</span>
+              <a class="chip" href="./notes.html">Buka</a>
             </div>
 
             <div class="item">
               <div>
                 <p class="t">Kuiz</p>
-                <p class="d">Buka/tutup kuiz dan pautan Google Form.</p>
+                <p class="d">Tambah kuiz (Google Form link), dan aktif/nonaktif.</p>
               </div>
-              <span class="chip">Coming soon</span>
+              <a class="chip" href="./quizzes.html">Buka</a>
+            </div>
+
+            <div class="item">
+              <div>
+                <p class="t">Subjek</p>
+                <p class="d">(Optional) Kalau nak tambah subject ikut bab.</p>
+              </div>
+              <span class="chip">Auto (guna sheet / notes page)</span>
             </div>
           </div>
         </section>
@@ -185,7 +176,6 @@
 
       const token = localStorage.getItem("kk_token") || "";
       if(!token){
-        // satu pintu masuk
         location.href = "../pelajar/login.html";
         return;
       }
@@ -205,8 +195,7 @@
         return;
       }
 
-      const displayName = me.user.name || me.user.email || "Admin";
-      whoEl.textContent = `Hi, ${displayName}`;
+      whoEl.textContent = `Hi, ${me.user.name || me.user.email || "Admin"}`;
       showMsg("ok", "Akses admin disahkan.");
     }
 
