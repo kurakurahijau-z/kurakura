@@ -118,6 +118,33 @@
       text-decoration:none;
     }
     .links a:hover{ text-decoration:underline; }
+
+    /* ✅ session box */
+    .session{
+      display:none;
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 14px;
+      background: rgba(2,6,23,.04);
+      border: 1px solid rgba(15,23,42,.08);
+    }
+    .session strong{ font-weight: 950; }
+    .session .actions{
+      margin-top: 10px;
+      display:flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content:flex-end;
+    }
+    .btnSmall{
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-weight: 900;
+      border: 0;
+      cursor: pointer;
+    }
+    .btnGo{ background:#059669; color:#fff; }
+    .btnSwap{ background: rgba(255,255,255,.85); border:1px solid rgba(15,23,42,.12); color:#0f172a; }
   </style>
 </head>
 
@@ -129,6 +156,15 @@
 
       <div id="msg" class="msg"></div>
 
+      <!-- ✅ kalau ada token, kita bagi pilihan -->
+      <div id="session" class="session">
+        <div id="sessionText"></div>
+        <div class="actions">
+          <button id="btnContinue" class="btnSmall btnGo" type="button">Teruskan</button>
+          <button id="btnSwitch" class="btnSmall btnSwap" type="button">Tukar akaun</button>
+        </div>
+      </div>
+
       <label for="email">Email</label>
       <input id="email" class="input" type="email"
         placeholder="contoh: ali@student.com"
@@ -139,7 +175,7 @@
         placeholder="Password"
         autocomplete="current-password" />
 
-      <button id="btnLogin" class="btn-primary btn">Log Masuk</button>
+      <button id="btnLogin" class="btn-primary btn" type="button">Log Masuk</button>
 
       <div class="links">
         <a href="./register.html">Daftar akaun baru</a>
@@ -187,21 +223,49 @@
       return "./dashboard.html";
     }
 
-    async function autoRedirectIfLoggedIn(){
+    function clearSession(){
+      localStorage.removeItem("kk_token");
+      localStorage.removeItem("kk_user");
+    }
+
+    function escapeHtml(s){
+      return String(s ?? "")
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    async function checkExistingSession(){
       const token = localStorage.getItem("kk_token") || "";
       if(!token) return;
 
       try{
         const me = await apiPost({ action:"me", token });
-        if(me && me.ok && me.user){
-          const to = routeByRole(me.user.role);
-          window.location.replace(to);
-        } else {
-          localStorage.removeItem("kk_token");
-          localStorage.removeItem("kk_user");
+        if(!me || !me.ok || !me.user){
+          clearSession();
+          return;
         }
+
+        const u = me.user;
+        $("sessionText").innerHTML =
+          `Anda masih log masuk sebagai <strong>${escapeHtml(u.name || u.email || "user")}</strong> (${escapeHtml(u.role || "student")}).`;
+
+        $("session").style.display = "block";
+
+        $("btnContinue").onclick = () => {
+          window.location.replace(routeByRole(u.role));
+        };
+
+        $("btnSwitch").onclick = () => {
+          clearSession();
+          $("session").style.display = "none";
+          showMsg("ok", "Ok. Sila log masuk guna akaun lain.");
+        };
+
       }catch(e){
-        // kalau server down, jangan kacau user tengah nak login
+        // kalau server down, jangan kacau
       }
     }
 
@@ -242,8 +306,7 @@
       }
     });
 
-    // auto hantar kalau dah ada token
-    autoRedirectIfLoggedIn();
+    checkExistingSession();
   </script>
 </body>
 </html>
