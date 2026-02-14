@@ -1,5 +1,5 @@
 window.APP_CONFIG = {
   APP_NAME: "kura kura hijau",
-  BASE_URL: "https://script.google.com/macros/s/AKfycbybvP8q-qNNsVvjbG-MR0KJRmx5qks21gAU_cwJrhJLfF0Vg8HsdD3Avs1Rmz5MUHEo/exec"
+  BASE_URL: "https://script.google.com/macros/s/AKfycbxTOhwbSkTgHoMvrp3EMRtKJTWm4UlddGlySl0pNbN4ytM2M0PhvAbpWd_JI0g3IR6H/exec"
 };
 
