@@ -1,154 +1,93 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ms">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Login Pelajar</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- CONFIG -->
-  <script src="../config.js"></script>
-
-  <style>
-    body{
-      font-family: Arial, sans-serif;
-      background:#e7f3ef;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      height:100vh;
-      margin:0;
-    }
-    .card{
-      background:#fff;
-      padding:30px;
-      border-radius:12px;
-      width:350px;
-      box-shadow:0 8px 20px rgba(0,0,0,0.08);
-    }
-    h2{
-      margin-top:0;
-    }
-    input{
-      width:100%;
-      padding:10px;
-      margin:8px 0;
-      border-radius:8px;
-      border:1px solid #ccc;
-      font-size:14px;
-    }
-    button{
-      width:100%;
-      padding:10px;
-      margin-top:10px;
-      border:none;
-      border-radius:8px;
-      background:#16a34a;
-      color:#fff;
-      font-weight:bold;
-      cursor:pointer;
-    }
-    button:hover{
-      background:#15803d;
-    }
-    .error{
-      background:#fee2e2;
-      color:#991b1b;
-      padding:8px;
-      border-radius:6px;
-      margin-bottom:10px;
-      display:none;
-    }
-  </style>
+  <!-- ✅ absolute paths (penting untuk GitHub Pages /kurakura/) -->
+  <link rel="stylesheet" href="/kurakura/styles.css" />
+  <script src="/kurakura/config.js"></script>
+  <script src="/kurakura/app.js"></script>
 </head>
+
 <body>
+  <main class="auth-wrap">
+    <section class="card auth-card">
+      <h1 class="auth-title">Login</h1>
+      <p class="muted">Masuk untuk akses kelas, nota & kuiz.</p>
 
-<div class="card">
-  <h2>Login</h2>
-  <div id="errorBox" class="error"></div>
+      <div id="msg" class="notice err" style="display:none;"></div>
 
-  <input type="email" id="email" placeholder="Email">
-  <input type="password" id="password" placeholder="Password">
-  <button onclick="login()">Log Masuk</button>
-</div>
+      <label class="label">Email</label>
+      <input id="email" class="input" type="email" autocomplete="username" placeholder="email@contoh.com" />
 
-<script>
-function getBaseUrl(){
-  return window.APP_CONFIG?.BASE_URL || "";
-}
+      <label class="label">Password</label>
+      <input id="password" class="input" type="password" autocomplete="current-password" placeholder="••••••••" />
 
-async function apiPost(params){
-  const BASE_URL = getBaseUrl();
-  if(!BASE_URL){
-    return { ok:false, message:"BASE_URL tak dijumpai" };
-  }
+      <button id="btnLogin" class="btn primary w-full">Log Masuk</button>
 
-  const action = String(params?.action || "").trim();
+      <div class="auth-links">
+        <a class="link" href="./register.html">Daftar akaun baru</a>
+        <a class="link" href="./reset.html">Lupa password?</a>
+      </div>
 
-  // Force action masuk querystring
-  const url = action
-    ? `${BASE_URL}?action=${encodeURIComponent(action)}`
-    : BASE_URL;
+      <a class="link" href="/kurakura/index.html">← balik</a>
+    </section>
+  </main>
 
-  const body = new URLSearchParams();
+  <script>
+    const $ = (id) => document.getElementById(id);
 
-  Object.entries(params || {}).forEach(([k,v])=>{
-    if(k === "action") return;
-    body.append(k, v ?? "");
-  });
+    function showErr(text){
+      const el = $("msg");
+      el.style.display = "block";
+      el.textContent = text;
+    }
+    function clearErr(){
+      const el = $("msg");
+      el.style.display = "none";
+      el.textContent = "";
+    }
 
-  const res = await fetch(url,{
-    method:"POST",
-    headers:{
-      "Content-Type":"application/x-www-form-urlencoded;charset=UTF-8"
-    },
-    body
-  });
+    // ✅ guard: kalau config.js tak load, bagi mesej jelas
+    const BASE_URL = window.APP_CONFIG?.BASE_URL || "";
+    if(!BASE_URL){
+      showErr("BASE_URL tak dijumpai. Semak fail /kurakura/config.js wujud & path script betul.");
+    }
 
-  const text = await res.text();
+    $("btnLogin").addEventListener("click", async ()=>{
+      clearErr();
 
-  try{
-    return JSON.parse(text);
-  }catch(e){
-    return { ok:false, message:"Response bukan JSON", raw:text };
-  }
-}
+      if(!BASE_URL){
+        showErr("BASE_URL tak dijumpai. config.js belum load.");
+        return;
+      }
 
-async function login(){
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value.trim();
-  const errorBox = document.getElementById("errorBox");
+      const email = ($("email").value || "").trim();
+      const password = $("password").value || "";
 
-  errorBox.style.display="none";
+      if(!email || !password){
+        showErr("Sila isi email dan password.");
+        return;
+      }
 
-  if(!email || !password){
-    errorBox.innerText="Isi email dan password.";
-    errorBox.style.display="block";
-    return;
-  }
+      // apiPost dari app.js (akan guna BASE_URL dari config.js)
+      const res = await apiPost({ action:"login", email, password });
 
-  const result = await apiPost({
-    action:"login",
-    email,
-    password
-  });
+      if(!res || !res.ok){
+        showErr(res?.message || "Login gagal.");
+        return;
+      }
 
-  if(!result.ok){
-    errorBox.innerText=result.message || "Login gagal.";
-    errorBox.style.display="block";
-    return;
-  }
+      localStorage.setItem("kk_token", res.token);
+      localStorage.setItem("kk_user", JSON.stringify(res.user || {}));
 
-  // Simpan token
-  localStorage.setItem("token", result.token);
-
-  // Redirect ikut role
-  if(result.user?.isAdmin){
-    window.location.href="../admin/dashboard.html";
-  }else{
-    window.location.href="dashboard.html";
-  }
-}
-</script>
-
+      // ✅ auto redirect ikut role
+      const role = (res.user?.role || "").toLowerCase();
+      if(role === "admin") location.href = "/kurakura/admin/dashboard.html";
+      else location.href = "/kurakura/pelajar/dashboard.html";
+    });
+  </script>
 </body>
 </html>
