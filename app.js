@@ -1,130 +1,104 @@
-// app.js
-// Shared helpers for kura kura hijau (GitHub Pages version)
+// app.js - shared helpers
 
-const BASE_URL = window.APP_CONFIG?.BASE_URL || "";
+// === SET BASE URL (Google Apps Script Web App URL) ===
+const BASE_URL =
+  window.APP_CONFIG?.BASE_URL ||
+  "https://script.google.com/macros/s/AKfycbxTOhwbSkTgHoMvrp3EMRtKJTWm4UlddGlySl0pNbN4ytM2M0PhvAbpWd_JI0g3IR6H/exec";
 
-const TOKEN_KEY = "kk_token";
-const USER_KEY  = "kk_user";
-
-/* ==============================
-   Basic Navigation
-============================== */
-
-function go(path){
-  window.location.href = path;
+// === SET APP BASE PATH (GitHub Pages project repo path) ===
+// Force using config BASE_PATH if available to avoid /pelajar/... 404
+function normalizeBasePath_(p) {
+  p = String(p || "").trim();
+  if (!p) return "";
+  if (!p.startsWith("/")) p = "/" + p;
+  // remove trailing slash
+  p = p.replace(/\/+$/, "");
+  return p;
 }
 
-function logout(){
+const APP_BASE = (() => {
+  const forced = normalizeBasePath_(window.APP_CONFIG?.BASE_PATH);
+  if (forced) return forced;
+
+  // fallback infer: /<repo>/...
+  const parts = window.location.pathname.split("/").filter(Boolean);
+  if (parts.length === 0) return "";
+  // if running at domain root, empty; else first segment is repo
+  return "/" + parts[0];
+})();
+
+function toUrl(path) {
+  path = String(path || "");
+  if (!path) return APP_BASE + "/";
+
+  // absolute URL, keep
+  if (/^https?:\/\//i.test(path)) return path;
+
+  // ensure leading slash
+  if (!path.startsWith("/")) path = "/" + path;
+
+  // avoid double base when already includes it
+  if (APP_BASE && path.startsWith(APP_BASE + "/")) return path;
+
+  return (APP_BASE || "") + path;
+}
+
+// token storage keys
+const TOKEN_KEY = "kk_token";
+const USER_KEY = "kk_user";
+
+function go(path) {
+  window.location.href = toUrl(path);
+}
+
+function logout() {
   localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(USER_KEY);
-  go("/pelajar/login.html");
+  go("/index.html");
 }
 
-function getToken(){
+function requireAuthOrRedirect() {
+  const t = localStorage.getItem(TOKEN_KEY);
+  if (!t) go("/index.html");
+}
+
+function getToken() {
   return localStorage.getItem(TOKEN_KEY) || "";
 }
 
-function getUser(){
-  try{
-    const raw = localStorage.getItem(USER_KEY);
-    return raw ? JSON.parse(raw) : null;
-  }catch(e){
-    return null;
-  }
+function getParam(name) {
+  const url = new URL(window.location.href);
+  return url.searchParams.get(name) || "";
 }
 
-/* ==============================
-   Auth Guards
-============================== */
-
-function requireAuthOrRedirect(){
-  const token = getToken();
-  if(!token){
-    go("/pelajar/login.html");
-  }
-}
-
-async function requireAdminOrRedirect(){
-  const token = getToken();
-  if(!token){
-    go("/pelajar/login.html");
-    return;
-  }
-
-  const res = await apiPost({ action:"me" });
-
-  if(!res?.ok || !res?.user){
-    logout();
-    return;
-  }
-
-  if(String(res.user.role).toLowerCase() !== "admin"){
-    go("/pelajar/dashboard.html");
-  }
-}
-
-async function requireStudentOrRedirect(){
-  const token = getToken();
-  if(!token){
-    go("/pelajar/login.html");
-    return;
-  }
-
-  const res = await apiPost({ action:"me" });
-
-  if(!res?.ok || !res?.user){
-    logout();
-    return;
-  }
-
-  if(String(res.user.role).toLowerCase() !== "student"){
-    go("/admin/dashboard.html");
-  }
-}
-
-/* ==============================
-   API Helper (JSON only)
-============================== */
-
-async function apiPost(payload){
-  if(!BASE_URL){
-    return { ok:false, message:"BASE_URL tidak diset dalam config.js" };
-  }
-
+async function apiPost(payload) {
   payload = payload || {};
   payload.token = payload.token || getToken();
 
-  try{
-    const res = await fetch(BASE_URL, {
-      method: "POST",
-      headers: { "Content-Type":"application/json" },
-      body: JSON.stringify(payload)
-    });
+  const res = await fetch(BASE_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
 
-    const data = await res.json();
-    return data;
-
-  }catch(err){
-    console.error("API ERROR:", err);
-    return { ok:false, message:"Server tidak dapat dihubungi." };
+  let data = null;
+  try {
+    data = await res.json();
+  } catch (_) {
+    data = { ok: false, message: "Invalid JSON response" };
   }
+  return data;
 }
 
-/* ==============================
-   Utils
-============================== */
-
-function escapeHtml(s){
+// --- escaping
+function escapeHtml(s) {
   s = String(s ?? "");
-  return s.replace(/[&<>"']/g, m => ({
-    "&":"&amp;",
-    "<":"&lt;",
-    ">":"&gt;",
-    '"':"&quot;",
-    "'":"&#039;"
+  return s.replace(/[&<>"']/g, (m) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#039;",
   }[m]));
 }
-
-function escapeAttr(s){
-  return escapeHtml(s);
-}
+function escapeAttr(s) { return escapeHtml(s); }
