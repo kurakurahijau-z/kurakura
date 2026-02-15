@@ -18,7 +18,7 @@ function getAppBasePath(){
   const parts = (window.location.pathname || "").split("/").filter(Boolean);
   if (!parts.length) return ""; // root domain
 
-  // GitHub Pages biasa: /<repo-name>/.
+  // GitHub Pages biasa: /<repo-name>/...
   return "/" + parts[0];
 }
 
