@@ -1,104 +1,112 @@
-// app.js - shared helpers
+app.js
+
+// app.js - shared helpers (GitHub Pages safe)
 
 // === SET BASE URL (Google Apps Script Web App URL) ===
 const BASE_URL =
   window.APP_CONFIG?.BASE_URL ||
   "https://script.google.com/macros/s/AKfycbxTOhwbSkTgHoMvrp3EMRtKJTWm4UlddGlySl0pNbN4ytM2M0PhvAbpWd_JI0g3IR6H/exec";
 
-// === SET APP BASE PATH (GitHub Pages project repo path) ===
-// Force using config BASE_PATH if available to avoid /pelajar/... 404
-function normalizeBasePath_(p) {
-  p = String(p || "").trim();
-  if (!p) return "";
-  if (!p.startsWith("/")) p = "/" + p;
-  // remove trailing slash
-  p = p.replace(/\/+$/, "");
-  return p;
+// token storage keys
+const TOKEN_KEY = "kk_token";
+const USER_KEY  = "kk_user";
+
+// ===== Base path helper (fix untuk GitHub Pages subpath: /kurakura) =====
+function getAppBasePath(){
+  // Kalau config.js ada define APP_BASE, guna itu (paling solid)
+  if (window.APP_CONFIG?.APP_BASE) return window.APP_CONFIG.APP_BASE.replace(/\/$/, "");
+
+  // Auto-detect: ambik first segment path (contoh: /kurakura/pelajar/login.html)
+  const parts = (window.location.pathname || "").split("/").filter(Boolean);
+  if (!parts.length) return ""; // root domain
+
+  // GitHub Pages biasa: /<repo-name>/...
+  return "/" + parts[0];
 }
 
-const APP_BASE = (() => {
-  const forced = normalizeBasePath_(window.APP_CONFIG?.BASE_PATH);
-  if (forced) return forced;
+const APP_BASE = getAppBasePath();
 
-  // fallback infer: /<repo>/...
-  const parts = window.location.pathname.split("/").filter(Boolean);
-  if (parts.length === 0) return "";
-  // if running at domain root, empty; else first segment is repo
-  return "/" + parts[0];
-})();
-
-function toUrl(path) {
-  path = String(path || "");
-  if (!path) return APP_BASE + "/";
-
-  // absolute URL, keep
-  if (/^https?:\/\//i.test(path)) return path;
-
-  // ensure leading slash
+function toUrl(path){
+  // path boleh jadi "/index.html" atau "pelajar/login.html"
+  path = String(path || "").trim();
+  if (!path) path = "/index.html";
   if (!path.startsWith("/")) path = "/" + path;
 
-  // avoid double base when already includes it
+  // elak double base (kalau user pass "/kurakura/index.html")
   if (APP_BASE && path.startsWith(APP_BASE + "/")) return path;
 
   return (APP_BASE || "") + path;
 }
 
-// token storage keys
-const TOKEN_KEY = "kk_token";
-const USER_KEY = "kk_user";
-
-function go(path) {
+function go(path){
   window.location.href = toUrl(path);
 }
 
-function logout() {
+function logout(){
   localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(USER_KEY);
   go("/index.html");
 }
 
-function requireAuthOrRedirect() {
+function requireAuthOrRedirect(){
   const t = localStorage.getItem(TOKEN_KEY);
-  if (!t) go("/index.html");
+  if(!t) go("/index.html");
 }
 
-function getToken() {
-  return localStorage.getItem(TOKEN_KEY) || "";
+// ===== User helpers =====
+function getToken(){ return localStorage.getItem(TOKEN_KEY) || ""; }
+
+function getUser(){
+  try { return JSON.parse(localStorage.getItem(USER_KEY) || "{}"); }
+  catch(_) { return {}; }
 }
 
-function getParam(name) {
+function requireAdminOrRedirect(){
+  requireAuthOrRedirect();
+  const u = getUser();
+  if (String(u.role || "").toLowerCase() !== "admin") {
+    // kalau bukan admin, campak balik ke dashboard pelajar
+    go("/pelajar/dashboard.html");
+  }
+}
+
+function requireStudentOrRedirect(){
+  requireAuthOrRedirect();
+  const u = getUser();
+  if (String(u.role || "").toLowerCase() === "admin") {
+    go("/admin/dashboard.html");
+  }
+}
+
+// ===== URL param helper =====
+function getParam(name){
   const url = new URL(window.location.href);
   return url.searchParams.get(name) || "";
 }
 
-async function apiPost(payload) {
+// ===== API =====
+async function apiPost(payload){
   payload = payload || {};
   payload.token = payload.token || getToken();
 
   const res = await fetch(BASE_URL, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
+    headers: { "Content-Type":"application/json" },
+    body: JSON.stringify(payload)
   });
 
   let data = null;
-  try {
-    data = await res.json();
-  } catch (_) {
-    data = { ok: false, message: "Invalid JSON response" };
-  }
+  try{ data = await res.json(); }
+  catch(_){ data = { ok:false, message:"Invalid JSON response" }; }
+
   return data;
 }
 
 // --- escaping
-function escapeHtml(s) {
+function escapeHtml(s){
   s = String(s ?? "");
-  return s.replace(/[&<>"']/g, (m) => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#039;",
+  return s.replace(/[&<>"']/g, m => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
   }[m]));
 }
-function escapeAttr(s) { return escapeHtml(s); }
+function escapeAttr(s){ return escapeHtml(s); }
