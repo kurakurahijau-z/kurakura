@@ -1,4 +1,3 @@
-<!-- PASTE TERUS → pelajar/register.html -->
 <!DOCTYPE html>
 <html lang="ms">
 <head>
@@ -21,7 +20,6 @@
       outline:none; font-size:15px;
     }
     .input:focus{ border-color:rgba(5,150,105,.55); box-shadow:0 0 0 4px rgba(5,150,105,.14); }
-    .help{ margin:8px 0 0; font-size:12px; color:var(--kk-muted); font-weight:700; opacity:.9; line-height:1.4; }
     .btn{ width:100%; margin-top:16px; }
     .msg{ margin-top:12px; padding:10px 12px; border-radius:12px; font-weight:800; display:none; }
     .msg.ok{ display:block; background:rgba(34,197,94,.12); border:1px solid rgba(34,197,94,.25); color:#065f46; }
@@ -33,6 +31,14 @@
     .kbd{
       font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;
       font-size:11px; padding:2px 6px; border-radius:8px; border:1px solid rgba(15,23,42,.18); background:rgba(255,255,255,.55);
+    }
+    .hint{
+      margin:8px 0 0;
+      font-size:12px;
+      color:var(--kk-muted);
+      font-weight:700;
+      line-height:1.45;
+      opacity:.9;
     }
   </style>
 </head>
@@ -57,10 +63,9 @@
       <label for="password">Password</label>
       <input id="password" class="input" type="password" placeholder="Password (min 4)" autocomplete="new-password" />
 
-      <!-- NEW: KOD KELAS -->
-      <label for="classCode">Kod Kelas (optional)</label>
-      <input id="classCode" class="input" type="text" placeholder="contoh: PMS-7917" />
-      <p class="help">Kalau ada kod kelas, isi terus. Sistem akan auto join lepas daftar.</p>
+      <label for="classCode">Kod Kelas (optional tapi digalakkan)</label>
+      <input id="classCode" class="input" type="text" placeholder="contoh: PMS-ABC123" />
+      <p class="hint">Kalau isi kod kelas, lepas daftar sistem akan auto join kelas tu.</p>
 
       <button id="btnRegister" class="btn-primary btn">Daftar</button>
 
@@ -78,6 +83,7 @@
       const el = $("msg");
       el.className = "msg " + (type==="ok" ? "ok" : "err");
       el.textContent = text;
+      el.style.display = "block";
     }
 
     function getBaseUrl(){
@@ -98,11 +104,6 @@
       catch(e){ return { ok:false, message:"Invalid JSON from server", raw:text }; }
     }
 
-    function saveSession(token, user){
-      localStorage.setItem("kk_token", token || "");
-      localStorage.setItem("kk_user", JSON.stringify(user || {}));
-    }
-
     $("btnRegister").addEventListener("click", async ()=>{
       const name = $("name").value.trim();
       const email = $("email").value.trim();
@@ -114,12 +115,16 @@
         showMsg("err","Isi email, no pendaftaran & password dulu.");
         return;
       }
+      if(password.length < 4){
+        showMsg("err","Password terlalu pendek (min 4).");
+        return;
+      }
 
       $("btnRegister").disabled = true;
       $("btnRegister").textContent = "Daftar...";
 
       try{
-        // 1) REGISTER
+        // 1) register
         const reg = await apiPost({
           action: "register",
           name,
@@ -135,38 +140,46 @@
           return;
         }
 
-        // 2) AUTO LOGIN (supaya tak perlu patah balik ke login)
-        const login = await apiPost({
+        showMsg("ok","Register berjaya. Auto login...");
+
+        // 2) auto login
+        const log = await apiPost({
           action: "login",
           email,
           password
         });
 
-        if(!login || !login.ok){
-          showMsg("ok","Register berjaya. Sila login.");
-          setTimeout(()=> window.location.href = "./login.html", 650);
+        if(!log || !log.ok || !log.token){
+          showMsg("err", log?.message || "Auto login gagal. Sila login manual.");
+          setTimeout(()=> window.location.href = "./login.html", 800);
           return;
         }
 
-        saveSession(login.token, login.user);
+        localStorage.setItem("kk_token", log.token);
+        if(log.user) localStorage.setItem("kk_user", JSON.stringify(log.user));
 
-        // 3) OPTIONAL: AUTO JOIN CLASS
+        // 3) auto join class (kalau ada classCode)
         if(classCode){
           const join = await apiPost({
             action: "joinClass",
-            token: login.token,
+            token: log.token,
             classCode
           });
 
-          // kalau join gagal, jangan block — bagi info je
-          if(!join || !join.ok){
-            showMsg("ok","Daftar berjaya. Tapi join kelas gagal: " + (join?.message || "Error") + " (Boleh join dalam dashboard)");
+          if(join && join.ok){
+            showMsg("ok","Siap daftar + join kelas. Redirect dashboard...");
+            setTimeout(()=> window.location.href = "./dashboard.html", 650);
+            return;
+          }else{
+            // join fail tapi akaun dah wujud; still boleh masuk dashboard
+            showMsg("err", (join?.message || "Join kelas gagal") + " — anda masih boleh join kemudian.");
             setTimeout(()=> window.location.href = "./dashboard.html", 900);
             return;
           }
         }
 
-        showMsg("ok","Daftar berjaya. Masuk dashboard...");
+        // kalau tak isi kod kelas
+        showMsg("ok","Register + login berjaya. Redirect dashboard...");
         setTimeout(()=> window.location.href = "./dashboard.html", 650);
 
       }catch(err){
