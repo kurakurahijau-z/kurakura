@@ -1,81 +1,46 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ms">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Admin Dashboard • Kura Kura Hijau</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin • Redirect</title>
+
   <link rel="stylesheet" href="../styles.css" />
+  <script src="../config.js"></script>
+  <script src="../app.js"></script>
+
+  <style>
+    .wrap{ min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px; }
+    .cardx{
+      width:min(560px,92vw);
+      background: rgba(255,255,255,.82);
+      border: 1px solid rgba(255,255,255,.55);
+      border-radius: 18px;
+      box-shadow: 0 10px 30px rgba(2, 6, 23, .10);
+      padding: 18px;
+    }
+    .t{ margin:0 0 6px; font-size:18px; font-weight:950; letter-spacing:-.01em; }
+    .s{ margin:0; color:var(--kk-muted); font-weight:800; }
+  </style>
 </head>
-<body>
-  <header class="topbar">
-    <div>
-      <h1>Admin Dashboard</h1>
-      <p id="meLine" class="muted"></p>
-    </div>
-    <div class="actions">
-      <button class="btn" onclick="go('../dashboard.html')">Dashboard</button>
-      <button class="btn danger" onclick="logout()">Keluar</button>
-    </div>
-  </header>
 
-  <main class="container">
-    <section class="card">
-      <h2>Kelas Anda</h2>
-      <p class="muted">Pilih kelas untuk urus Subjects / Notes / Quizzes.</p>
-
-      <div id="status" class="notice"></div>
-      <div id="classes" class="grid"></div>
+<body class="stage">
+  <main class="wrap">
+    <section class="cardx">
+      <p class="t">Admin</p>
+      <p class="s">Redirecting…</p>
     </section>
   </main>
 
-<script src="../app.js"></script>
-<script>
-(async function init(){
-  requireAuthOrRedirect();
-
-  const me = await apiPost({ action:"me" });
-  if(!me.ok) return setStatus(me.message || "Gagal load profile.");
-
-  if(String(me.user.role||"").toLowerCase() !== "admin"){
-    setStatus("Akses ditolak. Akaun ini bukan admin.");
-    return;
-  }
-  document.getElementById("meLine").textContent =
-    `Hi, ${me.user.name || me.user.email} (Admin)`;
-
-  const res = await apiPost({ action:"adminListOwnedClasses" });
-  if(!res.ok) return setStatus(res.message || "Gagal load kelas.");
-
-  renderClasses(res.classes || []);
-})();
-
-function setStatus(msg){
-  const el = document.getElementById("status");
-  el.textContent = msg || "";
-  el.style.display = msg ? "block" : "none";
-}
-
-function renderClasses(list){
-  const root = document.getElementById("classes");
-  root.innerHTML = "";
-  if(!list.length){
-    root.innerHTML = `<div class="muted">Tiada kelas (owned) dijumpai.</div>`;
-    return;
-  }
-
-  list.forEach(c=>{
-    const div = document.createElement("div");
-    div.className = "tile";
-    div.innerHTML = `
-      <div class="tile-title">${escapeHtml(c.className || c.classId)}</div>
-      <div class="tile-sub muted">Code: <b>${escapeHtml(c.classCode||"-")}</b></div>
-      <div class="tile-actions">
-        <button class="btn" onclick="go('class.html?classId=${encodeURIComponent(c.classId)}')">Urus Kelas</button>
-      </div>
-    `;
-    root.appendChild(div);
-  });
-}
-</script>
+  <script>
+    // Pastikan hanya admin boleh lepas
+    try{
+      requireAdminOrRedirect();           // akan campak kalau bukan admin / tak login
+      go("/admin/dashboard.html");        // kalau ok, terus dashboard admin
+    }catch(e){
+      // fallback safety
+      go("/pelajar/login.html");
+    }
+  </script>
 </body>
 </html>
