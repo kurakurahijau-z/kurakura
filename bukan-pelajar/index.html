@@ -1,18 +1,137 @@
 <!DOCTYPE html>
 <html lang="ms">
 <head>
-  <meta charset="UTF-8">
-  <title>Bukan Pelajar</title>
-  <link rel="stylesheet" href="../styles.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pilih Akses • kura kura hijau</title>
+
+  <link rel="stylesheet" href="../styles.css" />
+  <script src="../config.js"></script>
+  <script src="../app.js"></script>
+
+  <style>
+    .wrap{ min-height:100vh; display:flex; align-items:center; justify-content:center; padding:26px 16px; }
+    .box{ width:min(720px,92vw); }
+    .title{ margin:0 0 8px; font-size:42px; line-height:1.05; letter-spacing:-.02em; font-weight:900; }
+    .sub{ margin:0 0 18px; color:var(--kk-muted); font-weight:700; line-height:1.55; }
+
+    .grid{ display:grid; gap:12px; grid-template-columns:1fr; margin-top:14px; }
+    @media(min-width: 900px){ .grid{ grid-template-columns:1fr 1fr; } }
+
+    .pick{
+      display:flex; flex-direction:column; gap:10px;
+      padding:16px; border-radius:18px;
+      background:rgba(255,255,255,.82);
+      border:1px solid rgba(15,23,42,.10);
+      box-shadow:0 16px 40px rgba(2,6,23,.10);
+      cursor:pointer;
+      transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+    }
+    .pick:hover{
+      transform: translateY(-2px);
+      border-color: rgba(5,150,105,.25);
+      box-shadow:0 22px 60px rgba(2,6,23,.12);
+    }
+    .pick h3{ margin:0; font-weight:950; font-size:18px; letter-spacing:-.01em; }
+    .pick p{ margin:0; color:var(--kk-muted); font-weight:700; line-height:1.55; }
+    .tag{
+      width:fit-content;
+      padding:6px 10px; border-radius:999px;
+      border:1px solid rgba(5,150,105,.20);
+      background:rgba(5,150,105,.08);
+      color:#065f46; font-weight:900; font-size:12px;
+    }
+
+    .row{ display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; }
+    .btn{ border:0; cursor:pointer; padding:12px 14px; border-radius:14px; font-weight:900; }
+    .btn.primary{ background:#059669; color:#fff; box-shadow:0 10px 22px rgba(5,150,105,.18); }
+    .btn.primary:hover{ background:#047857; }
+    .btn.ghost{ background:rgba(255,255,255,.70); color:#0f172a; border:1px solid rgba(15,23,42,.12); box-shadow:0 10px 30px rgba(2,6,23,.06); }
+    .btn.ghost:hover{ background:rgba(255,255,255,.90); }
+
+    .tiny{ margin-top:12px; font-size:12px; color:var(--kk-muted); font-weight:700; opacity:.85; }
+    .msg{ margin-top:12px; padding:10px 12px; border-radius:12px; font-weight:900; display:none; }
+    .msg.err{ display:block; background:rgba(239,68,68,.10); border:1px solid rgba(239,68,68,.22); color:#991b1b; }
+  </style>
 </head>
+
 <body class="stage">
+  <main class="wrap">
+    <section class="card box">
+      <h1 class="title">Pilih akses</h1>
+      <p class="sub">
+        Portal ni ada dua laluan: <b>Pelajar</b> dan <b>Admin</b>.  
+        Kalau kau dah login sebelum ni, sistem akan auto hantar ke dashboard yang betul.
+      </p>
 
-<main style="min-height:100vh;display:flex;align-items:center;justify-content:center;">
-  <div class="card" style="text-align:center">
-    <h1>Bukan Pelajar</h1>
-    <p>Portfolio, inovasi, KPI & rekod peribadi</p>
-  </div>
-</main>
+      <div id="msg" class="msg err"></div>
 
+      <div class="grid">
+        <div class="pick" id="pickStudent" role="button" tabindex="0">
+          <span class="tag">Pelajar</span>
+          <h3>Masuk sebagai pelajar</h3>
+          <p>Login / daftar, join kelas guna kod, tengok nota & kuiz ikut kelas.</p>
+        </div>
+
+        <div class="pick" id="pickAdmin" role="button" tabindex="0">
+          <span class="tag">Admin</span>
+          <h3>Masuk sebagai admin</h3>
+          <p>Urus kelas, subject, nota, dan kuiz. Hanya akaun role <b>admin</b>.</p>
+        </div>
+      </div>
+
+      <div class="row">
+        <button class="btn ghost" id="btnHome" type="button">Balik home</button>
+        <button class="btn primary" id="btnLogout" type="button">Logout (jika sangkut)</button>
+      </div>
+
+      <div class="tiny">
+        Tip: kalau redirect pelik, tekan <b>Logout</b> dulu, lepas tu masuk balik.
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // Auto-redirect jika dah ada token + user
+    (async function autoRedirect(){
+      try{
+        const token = localStorage.getItem("kk_token") || "";
+        const rawUser = localStorage.getItem("kk_user") || "";
+        const user = rawUser ? JSON.parse(rawUser) : null;
+
+        if(!token || !user) return;
+
+        // kalau ada token, try me() utk confirm role (lebih reliable)
+        let role = String(user.role || "").toLowerCase();
+        try{
+          const me = await apiPost({ action:"me" });
+          if(me && me.ok && me.user) role = String(me.user.role || role).toLowerCase();
+        }catch(_){}
+
+        if(role === "admin"){
+          window.location.replace("../admin/dashboard.html");
+        }else{
+          window.location.replace("../pelajar/dashboard.html");
+        }
+      }catch(e){
+        const el = document.getElementById("msg");
+        el.textContent = "Ralat baca session. Cuba Logout dulu.";
+        el.style.display = "block";
+      }
+    })();
+
+    function goTo(path){ window.location.href = path; }
+
+    document.getElementById("pickStudent").addEventListener("click", ()=> goTo("../pelajar/login.html"));
+    document.getElementById("pickAdmin").addEventListener("click", ()=> goTo("../admin/index.htm"));
+
+    document.getElementById("btnHome").addEventListener("click", ()=> goTo("../index.html"));
+
+    document.getElementById("btnLogout").addEventListener("click", ()=>{
+      localStorage.removeItem("kk_token");
+      localStorage.removeItem("kk_user");
+      goTo("../index.html");
+    });
+  </script>
 </body>
 </html>
