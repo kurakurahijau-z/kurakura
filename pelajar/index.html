@@ -1,83 +1,21 @@
-<!-- pelajar/index.html (REPLACE FULL FILE) -->
+pelajar/index.html
+
 <!DOCTYPE html>
 <html lang="ms">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pelajar • kura kura hijau</title>
-
-  <link rel="stylesheet" href="../styles.css" />
-  <script src="../config.js"></script>
-  <script src="../app.js"></script>
-
-  <style>
-    .wrap{ min-height:100vh; display:flex; align-items:center; justify-content:center; padding:26px 16px; }
-    .box{ width:min(560px,92vw); }
-    .title{ margin:0 0 6px; font-size:44px; line-height:1.05; letter-spacing:-.02em; font-weight:900; }
-    .sub{ margin:0 0 18px; color:var(--kk-muted); font-weight:700; }
-    .row{ display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; }
-    .btn{ width:100%; }
-    @media(min-width:560px){ .btn{ width:auto; } }
-    .msg{ margin-top:12px; padding:10px 12px; border-radius:12px; font-weight:800; display:none; }
-    .msg.err{ display:block; background:rgba(239,68,68,.10); border:1px solid rgba(239,68,68,.22); color:#991b1b; }
-    .msg.ok{ display:block; background:rgba(34,197,94,.12); border:1px solid rgba(34,197,94,.25); color:#065f46; }
-  </style>
+  <meta charset="UTF-8">
+  <title>Pelajar</title>
+  <link rel="stylesheet" href="../styles.css">
 </head>
-
 <body class="stage">
-  <main class="wrap">
-    <section class="card box" style="text-align:center">
-      <h1 class="title">Pelajar</h1>
-      <p class="sub">Masuk untuk lihat kelas, nota & kuiz.</p>
 
-      <div id="msg" class="msg"></div>
+<main style="min-height:100vh;display:flex;align-items:center;justify-content:center;">
+  <div class="card" style="text-align:center">
+    <h1>Pelajar</h1>
+    <p>Portal pembelajaran</p>
+    <a class="btn-primary" href="login.html">Log Masuk</a>
+  </div>
+</main>
 
-      <div class="row" style="justify-content:center">
-        <a class="btn-primary btn" href="./login.html">Log Masuk</a>
-        <a class="btn-soft btn" href="./register.html">Daftar</a>
-      </div>
-    </section>
-  </main>
-
-  <script>
-    const msgEl = document.getElementById("msg");
-
-    function showMsg(type, text){
-      msgEl.className = "msg " + (type === "ok" ? "ok" : "err");
-      msgEl.textContent = text;
-      msgEl.style.display = "block";
-    }
-
-    // Auto redirect kalau dah login
-    (async function(){
-      const token = localStorage.getItem("kk_token") || "";
-      if(!token) return; // belum login, biar page biasa
-
-      try{
-        const me = await apiPost({ action:"me" });
-
-        if(!me || !me.ok || !me.user){
-          // token rosak/expired
-          localStorage.removeItem("kk_token");
-          localStorage.removeItem("kk_user");
-          return;
-        }
-
-        // simpan user latest
-        localStorage.setItem("kk_user", JSON.stringify(me.user));
-
-        const role = String(me.user.role || "").toLowerCase();
-        if(role === "admin"){
-          window.location.href = "../admin/dashboard.html";
-        }else{
-          window.location.href = "./dashboard.html";
-        }
-
-      }catch(err){
-        console.error(err);
-        showMsg("err", "Tak dapat semak sesi login. Cuba refresh.");
-      }
-    })();
-  </script>
 </body>
 </html>
