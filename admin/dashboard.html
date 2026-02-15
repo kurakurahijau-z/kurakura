@@ -1,3 +1,4 @@
+<!-- admin/dashboard.html -->
 <!DOCTYPE html>
 <html lang="ms">
 <head>
@@ -7,6 +8,7 @@
 
   <link rel="stylesheet" href="../styles.css" />
   <script src="../config.js"></script>
+  <script src="../app.js"></script>
 
   <style>
     .page{ min-height:100vh; padding: 18px 16px 40px; }
@@ -14,63 +16,58 @@
     .top-inner{ max-width: 1100px; margin: 0 auto; padding: 14px 8px; display:flex; align-items:center; justify-content:space-between; gap: 12px; }
 
     .brand{ display:flex; flex-direction:column; gap: 4px; }
-    .brand h1{ margin:0; font-size: 22px; letter-spacing: -0.02em; line-height: 1.1; font-weight: 950; }
-    .brand .sub{ margin:0; color:#334155; font-weight:850; font-size: 13px; opacity: .9; }
+    .brand h1{ margin:0; font-size: 22px; letter-spacing: -0.02em; line-height: 1.1; }
+    .brand .sub{ margin:0; color:#334155; font-weight:800; font-size: 13px; opacity: .9; }
 
     .btn{ border: 0; cursor: pointer; padding: 10px 14px; border-radius: 14px; font-weight: 900; background: #059669; color: #fff; box-shadow: 0 8px 18px rgba(5,150,105,.18); }
     .btn:hover{ background:#047857; }
-    .btn.ghost{
-      background: rgba(255,255,255,.75);
-      color:#0f172a;
-      border: 1px solid rgba(15,23,42,.10);
-      box-shadow: 0 10px 30px rgba(2,6,23,.06);
-    }
+    .btn.ghost{ background: rgba(255,255,255,.75); color:#0f172a; border: 1px solid rgba(15,23,42,.10); box-shadow: 0 10px 30px rgba(2,6,23,.06); }
     .btn.ghost:hover{ background: rgba(255,255,255,.90); }
 
     .container{ max-width: 1100px; margin: 16px auto 0; display:grid; gap: 14px; }
 
-    .card{
-      background: rgba(255,255,255,.82);
-      border: 1px solid rgba(255,255,255,.55);
-      border-radius: 18px;
-      box-shadow: 0 10px 30px rgba(2, 6, 23, .10);
-      padding: 18px;
-    }
+    .card{ background: rgba(255,255,255,.82); border: 1px solid rgba(255,255,255,.55); border-radius: 18px; box-shadow: 0 10px 30px rgba(2, 6, 23, .10); padding: 18px; }
 
     .msg{ display:none; padding: 10px 12px; border-radius: 14px; font-weight: 900; }
     .msg.err{ display:block; background: rgba(239,68,68,.10); border: 1px solid rgba(239,68,68,.28); color: #991b1b; }
     .msg.ok{ display:block; background: rgba(34,197,94,.10); border: 1px solid rgba(34,197,94,.28); color: #065f46; }
 
     .grid{ display:grid; gap: 14px; grid-template-columns: 1fr; }
-    @media(min-width: 900px){ .grid{ grid-template-columns: 1.1fr .9fr; } }
+    @media(min-width: 900px){ .grid{ grid-template-columns: 1.15fr .85fr; } }
 
     .section-title{ margin: 0 0 10px; font-size: 16px; font-weight: 950; letter-spacing: -.01em; }
-    .muted{ margin:0; color:#334155; font-weight: 850; opacity: .92; line-height: 1.6; }
 
-    .list{ display:grid; gap: 10px; margin-top: 10px; }
-    .item{
-      border-radius: 16px;
-      padding: 12px;
+    .class-list{ display:grid; gap: 12px; grid-template-columns: 1fr; }
+    @media(min-width: 900px){ .class-list{ grid-template-columns: 1fr 1fr; } }
+
+    .class-card{
+      border-radius: 18px; padding: 14px;
       background: rgba(255,255,255,.68);
       border: 1px solid rgba(15,23,42,.08);
-      box-shadow: 0 14px 34px rgba(2,6,23,.06);
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap: 10px;
+      box-shadow: 0 14px 34px rgba(2,6,23,.08);
+      display:flex; flex-direction:column; gap: 8px;
+      cursor: pointer;
+      transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
     }
-    .item .t{ margin:0; font-weight: 950; font-size: 14px; color:#0f172a; }
-    .item .d{ margin:6px 0 0; font-weight: 850; font-size: 12px; color:#334155; opacity:.92; }
-    .chip{
-      padding: 6px 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(15,23,42,.12);
-      background: rgba(255,255,255,.65);
-      font-weight: 900;
-      font-size: 12px;
-      white-space: nowrap;
+    .class-card:hover{ transform: translateY(-2px); border-color: rgba(5,150,105,.25); box-shadow: 0 18px 40px rgba(2,6,23,.10); }
+    .class-card .title{ font-weight: 950; font-size: 16px; margin:0; color:#0f172a; }
+    .class-card .meta{ margin:0; color:#334155; font-weight: 800; font-size: 13px; opacity: .9; }
+
+    .pill{
+      display:inline-flex; align-items:center; gap: 8px;
+      padding: 8px 10px; border-radius: 999px;
+      border: 1px solid rgba(5,150,105,.20);
+      background: rgba(5,150,105,.08);
+      color:#065f46; font-weight: 950; font-size: 12px;
+      width: fit-content;
     }
+    .muted{ margin:0; color:#334155; font-weight: 800; opacity: .92; line-height: 1.55; }
   </style>
+
+  <script>
+    // ✅ WAJIB: lock page ni untuk admin sahaja
+    requireAdminOrRedirect();
+  </script>
 </head>
 
 <body class="stage">
@@ -78,12 +75,12 @@
     <div class="top-inner">
       <div class="brand">
         <h1>Dashboard Admin</h1>
-        <p class="sub" id="who">Loading...</p>
+        <p class="sub" id="who">Memuatkan...</p>
       </div>
 
       <div style="display:flex; gap:10px; align-items:center;">
-        <button class="btn ghost" id="btnToStudent" type="button">Ke portal pelajar</button>
-        <button class="btn" id="btnLogout" type="button">Logout</button>
+        <button class="btn ghost" id="btnRefresh" type="button">Muat semula</button>
+        <button class="btn" id="btnLogout" type="button">Keluar</button>
       </div>
     </div>
   </header>
@@ -94,45 +91,26 @@
 
       <div class="grid">
         <section class="card">
-          <h2 class="section-title">Pengurusan</h2>
-          <p class="muted">
-            Ini ruang admin untuk urus kandungan: <b>nota</b> dan <b>kuiz</b> ikut kelas/subject.
+          <h2 class="section-title">Kelas saya (owner)</h2>
+          <div id="classes" class="class-list"></div>
+
+          <p class="muted" id="classesHint" style="margin:10px 0 0;">
+            Tiada kelas dipaparkan. Pastikan anda sudah create kelas dan ownerUserId betul.
           </p>
-
-          <div class="list" style="margin-top:12px;">
-            <div class="item">
-              <div>
-                <p class="t">Nota</p>
-                <p class="d">Tambah / edit nota, dan release/unrelease.</p>
-              </div>
-              <a class="chip" href="./notes.html">Buka</a>
-            </div>
-
-            <div class="item">
-              <div>
-                <p class="t">Kuiz</p>
-                <p class="d">Tambah kuiz (Google Form link), dan aktif/nonaktif.</p>
-              </div>
-              <a class="chip" href="./quizzes.html">Buka</a>
-            </div>
-
-            <div class="item">
-              <div>
-                <p class="t">Subjek</p>
-                <p class="d">(Optional) Kalau nak tambah subject ikut bab.</p>
-              </div>
-              <span class="chip">Auto (guna sheet / notes page)</span>
-            </div>
-          </div>
         </section>
 
         <section class="card">
-          <h2 class="section-title">Nota ringkas</h2>
+          <h2 class="section-title">Akses pantas</h2>
           <p class="muted" style="margin:0;">
-            ✅ Admin login guna halaman login yang sama.<br>
-            ✅ Lepas login, sistem auto-redirect ikut role.<br>
-            ✅ Kalau pelajar cuba buka halaman admin, sistem akan halang.
+            1) Klik kelas → urus Subjects / Notes / Quizzes.<br>
+            2) Notes: pastikan <b>releaseStatus = released</b> bila nak bagi pelajar nampak.<br>
+            3) Quizzes: pastikan <b>isActive = TRUE</b> bila nak pelajar nampak.
           </p>
+
+          <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
+            <span class="pill" id="pillCount">Kelas: -</span>
+            <span class="pill">Role: admin</span>
+          </div>
         </section>
       </div>
     </div>
@@ -141,6 +119,9 @@
   <script>
     const msgEl = document.getElementById("msg");
     const whoEl = document.getElementById("who");
+    const classesEl = document.getElementById("classes");
+    const classesHint = document.getElementById("classesHint");
+    const pillCount = document.getElementById("pillCount");
 
     function showMsg(type, text){
       msgEl.className = "msg " + (type === "ok" ? "ok" : "err");
@@ -153,63 +134,78 @@
       msgEl.className = "msg";
     }
 
-    function getBaseUrl(){
-      const cfg = window.APP_CONFIG;
-      return (cfg && cfg.BASE_URL) ? cfg.BASE_URL : null;
+    function renderClasses(list){
+      classesEl.innerHTML = "";
+
+      if(!Array.isArray(list) || list.length === 0){
+        classesHint.style.display = "block";
+        pillCount.textContent = "Kelas: 0";
+        return;
+      }
+
+      classesHint.style.display = "none";
+      pillCount.textContent = `Kelas: ${list.length}`;
+
+      list.forEach(c => {
+        const title = c.className || c.title || "Kelas";
+        const desc  = c.classCode ? ("Kod: " + c.classCode) : "";
+        const classId = c.classId || "";
+
+        const card = document.createElement("div");
+        card.className = "class-card";
+        card.innerHTML = `
+          <p class="title">${escapeHtml(title)}</p>
+          <p class="meta">${escapeHtml(desc)}</p>
+          <span class="pill">Urus kelas</span>
+        `;
+
+        card.addEventListener("click", () => {
+          if(!classId){
+            showMsg("err", "Ralat data: classId tidak wujud.");
+            return;
+          }
+          // pergi ke admin/class.html untuk manage subject/notes/quizzes
+          go(`/admin/class.html?classId=${encodeURIComponent(classId)}`);
+        });
+
+        classesEl.appendChild(card);
+      });
     }
 
-    async function apiPost(params){
-      const BASE_URL = getBaseUrl();
-      if(!BASE_URL) throw new Error("APP_CONFIG.BASE_URL tak wujud. Semak config.js");
-
-      const body = new URLSearchParams();
-      Object.entries(params).forEach(([k,v]) => body.append(k, v ?? ""));
-
-      const res = await fetch(BASE_URL, { method:"POST", body });
-      const text = await res.text();
-      try{ return JSON.parse(text); }
-      catch(e){ return { ok:false, message:"Invalid JSON from server", raw:text }; }
-    }
-
-    async function boot(){
+    async function loadDashboard(){
       clearMsg();
 
-      const token = localStorage.getItem("kk_token") || "";
-      if(!token){
-        location.href = "../pelajar/login.html";
+      // 1) greet guna localStorage (instant)
+      const u = getUser();
+      whoEl.textContent = `Hi, ${u?.name || u?.email || "Admin"}`;
+
+      // 2) verify token still valid (server-side)
+      const me = await apiPost({ action:"me" });
+      if(!me || !me.ok){
+        showMsg("err", me?.message || "Sesi tamat. Sila login semula.");
+        logout();
+        return;
+      }
+      // optional refresh user cache
+      localStorage.setItem("kk_user", JSON.stringify(me.user || u));
+
+      // 3) load classes owned by this admin
+      const out = await apiPost({ action:"adminListOwnedClasses" });
+      if(!out || !out.ok){
+        console.error("adminListOwnedClasses failed:", out);
+        showMsg("err", out?.message || "Tidak dapat memuatkan senarai kelas.");
+        renderClasses([]);
         return;
       }
 
-      const me = await apiPost({ action:"me", token });
-      if(!me || !me.ok || !me.user){
-        localStorage.removeItem("kk_token");
-        localStorage.removeItem("kk_user");
-        location.href = "../pelajar/login.html";
-        return;
-      }
-
-      const role = String(me.user.role || "").toLowerCase();
-      if(role !== "admin"){
-        showMsg("err", "Akses admin tidak dibenarkan untuk akaun ini.");
-        setTimeout(()=> location.href = "../pelajar/dashboard.html", 700);
-        return;
-      }
-
-      whoEl.textContent = `Hi, ${me.user.name || me.user.email || "Admin"}`;
-      showMsg("ok", "Akses admin disahkan.");
+      renderClasses(out.classes || []);
+      showMsg("ok","Dashboard admin siap dimuatkan.");
     }
 
-    document.getElementById("btnLogout").addEventListener("click", ()=>{
-      localStorage.removeItem("kk_token");
-      localStorage.removeItem("kk_user");
-      location.href = "../pelajar/login.html";
-    });
+    document.getElementById("btnLogout").addEventListener("click", logout);
+    document.getElementById("btnRefresh").addEventListener("click", loadDashboard);
 
-    document.getElementById("btnToStudent").addEventListener("click", ()=>{
-      location.href = "../pelajar/dashboard.html";
-    });
-
-    boot();
+    loadDashboard();
   </script>
 </body>
 </html>
