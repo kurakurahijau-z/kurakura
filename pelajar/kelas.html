@@ -1,3 +1,5 @@
+pelajar/kelas.html
+
 <!DOCTYPE html>
 <html lang="ms">
 <head>
@@ -9,21 +11,20 @@
   <script src="../config.js"></script>
 
   <style>
-    .page{ min-height:100vh; padding: 18px 16px 44px; }
+    .page{ min-height:100vh; padding: 18px 16px 40px; }
     .top{ position: sticky; top: 0; z-index: 20; background: rgba(255,255,255,.75); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,.50); }
-    .top-inner{ max-width: 1120px; margin: 0 auto; padding: 14px 8px; display:flex; align-items:center; justify-content:space-between; gap: 12px; }
-
+    .top-inner{ max-width: 1100px; margin: 0 auto; padding: 14px 8px; display:flex; align-items:center; justify-content:space-between; gap: 12px; }
     .brand{ display:flex; flex-direction:column; gap: 4px; }
-    .brand h1{ margin:0; font-size: 20px; letter-spacing: -0.02em; line-height: 1.1; }
-    .brand .sub{ margin:0; color:#334155; font-weight:800; font-size: 13px; opacity: .9; }
+    .brand h1{ margin:0; font-size: 20px; letter-spacing: -0.02em; line-height: 1.1; font-weight: 950; }
+    .brand .sub{ margin:0; color:#334155; font-weight:800; font-size: 13px; opacity:.9; }
 
-    .btn{ border: 0; cursor: pointer; padding: 10px 14px; border-radius: 14px; font-weight: 900; background: #059669; color: #fff; box-shadow: 0 8px 18px rgba(5,150,105,.18); }
+    .btn{ border: 0; cursor: pointer; padding: 10px 14px; border-radius: 14px; font-weight: 900; background: #059669; color: #fff; box-shadow: 0 8px 18px rgba(5,150,105,.18); transition: transform .08s ease, background .15s ease, box-shadow .15s ease; }
     .btn:hover{ background:#047857; }
+    .btn:active{ transform: translateY(1px); }
     .btn.ghost{ background: rgba(255,255,255,.75); color:#0f172a; border: 1px solid rgba(15,23,42,.10); box-shadow: 0 10px 30px rgba(2,6,23,.06); }
     .btn.ghost:hover{ background: rgba(255,255,255,.90); }
 
-    .container{ max-width: 1120px; margin: 16px auto 0; display:grid; gap: 14px; }
-
+    .container{ max-width: 1100px; margin: 16px auto 0; display:grid; gap: 14px; }
     .card{ background: rgba(255,255,255,.82); border: 1px solid rgba(255,255,255,.55); border-radius: 18px; box-shadow: 0 10px 30px rgba(2, 6, 23, .10); padding: 18px; }
 
     .msg{ display:none; padding: 10px 12px; border-radius: 14px; font-weight: 900; }
@@ -31,43 +32,36 @@
     .msg.ok{ display:block; background: rgba(34,197,94,.10); border: 1px solid rgba(34,197,94,.28); color: #065f46; }
 
     .grid{ display:grid; gap: 14px; grid-template-columns: 1fr; }
-    @media(min-width: 980px){ .grid{ grid-template-columns: 1fr 1fr; } }
+    @media(min-width: 900px){ .grid{ grid-template-columns: 1fr 1fr; } }
 
     .section-title{ margin: 0 0 10px; font-size: 16px; font-weight: 950; letter-spacing: -.01em; }
+
+    .pill{ display:inline-flex; align-items:center; gap: 8px; padding: 8px 10px; border-radius: 999px; border: 1px solid rgba(5,150,105,.20); background: rgba(5,150,105,.08); color:#065f46; font-weight: 950; font-size: 12px; width: fit-content; }
     .muted{ margin:0; color:#334155; font-weight: 800; opacity: .92; line-height: 1.55; }
 
-    .list{ display:grid; gap: 10px; }
-    .item{
-      border-radius: 18px; padding: 14px;
-      background: rgba(255,255,255,.68);
-      border: 1px solid rgba(15,23,42,.08);
-      box-shadow: 0 14px 34px rgba(2,6,23,.08);
-      display:flex; flex-direction:column; gap: 6px;
-    }
-    .item .title{ font-weight: 950; font-size: 15px; margin:0; color:#0f172a; }
-    .item .meta{ margin:0; color:#334155; font-weight: 800; font-size: 12.5px; opacity: .9; }
-    .item .actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top: 6px; }
+    .list{ display:grid; gap: 10px; margin-top: 10px; }
+    .item{ border-radius: 16px; padding: 12px; background: rgba(255,255,255,.68); border: 1px solid rgba(15,23,42,.08); box-shadow: 0 14px 34px rgba(2,6,23,.06); }
+    .item .t{ margin:0; font-weight: 950; font-size: 14px; color:#0f172a; }
+    .item .d{ margin:6px 0 0; font-weight: 800; font-size: 12px; color:#334155; opacity:.92; }
 
-    .pill{
+    .code{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; font-size: 12px; padding: 2px 8px; border-radius: 999px; border: 1px solid rgba(15,23,42,.14); background: rgba(255,255,255,.55); font-weight: 900; }
+
+    .actions{ display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end; margin-top:10px; }
+    .btnSmall{ padding: 10px 12px; border-radius: 12px; font-weight: 950; border:0; cursor:pointer; }
+    .btnLink{ background: rgba(255,255,255,.80); border: 1px solid rgba(15,23,42,.10); }
+    .btnPrimary{ background:#059669; color:#fff; box-shadow: 0 8px 18px rgba(5,150,105,.18); }
+    .btnDisabled{ background: rgba(15,23,42,.10); color: rgba(15,23,42,.45); cursor:not-allowed; box-shadow:none; }
+
+    .statusPill{
       display:inline-flex; align-items:center; gap: 8px;
-      padding: 8px 10px; border-radius: 999px;
-      border: 1px solid rgba(5,150,105,.20);
-      background: rgba(5,150,105,.08);
-      color:#065f46; font-weight: 950; font-size: 12px;
+      padding: 6px 10px; border-radius: 999px;
+      border: 1px solid rgba(15,23,42,.12);
+      background: rgba(255,255,255,.65);
+      font-weight: 950; font-size: 12px;
       width: fit-content;
     }
-    a.linkbtn{
-      display:inline-flex; align-items:center; justify-content:center;
-      text-decoration:none;
-      padding: 10px 12px;
-      border-radius: 14px;
-      font-weight: 950;
-      background: rgba(255,255,255,.75);
-      color:#0f172a;
-      border: 1px solid rgba(15,23,42,.10);
-      box-shadow: 0 10px 30px rgba(2,6,23,.06);
-    }
-    a.linkbtn:hover{ background: rgba(255,255,255,.90); }
+    .dot{ width: 10px; height: 10px; border-radius: 999px; background:#16a34a; }
+    .dot.closed{ background:#64748b; }
   </style>
 </head>
 
@@ -76,12 +70,11 @@
     <div class="top-inner">
       <div class="brand">
         <h1 id="title">Kelas</h1>
-        <p class="sub" id="subtitle">Memuatkan...</p>
+        <p class="sub" id="sub">Memuatkan...</p>
       </div>
 
       <div style="display:flex; gap:10px; align-items:center;">
         <button class="btn ghost" id="btnBack" type="button">← Dashboard</button>
-        <button class="btn ghost" id="btnRefresh" type="button">Muat semula</button>
         <button class="btn" id="btnLogout" type="button">Keluar</button>
       </div>
     </div>
@@ -91,52 +84,69 @@
     <div class="container">
       <div id="msg" class="msg"></div>
 
+      <section class="card">
+        <h2 class="section-title">Maklumat kelas</h2>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+          <span class="pill">classId: <span class="code" id="classIdPill">-</span></span>
+          <span class="pill">classCode: <span class="code" id="classCodePill">-</span></span>
+        </div>
+        <p class="muted" style="margin-top:10px;">
+          Di bawah ialah senarai <b>Nota</b> (released sahaja) dan <b>Kuiz</b> mengikut kelas ini.
+        </p>
+      </section>
+
       <div class="grid">
         <section class="card">
-          <h2 class="section-title">Nota (released)</h2>
-          <div id="notes" class="list"></div>
-          <p id="notesHint" class="muted" style="margin-top:10px; display:none;">Tiada nota untuk kelas ini.</p>
+          <h2 class="section-title">Nota</h2>
+          <p class="muted">Dipaparkan jika <b>releaseStatus = released</b> dan <b>isActive = TRUE</b>.</p>
+          <div class="list" id="notesList"></div>
         </section>
 
         <section class="card">
-          <h2 class="section-title">Kuiz (active)</h2>
-          <div id="quizzes" class="list"></div>
-          <p id="quizHint" class="muted" style="margin-top:10px; display:none;">Tiada kuiz untuk kelas ini.</p>
+          <h2 class="section-title">Kuiz</h2>
+          <p class="muted">Dipaparkan jika <b>isActive = TRUE</b>. Status <b>closed</b> akan dikunci.</p>
+          <div class="list" id="quizList"></div>
         </section>
       </div>
     </div>
   </main>
 
   <script>
-    const BASE_URL = window.APP_CONFIG && window.APP_CONFIG.BASE_URL ? window.APP_CONFIG.BASE_URL : "";
-    const msgEl = document.getElementById("msg");
+    const $ = (id)=>document.getElementById(id);
 
     function showMsg(type, text){
-      msgEl.className = "msg " + (type === "ok" ? "ok" : "err");
-      msgEl.textContent = text;
-      msgEl.style.display = "block";
+      const el = $("msg");
+      el.className = "msg " + (type === "ok" ? "ok" : "err");
+      el.textContent = text;
+      el.style.display = "block";
     }
     function clearMsg(){
-      msgEl.style.display = "none";
-      msgEl.textContent = "";
-      msgEl.className = "msg";
+      const el = $("msg");
+      el.style.display = "none";
+      el.textContent = "";
+      el.className = "msg";
     }
 
-    function getParam(name){
-      const u = new URL(window.location.href);
-      return u.searchParams.get(name) || "";
+    function getBaseUrl(){
+      const cfg = window.APP_CONFIG;
+      return (cfg && cfg.BASE_URL) ? cfg.BASE_URL : null;
     }
 
     async function apiPost(params){
-      if(!BASE_URL) return { ok:false, message:"APP_CONFIG.BASE_URL tak wujud. Semak config.js" };
+      const BASE_URL = getBaseUrl();
+      if(!BASE_URL) throw new Error("APP_CONFIG.BASE_URL tak wujud. Semak config.js");
 
       const body = new URLSearchParams();
-      Object.entries(params || {}).forEach(([k,v]) => body.append(k, v ?? ""));
+      Object.entries(params).forEach(([k,v]) => body.append(k, v ?? ""));
 
-      const res = await fetch(BASE_URL, { method: "POST", body });
+      const res = await fetch(BASE_URL, { method:"POST", body });
       const text = await res.text();
-      try { return JSON.parse(text); }
+      try{ return JSON.parse(text); }
       catch(e){ return { ok:false, message:"Response bukan JSON", raw:text }; }
+    }
+
+    function q(name){
+      return new URLSearchParams(location.search).get(name) || "";
     }
 
     function escapeHtml(s){
@@ -148,126 +158,174 @@
         .replaceAll("'","&#039;");
     }
 
-    function renderNotes(list){
-      const el = document.getElementById("notes");
-      const hint = document.getElementById("notesHint");
+    function renderNotes(list, classId){
+      const el = $("notesList");
       el.innerHTML = "";
 
       if(!Array.isArray(list) || list.length === 0){
-        hint.style.display = "block";
-        return;
-      }
-      hint.style.display = "none";
-
-      list.forEach(n => {
-        const title = n.title || "Nota";
-        const subject = n.subjectName ? `Subject: ${n.subjectName}` : "";
-        const link = n.contentLink || "";
-
-        const item = document.createElement("div");
-        item.className = "item";
-        item.innerHTML = `
-          <p class="title">${escapeHtml(title)}</p>
-          <p class="meta">${escapeHtml(subject)}</p>
-          <div class="actions">
-            ${link ? `<a class="linkbtn" href="${escapeHtml(link)}" target="_blank" rel="noopener">Buka nota</a>` : `<span class="pill">Tiada link</span>`}
-            <span class="pill">released</span>
+        el.innerHTML = `
+          <div class="item">
+            <p class="t">Tiada nota</p>
+            <p class="d">Nota akan muncul selepas pensyarah “release” nota untuk kelas ini.</p>
           </div>
         `;
-        el.appendChild(item);
+        return;
+      }
+
+      list.forEach(n => {
+        const title = escapeHtml(n.title || "Nota");
+        const noteId = encodeURIComponent(n.noteId || "");
+        const subjectId = escapeHtml(n.subjectId || "-");
+        const releasedAt = escapeHtml(n.releasedAt || "-");
+        const link = String(n.contentLink || "").trim();
+
+        const card = document.createElement("div");
+        card.className = "item";
+
+        card.innerHTML = `
+          <p class="t">${title}</p>
+          <p class="d"><b>subjectId:</b> <span class="code">${subjectId}</span> • <b>releasedAt:</b> ${releasedAt}</p>
+          <div class="actions">
+            <button class="btnSmall btnLink" type="button">Buka pautan</button>
+            <button class="btnSmall btnPrimary" type="button">Lihat dalam portal</button>
+          </div>
+        `;
+
+        card.querySelector(".btnLink").addEventListener("click", ()=>{
+          if(!link){ alert("contentLink kosong dalam sheet Notes."); return; }
+          window.open(link, "_blank", "noopener");
+        });
+
+        card.querySelector(".btnPrimary").addEventListener("click", ()=>{
+          if(!noteId){ alert("noteId kosong dalam data."); return; }
+          location.href = `./nota.html?noteId=${noteId}&classId=${encodeURIComponent(classId)}`;
+        });
+
+        el.appendChild(card);
       });
     }
 
     function renderQuizzes(list){
-      const el = document.getElementById("quizzes");
-      const hint = document.getElementById("quizHint");
+      const el = $("quizList");
       el.innerHTML = "";
 
       if(!Array.isArray(list) || list.length === 0){
-        hint.style.display = "block";
-        return;
-      }
-      hint.style.display = "none";
-
-      list.forEach(q => {
-        const title = q.title || "Kuiz";
-        const subject = q.subjectName ? `Subject: ${q.subjectName}` : "";
-        const link = q.quizLink || "";
-
-        const item = document.createElement("div");
-        item.className = "item";
-        item.innerHTML = `
-          <p class="title">${escapeHtml(title)}</p>
-          <p class="meta">${escapeHtml(subject)}</p>
-          <div class="actions">
-            ${link ? `<a class="linkbtn" href="${escapeHtml(link)}" target="_blank" rel="noopener">Buka kuiz</a>` : `<span class="pill">Tiada link</span>`}
-            <span class="pill">active</span>
+        el.innerHTML = `
+          <div class="item">
+            <p class="t">Tiada kuiz</p>
+            <p class="d">Kuiz akan dipaparkan apabila pensyarah aktifkan kuiz untuk kelas ini.</p>
           </div>
         `;
-        el.appendChild(item);
+        return;
+      }
+
+      list.forEach(qz => {
+        const title = escapeHtml(qz.title || "Kuiz");
+        const subjectId = escapeHtml(qz.subjectId || "-");
+        const status = String(qz.status || "open").toLowerCase();
+        const isOpen = status !== "closed";
+        const link = String(qz.quizLink || "").trim();
+
+        const card = document.createElement("div");
+        card.className = "item";
+
+        card.innerHTML = `
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+            <p class="t" style="margin:0;">${title}</p>
+            <span class="statusPill">
+              <span class="dot ${isOpen ? "" : "closed"}"></span>
+              ${isOpen ? "open" : "closed"}
+            </span>
+          </div>
+          <p class="d"><b>subjectId:</b> <span class="code">${subjectId}</span></p>
+          <div class="actions">
+            <button class="btnSmall ${isOpen ? "btnPrimary" : "btnDisabled"}" type="button" ${isOpen ? "" : "disabled"}>
+              ${isOpen ? "Buka kuiz" : "Dikunci"}
+            </button>
+          </div>
+        `;
+
+        card.querySelector("button").addEventListener("click", ()=>{
+          if(!isOpen) return;
+          if(!link){ alert("quizLink kosong dalam sheet Quizzes."); return; }
+          // ✅ ikut request kau: jawab dekat link (Google Form), bukan dalam portal
+          window.open(link, "_blank", "noopener");
+        });
+
+        el.appendChild(card);
       });
     }
 
-    async function loadPage(){
+    async function boot(){
       clearMsg();
 
       const token = localStorage.getItem("kk_token") || "";
-      const userRaw = localStorage.getItem("kk_user") || "";
-      if(!token || !userRaw){
-        window.location.href = "./login.html";
+      if(!token){
+        location.href = "./login.html";
         return;
       }
 
-      const classId = getParam("classId");
+      const classId = q("classId").trim();
       if(!classId){
-        showMsg("err","classId tiada dalam URL.");
+        showMsg("err", "Ralat: classId tiada dalam URL. Sila kembali ke dashboard.");
         return;
       }
 
-      // 1) get class
-      const c = await apiPost({ action:"getClass", token, classId });
-      if(!c || !c.ok){
-        showMsg("err", c?.message || "Tak dapat load kelas.");
+      $("classIdPill").textContent = classId;
+
+      // 1) verify token -> me
+      const me = await apiPost({ action:"me", token });
+      if(!me || !me.ok){
+        showMsg("err", me?.message || "Sesi tamat. Sila log masuk semula.");
+        localStorage.removeItem("kk_token");
+        localStorage.removeItem("kk_user");
+        setTimeout(()=> location.href="./login.html", 700);
+        return;
+      }
+      const displayName = me.user?.name || me.user?.email || "Pelajar";
+      $("sub").textContent = `Hi, ${displayName}`;
+
+      // 2) get class info
+      const cls = await apiPost({ action:"getClass", token, classId });
+      if(!cls || !cls.ok){
+        showMsg("err", cls?.message || "Tidak dapat memuatkan maklumat kelas.");
         return;
       }
 
-      const className = c.class?.className || "Kelas";
-      const classCode = c.class?.classCode || "";
-      document.getElementById("title").textContent = className;
-      document.getElementById("subtitle").textContent = classCode ? `Kod kelas: ${classCode}` : "—";
+      $("title").textContent = cls.class?.className || "Kelas";
+      $("classCodePill").textContent = cls.class?.classCode || "-";
 
-      // 2) notes
-      const n = await apiPost({ action:"listNotesForClass", token, classId });
-      if(!n || !n.ok){
-        console.warn("notes failed:", n);
-        renderNotes([]);
-      }else{
-        renderNotes(n.notes || []);
-      }
-
-      // 3) quizzes
-      const q = await apiPost({ action:"listQuizzesForClass", token, classId });
-      if(!q || !q.ok){
-        console.warn("quizzes failed:", q);
+      // 3) list notes
+      const notes = await apiPost({ action:"listNotesForClass", token, classId });
+      if(!notes || !notes.ok){
+        showMsg("err", notes?.message || "Tidak dapat memuatkan nota.");
+        renderNotes([], classId);
         renderQuizzes([]);
-      }else{
-        renderQuizzes(q.quizzes || []);
+        return;
       }
+      renderNotes(notes.notes || [], classId);
+
+      // 4) list quizzes (optional)
+      const quizzes = await apiPost({ action:"listQuizzesForClass", token, classId });
+      if(!quizzes || !quizzes.ok){
+        console.warn("listQuizzesForClass failed:", quizzes);
+        renderQuizzes([]);
+        showMsg("ok", "Kelas dan nota berjaya dimuatkan. (Kuiz belum diaktifkan di backend)");
+        return;
+      }
+
+      renderQuizzes(quizzes.quizzes || []);
+      showMsg("ok", "Kelas, nota dan kuiz berjaya dimuatkan.");
     }
 
-    document.getElementById("btnBack").addEventListener("click", ()=> {
-      window.location.href = "./dashboard.html";
-    });
-
-    document.getElementById("btnRefresh").addEventListener("click", loadPage);
-
-    document.getElementById("btnLogout").addEventListener("click", ()=> {
+    $("btnBack").addEventListener("click", ()=> location.href = "./dashboard.html");
+    $("btnLogout").addEventListener("click", ()=>{
       localStorage.removeItem("kk_token");
       localStorage.removeItem("kk_user");
-      window.location.href = "./login.html";
+      location.href = "./login.html";
     });
 
-    loadPage();
+    boot();
   </script>
 </body>
 </html>
