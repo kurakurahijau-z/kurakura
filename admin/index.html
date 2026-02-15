@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin</title>
+</head>
+<body>
+  <script src="../config.js"></script>
+  <script src="../app.js"></script>
+  <script>
+    // kalau ada helper requireAdminOrRedirect dalam page lain, ok.
+    // Kalau tak ada, at least redirect ke dashboard.
+    try { requireAdminOrRedirect(); } catch(e) {}
+    window.location.href = "../admin/dashboard.html";
+  </script>
+</body>
+</html>
