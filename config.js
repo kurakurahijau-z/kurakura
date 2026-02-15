@@ -1,8 +1,6 @@
-// config.js
-window.APP_CONFIG = {
-  // Google Apps Script Web App URL
-  BASE_URL: "https://script.google.com/macros/s/AKfycbxTOhwbSkTgHoMvrp3EMRtKJTWm4UlddGlySl0pNbN4ytM2M0PhvAbpWd_JI0g3IR6H/exec",
+config.js
 
-  // GitHub Pages project base path (repo name)
-  BASE_PATH: "/kurakura"
+window.APP_CONFIG = {
+  APP_NAME: "kura kura hijau",
+  BASE_URL: "https://script.google.com/macros/s/AKfycbxTOhwbSkTgHoMvrp3EMRtKJTWm4UlddGlySl0pNbN4ytM2M0PhvAbpWd_JI0g3IR6H/exec"
 };
