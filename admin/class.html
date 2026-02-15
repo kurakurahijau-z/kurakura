@@ -1,10 +1,12 @@
+admin/class.html
+
 <!doctype html>
 <html lang="ms">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Urus Kelas • Admin</title>
-  <link rel="stylesheet" href="./styles.css" />
+  <link rel="stylesheet" href="../styles.css" />
 </head>
 <body>
   <header class="topbar">
@@ -13,9 +15,8 @@
       <p id="sub" class="muted"></p>
     </div>
     <div class="actions">
-      <!-- FIX: index.htm (bukan index.html) -->
-      <button class="btn" onclick="go('./index.htm')">⬅ Admin</button>
-      <button class="btn" onclick="go('./dashboard.html')">Dashboard</button>
+      <button class="btn" onclick="go('index.html')">⬅ Admin</button>
+      <button class="btn" onclick="go('../dashboard.html')">Dashboard</button>
       <button class="btn danger" onclick="logout()">Keluar</button>
     </div>
   </header>
@@ -101,7 +102,7 @@
     </div>
   </div>
 
-<script src="./app.js"></script>
+<script src="../app.js"></script>
 <script>
 let CLASS_ID = "";
 let CLASS = null;
@@ -122,15 +123,10 @@ let QUIZZES = [];
   CLASS_ID = getParam("classId");
   if(!CLASS_ID) return setStatus("classId tiada dalam URL.");
 
-  // FIX: jangan guna getClass (itu untuk pelajar/enroll)
-  // Validate ownership guna adminListOwnedClasses
-  const owned = await apiPost({ action:"adminListOwnedClasses" });
-  if(!owned.ok) return setStatus(owned.message || "Gagal load kelas admin.");
-
-  const found = (owned.classes || []).find(c => String(c.classId||"") === String(CLASS_ID));
-  if(!found) return setStatus("Bukan owner kelas ini / classId tak sah untuk admin ini.");
-
-  CLASS = found;
+  // confirm class + ownership via admin endpoints (soft)
+  const c = await apiPost({ action:"getClass", classId: CLASS_ID });
+  if(!c.ok) return setStatus(c.message || "Gagal load class.");
+  CLASS = c.class;
 
   document.getElementById("title").textContent = `Urus Kelas: ${CLASS.className}`;
   document.getElementById("sub").textContent = `classId: ${CLASS.classId} • classCode: ${CLASS.classCode}`;
@@ -289,9 +285,9 @@ async function toggleNoteActive(noteId, on){
   await reloadAll();
 }
 
-async function toggleNoteRelease(noteId, releaseStatus){
-  const res = await apiPost({ action:"adminSetNoteRelease", noteId, releaseStatus });
-  if(!res.ok) { alert(res.message || "Gagal update release."); return; }
+async function toggleNoteRelease(noteId, status){
+  const res = await apiPost({ action:"adminSetNoteRelease", noteId, releaseStatus: status });
+  if(!res.ok) { alert(res.message || "Gagal release nota."); return; }
   await reloadAll();
 }
 
@@ -308,7 +304,7 @@ function openNoteModal(note){
       <input id="m_noteTitle" placeholder="Contoh: Nota 1 - Pengenalan" />
 
       <label>Link Kandungan (Google Drive/Docs/PDF)</label>
-      <input id="m_noteLink" placeholder="https://." />
+      <input id="m_noteLink" placeholder="https://..." />
 
       <label>Release Status</label>
       <select id="m_noteRelease">
@@ -335,13 +331,14 @@ function openNoteModal(note){
     await reloadAll();
   });
 
+  // set defaults
   if(isEdit){
     document.getElementById("m_noteSubject").value = note.subjectId;
     document.getElementById("m_noteTitle").value = note.title || "";
     document.getElementById("m_noteLink").value = note.contentLink || "";
-    document.getElementById("m_noteRelease").value =
-      (String(note.releaseStatus||"draft").toLowerCase()==="released") ? "released" : "draft";
+    document.getElementById("m_noteRelease").value = (String(note.releaseStatus||"draft").toLowerCase()==="released") ? "released" : "draft";
   }else{
+    // default to first subject
     if(SUBJECTS[0]) document.getElementById("m_noteSubject").value = SUBJECTS[0].subjectId;
   }
 }
@@ -401,7 +398,7 @@ function openQuizModal(quiz){
       <input id="m_quizTitle" placeholder="Contoh: Kuiz 1 - Chapter 1" />
 
       <label>Link Kuiz (Google Form / Quizizz / dsb)</label>
-      <input id="m_quizLink" placeholder="https://." />
+      <input id="m_quizLink" placeholder="https://..." />
 
       <label>Active</label>
       <select id="m_quizActive">
@@ -452,6 +449,7 @@ function closeModal(){
   document.getElementById("modal").style.display = "none";
   document.getElementById("modalBody").innerHTML = "";
 }
+
 </script>
 </body>
 </html>
