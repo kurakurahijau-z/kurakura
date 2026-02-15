@@ -1,4 +1,4 @@
-// app.js - shared helpers (GitHub Pages safe)
+// app.js - shared helpers (GitHub Pages safe, Apps Script friendly)
 
 // === SET BASE URL (Google Apps Script Web App URL) ===
 const BASE_URL =
@@ -11,28 +11,19 @@ const USER_KEY  = "kk_user";
 
 // ===== Base path helper (fix untuk GitHub Pages subpath: /kurakura) =====
 function getAppBasePath(){
-  // Kalau config.js ada define APP_BASE, guna itu (paling solid)
   if (window.APP_CONFIG?.APP_BASE) return window.APP_CONFIG.APP_BASE.replace(/\/$/, "");
-
-  // Auto-detect: ambik first segment path (contoh: /kurakura/pelajar/login.html)
   const parts = (window.location.pathname || "").split("/").filter(Boolean);
-  if (!parts.length) return ""; // root domain
-
-  // GitHub Pages biasa: /<repo-name>/...
+  if (!parts.length) return "";
   return "/" + parts[0];
 }
 
 const APP_BASE = getAppBasePath();
 
 function toUrl(path){
-  // path boleh jadi "/index.html" atau "pelajar/login.html"
   path = String(path || "").trim();
   if (!path) path = "/index.html";
   if (!path.startsWith("/")) path = "/" + path;
-
-  // elak double base (kalau user pass "/kurakura/index.html")
   if (APP_BASE && path.startsWith(APP_BASE + "/")) return path;
-
   return (APP_BASE || "") + path;
 }
 
@@ -51,7 +42,6 @@ function requireAuthOrRedirect(){
   if(!t) go("/index.html");
 }
 
-// ===== User helpers =====
 function getToken(){ return localStorage.getItem(TOKEN_KEY) || ""; }
 
 function getUser(){
@@ -63,7 +53,6 @@ function requireAdminOrRedirect(){
   requireAuthOrRedirect();
   const u = getUser();
   if (String(u.role || "").toLowerCase() !== "admin") {
-    // kalau bukan admin, campak balik ke dashboard pelajar
     go("/pelajar/dashboard.html");
   }
 }
@@ -76,28 +65,50 @@ function requireStudentOrRedirect(){
   }
 }
 
-// ===== URL param helper =====
 function getParam(name){
   const url = new URL(window.location.href);
   return url.searchParams.get(name) || "";
 }
 
-// ===== API =====
+/**
+ * ✅ Apps Script CORS-safe POST
+ * - guna application/x-www-form-urlencoded (URLSearchParams)
+ * - tak set Content-Type header (browser auto set)
+ * - elak OPTIONS preflight
+ */
 async function apiPost(payload){
   payload = payload || {};
   payload.token = payload.token || getToken();
 
+  const body = new URLSearchParams();
+  Object.entries(payload).forEach(([k,v]) => body.append(k, v ?? ""));
+
   const res = await fetch(BASE_URL, {
     method: "POST",
-    headers: { "Content-Type":"application/json" },
-    body: JSON.stringify(payload)
+    body
   });
 
-  let data = null;
-  try{ data = await res.json(); }
-  catch(_){ data = { ok:false, message:"Invalid JSON response" }; }
+  const text = await res.text();
+  try { return JSON.parse(text); }
+  catch(e){ return { ok:false, message:"Response bukan JSON", raw:text }; }
+}
 
-  return data;
+/**
+ * Optional GET helper (kalau kau nak test cepat)
+ */
+async function apiGet(params){
+  params = params || {};
+  params.token = params.token || getToken();
+
+  const qs = new URLSearchParams();
+  Object.entries(params).forEach(([k,v]) => qs.append(k, v ?? ""));
+
+  const url = BASE_URL + (BASE_URL.includes("?") ? "&" : "?") + qs.toString();
+  const res = await fetch(url, { method:"GET" });
+
+  const text = await res.text();
+  try { return JSON.parse(text); }
+  catch(e){ return { ok:false, message:"Response bukan JSON", raw:text }; }
 }
 
 // --- escaping
