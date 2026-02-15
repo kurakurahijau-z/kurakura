@@ -1,9 +1,11 @@
+pelajar/login.html
+
 <!DOCTYPE html>
 <html lang="ms">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Login Pelajar</title>
+  <title>Log Masuk • kura kura hijau</title>
 
   <link rel="stylesheet" href="../styles.css" />
   <script src="../config.js"></script>
@@ -22,16 +24,16 @@
       font-size: 42px;
       line-height:1.05;
       letter-spacing:-0.02em;
-      font-weight: 900;
+      font-weight: 950;
     }
     .sub{
       margin:0 0 18px;
       color: var(--kk-muted);
-      font-weight: 600;
+      font-weight: 700;
     }
     label{
       display:block;
-      font-weight: 800;
+      font-weight: 850;
       margin: 14px 0 8px;
     }
     .input{
@@ -54,7 +56,7 @@
       margin-top: 12px;
       padding: 10px 12px;
       border-radius: 12px;
-      font-weight: 800;
+      font-weight: 850;
       display:none;
     }
     .msg.ok{
@@ -84,7 +86,7 @@
       gap: 8px;
       text-decoration:none;
       color: var(--kk-text);
-      font-weight: 800;
+      font-weight: 850;
       opacity:.9;
     }
     .back:hover{ opacity:1; }
@@ -92,7 +94,7 @@
     .tiny{
       font-size: 12px;
       color: var(--kk-muted);
-      font-weight: 700;
+      font-weight: 750;
       opacity:.85;
     }
     .kbd{
@@ -118,16 +120,52 @@
       text-decoration:none;
     }
     .links a:hover{ text-decoration:underline; }
+
+    /* ✅ session box */
+    .session{
+      display:none;
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 14px;
+      background: rgba(2,6,23,.04);
+      border: 1px solid rgba(15,23,42,.08);
+    }
+    .session strong{ font-weight: 950; }
+    .session .actions{
+      margin-top: 10px;
+      display:flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content:flex-end;
+    }
+    .btnSmall{
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-weight: 900;
+      border: 0;
+      cursor: pointer;
+    }
+    .btnGo{ background:#059669; color:#fff; }
+    .btnSwap{ background: rgba(255,255,255,.85); border:1px solid rgba(15,23,42,.12); color:#0f172a; }
   </style>
 </head>
 
 <body class="stage">
   <main class="wrap">
     <section class="card box">
-      <h1 class="title">Login</h1>
-      <p class="sub">Masuk untuk akses kelas, nota & kuiz.</p>
+      <h1 class="title">Log Masuk</h1>
+      <p class="sub">Satu pintu masuk untuk admin & pelajar. Sistem akan hantar automatik ikut peranan.</p>
 
       <div id="msg" class="msg"></div>
+
+      <!-- ✅ kalau ada token, kita bagi pilihan -->
+      <div id="session" class="session">
+        <div id="sessionText"></div>
+        <div class="actions">
+          <button id="btnContinue" class="btnSmall btnGo" type="button">Teruskan</button>
+          <button id="btnSwitch" class="btnSmall btnSwap" type="button">Tukar akaun</button>
+        </div>
+      </div>
 
       <label for="email">Email</label>
       <input id="email" class="input" type="email"
@@ -139,7 +177,7 @@
         placeholder="Password"
         autocomplete="current-password" />
 
-      <button id="btnLogin" class="btn-primary btn">Log Masuk</button>
+      <button id="btnLogin" class="btn-primary btn" type="button">Log Masuk</button>
 
       <div class="links">
         <a href="./register.html">Daftar akaun baru</a>
@@ -173,47 +211,72 @@
       if (!BASE_URL) throw new Error("APP_CONFIG.BASE_URL tak wujud. Semak config.js");
 
       const body = new URLSearchParams();
-      Object.entries(params || {}).forEach(([k,v]) => body.append(k, v ?? ""));
+      Object.entries(params).forEach(([k,v]) => body.append(k, v ?? ""));
 
       const res = await fetch(BASE_URL, { method:"POST", body });
       const text = await res.text();
       try { return JSON.parse(text); }
-      catch(e){ return { ok:false, message:"Invalid JSON", raw:text }; }
+      catch(e){ return { ok:false, message:"Response bukan JSON", raw:text }; }
     }
 
-    function redirectByRole(role){
-      const r = String(role || "").toLowerCase().trim();
-      if (r === "admin") {
-        window.location.href = "../admin/dashboard.html";
-      } else {
-        window.location.href = "./dashboard.html";
-      }
+    function routeByRole(role){
+      const r = String(role || "").toLowerCase();
+      if (r === "admin") return "../admin/dashboard.html";
+      return "./dashboard.html";
     }
 
-    // Auto-redirect kalau token masih valid
-    async function autoRedirectIfLoggedIn(){
+    function clearSession(){
+      localStorage.removeItem("kk_token");
+      localStorage.removeItem("kk_user");
+    }
+
+    function escapeHtml(s){
+      return String(s ?? "")
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    async function checkExistingSession(){
       const token = localStorage.getItem("kk_token") || "";
       if(!token) return;
 
       try{
         const me = await apiPost({ action:"me", token });
-        if(me && me.ok && me.user){
-          localStorage.setItem("kk_user", JSON.stringify(me.user));
-          redirectByRole(me.user.role);
+        if(!me || !me.ok || !me.user){
+          clearSession();
+          return;
         }
-      }catch(_){
-        // ignore: token mungkin expired
+
+        const u = me.user;
+        $("sessionText").innerHTML =
+          `Anda masih log masuk sebagai <strong>${escapeHtml(u.name || u.email || "user")}</strong> (${escapeHtml(u.role || "student")}).`;
+
+        $("session").style.display = "block";
+
+        $("btnContinue").onclick = () => {
+          window.location.replace(routeByRole(u.role));
+        };
+
+        $("btnSwitch").onclick = () => {
+          clearSession();
+          $("session").style.display = "none";
+          showMsg("ok", "Ok. Sila log masuk guna akaun lain.");
+        };
+
+      }catch(e){
+        // kalau server down, jangan kacau
       }
     }
-
-    autoRedirectIfLoggedIn();
 
     $("btnLogin").addEventListener("click", async () => {
       const email = $("email").value.trim();
       const password = $("password").value;
 
       if (!email || !password){
-        showMsg("err", "Isi email & password dulu.");
+        showMsg("err", "Sila isi email dan password.");
         return;
       }
 
@@ -221,14 +284,10 @@
       $("btnLogin").textContent = "Log masuk...";
 
       try{
-        const data = await apiPost({
-          action: "login",
-          email,
-          password
-        });
+        const data = await apiPost({ action:"login", email, password });
 
         if (!data || !data.ok){
-          showMsg("err", data?.message || "Login gagal.");
+          showMsg("err", data?.message || "Log masuk gagal.");
           $("btnLogin").disabled = false;
           $("btnLogin").textContent = "Log Masuk";
           return;
@@ -237,16 +296,19 @@
         if (data.token) localStorage.setItem("kk_token", data.token);
         if (data.user)  localStorage.setItem("kk_user", JSON.stringify(data.user));
 
-        showMsg("ok", "Login berjaya. Redirect...");
-        redirectByRole(data.user?.role);
+        const dest = routeByRole(data.user?.role);
+        showMsg("ok", "Berjaya. Sedang bawa masuk...");
+        window.location.replace(dest);
 
       }catch(err){
         console.error(err);
-        showMsg("err", "Fetch gagal. Check Console.");
+        showMsg("err", "Tak dapat connect server. Semak BASE_URL dan Console.");
         $("btnLogin").disabled = false;
         $("btnLogin").textContent = "Log Masuk";
       }
     });
+
+    checkExistingSession();
   </script>
 </body>
 </html>
