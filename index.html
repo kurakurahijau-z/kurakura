@@ -5,44 +5,76 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>kura kura hijau</title>
 
-  <link rel="stylesheet" href="styles.css" />
-  <script src="config.js"></script>
-  <script src="app.js"></script>
+  <link rel="stylesheet" href="./styles.css" />
+  <script src="./config.js"></script>
+  <script src="./app.js" defer></script>
+
+  <style>
+    .hero{
+      min-height: 100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: 26px 16px;
+    }
+    .center{
+      width:min(980px, 92vw);
+      text-align:center;
+    }
+    .logo{
+      font-size:72px;
+      letter-spacing:-0.03em;
+      font-weight: 950;
+      margin: 0 0 16px;
+    }
+    .logo .a{ color:#059669; }
+    .logo .b{ color:#0ea5e9; }
+    .logo .c{ color:#0f172a; }
+    .cards{
+      margin-top: 22px;
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: 16px;
+    }
+    @media(max-width:760px){ .cards{ grid-template-columns: 1fr; } }
+    .pick{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding: 18px;
+      border-radius: 18px;
+      border: 1px solid rgba(15,23,42,10);
+      background: rgba(255,255,255,70);
+      text-decoration:none;
+      color: inherit;
+    }
+    .pick .t{ font-size:18px; font-weight:950; margin:0; }
+    .pick .d{ margin:6px 0 0; color: var(--kk-muted); font-weight:800; }
+  </style>
 </head>
+<body class="stage">
+  <main class="hero">
+    <div class="center">
+      <h1 class="logo"><span class="a">kura</span> <span class="b">kura</span> <span class="c">hijau</span></h1>
 
-<body>
-  <div class="wrap">
-    <div class="container">
-      <h1 class="brand">
-        <span class="brand-a">kura</span>
-        <span class="brand-b">kura</span>
-        <span class="brand-c">hijau</span>
-      </h1>
-
-      <div class="grid-2">
-        <!-- ✅ FIX: terus ke login -->
-        <a class="card card-link" href="./pelajar/login.html">
-          <div class="card-row">
-            <div>
-              <div class="title">Pelajar</div>
-              <div class="muted">Portal</div>
-            </div>
-            <div class="pill">Masuk</div>
+      <div class="cards">
+        <a class="pick" href="./pelajar/login.html">
+          <div>
+            <p class="t">Pelajar</p>
+            <p class="d">Akses kelas, nota & kuiz</p>
           </div>
+          <span class="chip">Portal</span>
         </a>
 
-        <!-- ✅ Bukan pelajar (kalau ada page khas) -->
-        <a class="card card-link" href="./bukan-pelajar/index.html">
-          <div class="card-row">
-            <div>
-              <div class="title">Bukan Pelajar</div>
-              <div class="muted">Ruang</div>
-            </div>
-            <div class="pill pill-blue">Buka</div>
+        <a class="pick" href="./bukan-pelajar/index.html">
+          <div>
+            <p class="t">Bukan Pelajar</p>
+            <p class="d">Maklumat & ruang umum</p>
           </div>
+          <span class="chip">Ruang</span>
         </a>
       </div>
     </div>
-  </div>
+  </main>
 </body>
 </html>
