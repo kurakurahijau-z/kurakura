@@ -1,3 +1,5 @@
+pelajar/dashboard.html
+
 <!DOCTYPE html>
 <html lang="ms">
 <head>
@@ -21,6 +23,7 @@
     .btn:hover{ background:#047857; }
     .btn.ghost{ background: rgba(255,255,255,.75); color:#0f172a; border: 1px solid rgba(15,23,42,.10); box-shadow: 0 10px 30px rgba(2,6,23,.06); }
     .btn.ghost:hover{ background: rgba(255,255,255,.90); }
+    .btn.small{ padding: 10px 14px; border-radius: 14px; }
 
     .container{ max-width: 1100px; margin: 16px auto 0; display:grid; gap: 14px; }
 
@@ -61,28 +64,16 @@
     }
     .muted{ margin:0; color:#334155; font-weight: 800; opacity: .92; line-height: 1.55; }
 
-    .joinbox{
-      display:flex; gap:10px; flex-wrap:wrap; align-items:center;
-      margin-top: 12px;
-      padding: 12px;
-      border-radius: 16px;
-      border: 1px dashed rgba(15,23,42,.18);
-      background: rgba(255,255,255,.60);
-    }
+    /* join box */
+    .joinRow{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
     .input{
-      flex:1;
-      min-width: 220px;
-      width:100%;
-      box-sizing:border-box;
-      padding: 12px 12px;
-      border-radius: 14px;
-      border: 1px solid rgba(15,23,42,.16);
-      background: rgba(255,255,255,.70);
-      outline:none;
-      font-weight: 800;
+      flex:1; min-width: 220px;
+      width:100%; box-sizing:border-box; padding:12px 12px; border-radius:14px;
+      border:1px solid rgba(15,23,42,.16); background:rgba(255,255,255,.75);
+      outline:none; font-size:14px; font-weight:800;
     }
     .input:focus{ border-color:rgba(5,150,105,.55); box-shadow:0 0 0 4px rgba(5,150,105,.14); }
-    .btn.small{ padding: 10px 12px; border-radius: 14px; }
+    .help{ margin:8px 0 0; font-size:12px; color:#334155; font-weight:800; opacity:.9; }
   </style>
 </head>
 
@@ -109,26 +100,28 @@
         <section class="card">
           <h2 class="section-title">Kelas saya</h2>
 
-          <!-- Join Class -->
-          <div class="joinbox">
-            <input id="classCode" class="input" type="text" placeholder="Masukkan kod kelas (contoh: PMS123)" />
-            <button id="btnJoin" class="btn small" type="button">Join</button>
+          <!-- JOIN KELAS -->
+          <div style="margin-bottom:12px;">
+            <div class="joinRow">
+              <input id="classCode" class="input" type="text" placeholder="Masukkan kod kelas (contoh: PMS-7917)" />
+              <button class="btn small" id="btnJoin" type="button">Join Kelas</button>
+            </div>
+            <p class="help">Kod kelas akan diberi oleh pensyarah. Lepas join, senarai kelas akan muncul di bawah.</p>
           </div>
 
-          <div id="classes" class="class-list" style="margin-top:12px;"></div>
+          <div id="classes" class="class-list"></div>
 
           <p class="muted" id="classesHint" style="margin:10px 0 0;">
-            Tiada kelas dipaparkan. Kalau baru daftar, sila masukkan <b>kod kelas</b> dan tekan <b>Join</b>.
+            Tiada kelas dipaparkan. Masukkan kod kelas di atas untuk join.
           </p>
         </section>
 
         <section class="card">
           <h2 class="section-title">Panduan ringkas</h2>
           <p class="muted" style="margin:0;">
-            1) Masukkan kod kelas untuk join.<br>
-            2) Pilih kelas untuk masuk.<br>
-            3) Nota ikut kelas/subject (released sahaja).<br>
-            4) Kuiz ikut kelas/subject (active sahaja).
+            1) Join kelas guna kod kelas.<br>
+            2) Nota dipaparkan mengikut kelas/subject (released sahaja).<br>
+            3) Kuiz akan dibuka terus di tab baharu (Google Form).
           </p>
 
           <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
@@ -163,7 +156,9 @@
       try{
         const raw = localStorage.getItem("kk_user");
         return raw ? JSON.parse(raw) : null;
-      }catch(e){ return null; }
+      }catch(e){
+        return null;
+      }
     }
 
     async function apiPost(params){
@@ -199,8 +194,8 @@
       pillCount.textContent = `Kelas: ${list.length}`;
 
       list.forEach(c => {
-        const title = c.className || "Kelas";
-        const desc  = c.classCode || "";
+        const title = c.className || c.title || "Kelas";
+        const desc  = c.classCode || c.desc || "";
         const classId = c.classId || "";
 
         const card = document.createElement("div");
@@ -223,6 +218,24 @@
       });
     }
 
+    async function loadMyClasses(){
+      const token = localStorage.getItem("kk_token") || "";
+      if(!token){
+        window.location.href = "./login.html";
+        return;
+      }
+
+      const out = await apiPost({ action:"listMyClasses", token });
+      if(!out || !out.ok){
+        console.error("listMyClasses failed:", out);
+        showMsg("err", out?.message || "Tidak dapat memuatkan senarai kelas.");
+        renderClasses([]);
+        return;
+      }
+
+      renderClasses(out.classes || []);
+    }
+
     async function loadDashboard(){
       clearMsg();
 
@@ -237,58 +250,40 @@
       const displayName = user?.name || user?.email || "Pelajar";
       whoEl.textContent = `Hi, ${displayName}`;
 
-      const out = await apiPost({ action:"listMyClasses", token });
-
-      if(!out || !out.ok){
-        console.error("listMyClasses failed:", out);
-        showMsg("err", out?.message || "Tidak dapat memuatkan senarai kelas.");
-        renderClasses([]);
-        return;
-      }
-
-      renderClasses(out.classes || []);
-      // tak payah spam "ok" tiap kali load, tapi kalau kau nak, boleh buka balik:
-      // showMsg("ok", "Senarai kelas berjaya dimuatkan.");
+      await loadMyClasses();
+      showMsg("ok", "Senarai kelas berjaya dimuatkan.");
     }
 
-    // Join class
-    document.getElementById("btnJoin").addEventListener("click", async () => {
+    // JOIN KELAS
+    document.getElementById("btnJoin").addEventListener("click", async ()=>{
       clearMsg();
       const token = localStorage.getItem("kk_token") || "";
-      if(!token){
-        window.location.href = "./login.html";
-        return;
-      }
-
       const code = document.getElementById("classCode").value.trim();
-      if(!code){
-        showMsg("err","Masukkan kod kelas dulu.");
-        return;
-      }
 
-      const btn = document.getElementById("btnJoin");
-      btn.disabled = true;
-      btn.textContent = "Join...";
+      if(!token){ window.location.href = "./login.html"; return; }
+      if(!code){ showMsg("err","Sila masukkan kod kelas."); return; }
+
+      document.getElementById("btnJoin").disabled = true;
+      document.getElementById("btnJoin").textContent = "Joining...";
 
       try{
         const out = await apiPost({ action:"joinClass", token, classCode: code });
+
         if(!out || !out.ok){
-          showMsg("err", out?.message || "Join gagal.");
-          btn.disabled = false;
-          btn.textContent = "Join";
+          showMsg("err", out?.message || "Join kelas gagal.");
           return;
         }
 
-        showMsg("ok", out.message || "Berjaya join kelas.");
+        showMsg("ok", "Berjaya join kelas. Refresh senarai...");
         document.getElementById("classCode").value = "";
-        await loadDashboard();
+        await loadMyClasses();
 
-      }catch(e){
-        console.error(e);
+      }catch(err){
+        console.error(err);
         showMsg("err","Fetch gagal. Check Console.");
       }finally{
-        btn.disabled = false;
-        btn.textContent = "Join";
+        document.getElementById("btnJoin").disabled = false;
+        document.getElementById("btnJoin").textContent = "Join Kelas";
       }
     });
 
