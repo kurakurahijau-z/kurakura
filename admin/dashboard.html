@@ -1,127 +1,254 @@
-<!doctype html>
+admin/dashboard.html
+
+<!DOCTYPE html>
 <html lang="ms">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dashboard Admin • kura kura hijau</title>
+
   <link rel="stylesheet" href="../styles.css" />
-</head>
-<body>
+  <script src="../config.js"></script>
 
-  <div class="page">
-    <div class="topbar-2">
-      <div>
-        <div class="title">Dashboard Admin</div>
-        <div class="subtitle" id="hello">Hi, admin</div>
-      </div>
-      <div class="top-actions">
-        <button class="btn" onclick="go('../pelajar/index.html')">Ke portal pelajar</button>
-        <button class="btn primary" onclick="logout()">Logout</button>
-      </div>
-    </div>
-
-    <div class="container wide">
-
-      <div class="banner ok" id="adminOk">
-        Akses admin disahkan.
-      </div>
-
-      <div class="grid-2">
-        <div class="card">
-          <h2>Pengurusan</h2>
-          <p class="muted">Ini ruang admin untuk urus kandungan: nota dan kuiz ikut kelas/subject.</p>
-
-          <div class="list">
-            <!-- KELAS (BARU) -->
-            <div class="list-item">
-              <div class="li-left">
-                <div class="li-title">Kelas</div>
-                <div class="li-desc">Create kelas & dapatkan class code untuk pelajar join.</div>
-              </div>
-              <div class="li-right">
-                <button class="btn pill" onclick="go('create-class.html')">Buka</button>
-              </div>
-            </div>
-
-            <!-- NOTA -->
-            <div class="list-item">
-              <div class="li-left">
-                <div class="li-title">Nota</div>
-                <div class="li-desc">Tambah / edit nota, dan release/unrelease.</div>
-              </div>
-              <div class="li-right">
-                <button class="btn pill" onclick="go('notes.html')">Buka</button>
-              </div>
-            </div>
-
-            <!-- KUIZ -->
-            <div class="list-item">
-              <div class="li-left">
-                <div class="li-title">Kuiz</div>
-                <div class="li-desc">Tambah kuiz (Google Form link), dan aktif/nonaktif.</div>
-              </div>
-              <div class="li-right">
-                <button class="btn pill" onclick="go('quizzes.html')">Buka</button>
-              </div>
-            </div>
-
-            <!-- SUBJEK (OPTIONAL) -->
-            <div class="list-item">
-              <div class="li-left">
-                <div class="li-title">Subjek</div>
-                <div class="li-desc">(Optional) Kalau nak tambah subject ikut bab.</div>
-              </div>
-              <div class="li-right">
-                <button class="btn pill" onclick="go('class.html')">Buka</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="card">
-          <h2>Nota ringkas</h2>
-          <div class="checklist">
-            <div class="check">✅ Admin login guna halaman login yang sama.</div>
-            <div class="check">✅ Lepas login, sistem auto-redirect ikut role.</div>
-            <div class="check">✅ Kalau pelajar cuba buka halaman admin, sistem akan halang.</div>
-          </div>
-
-          <div class="muted" style="margin-top:14px;">
-            Tip: Lepas create kelas, bagi pelajar <b>class code</b> untuk join.
-          </div>
-        </div>
-      </div>
-
-      <div id="status" class="banner warn" style="display:none;"></div>
-
-    </div>
-  </div>
-
-  <script src="../app.js"></script>
-  <script>
-    (async function init(){
-      requireAuthOrRedirect();
-
-      const me = await apiPost({ action:"me" });
-      if(!me.ok){
-        showStatus(me.message || "Gagal semak session.");
-        return;
-      }
-
-      document.getElementById("hello").textContent =
-        `Hi, ${me.user.name || me.user.email || "admin"}`;
-
-      if(String(me.user.role || "").toLowerCase() !== "admin"){
-        showStatus("Akses ditolak. Akaun ini bukan admin.");
-        return;
-      }
-    })();
-
-    function showStatus(msg){
-      const el = document.getElementById("status");
-      el.textContent = msg;
-      el.style.display = "block";
+  <style>
+    .top{
+      position: sticky; top: 0; z-index: 20;
+      background: rgba(255,255,255,.75);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255,255,255,.50);
     }
+    .top-inner{
+      max-width: 1100px; margin: 0 auto;
+      padding: 14px 16px;
+      display:flex; align-items:center; justify-content:space-between; gap: 12px;
+    }
+    .title{
+      display:flex; flex-direction:column; gap: 4px;
+    }
+    .title h1{
+      margin:0; font-size: 22px; font-weight: 950; letter-spacing: -0.02em;
+      color:#0f172a;
+    }
+    .title p{
+      margin:0; font-size: 13px; font-weight: 850; color:#334155; opacity:.9;
+    }
+    .btns{ display:flex; gap: 10px; align-items:center; flex-wrap: wrap; }
+    .btn{
+      border: 0; cursor: pointer;
+      padding: 10px 14px; border-radius: 14px;
+      font-weight: 900;
+      background: #059669; color: #fff;
+      box-shadow: 0 8px 18px rgba(5,150,105,.18);
+    }
+    .btn:hover{ background:#047857; }
+    .btn.ghost{
+      background: rgba(255,255,255,.75);
+      color:#0f172a;
+      border: 1px solid rgba(15,23,42,.10);
+      box-shadow: 0 10px 30px rgba(2,6,23,.06);
+    }
+    .btn.ghost:hover{ background: rgba(255,255,255,.90); }
+
+    .page{ min-height:100vh; padding: 18px 16px 40px; }
+    .wrap{
+      max-width: 1100px; margin: 0 auto;
+      display:grid; gap: 14px;
+    }
+    .banner{
+      padding: 12px 14px;
+      border-radius: 16px;
+      background: rgba(16,185,129,.12);
+      border: 1px solid rgba(16,185,129,.20);
+      font-weight: 900;
+      color:#065f46;
+      box-shadow: 0 14px 40px rgba(2,6,23,.08);
+    }
+    .grid{
+      display:grid; gap: 14px;
+      grid-template-columns: 1.15fr .85fr;
+    }
+    @media (max-width: 880px){
+      .grid{ grid-template-columns: 1fr; }
+    }
+
+    .card{
+      background: rgba(255,255,255,.82);
+      border: 1px solid rgba(255,255,255,.60);
+      border-radius: 18px;
+      box-shadow: 0 14px 40px rgba(2,6,23,.10);
+      padding: 16px;
+    }
+    h2{ margin:0 0 8px; font-size: 18px; font-weight: 950; letter-spacing:-0.02em; }
+    p{ margin:0; color:#334155; font-weight: 800; opacity:.95; }
+
+    .items{ margin-top: 12px; display:grid; gap: 10px; }
+    .item{
+      display:flex; align-items:center; justify-content:space-between; gap: 12px;
+      padding: 12px 12px;
+      border-radius: 16px;
+      background: rgba(255,255,255,.72);
+      border: 1px solid rgba(2,6,23,.08);
+      box-shadow: 0 10px 26px rgba(2,6,23,.06);
+    }
+    .t{ margin:0; font-weight: 950; color:#0f172a; }
+    .d{ margin:2px 0 0; font-weight: 800; color:#475569; font-size: 13px; opacity:.95; }
+    .chip{
+      display:inline-flex; align-items:center; justify-content:center;
+      padding: 8px 12px;
+      border-radius: 999px;
+      text-decoration:none;
+      font-weight: 950;
+      color:#4c1d95;
+      background: rgba(139,92,246,.12);
+      border: 1px solid rgba(139,92,246,.22);
+    }
+    .chip:hover{ background: rgba(139,92,246,.16); }
+
+    .checklist{ margin: 10px 0 0; display:grid; gap: 6px; }
+    .check{ display:flex; gap: 10px; align-items:flex-start; color:#0f172a; font-weight: 850; }
+    .check span{ display:inline-block; transform: translateY(1px); }
+    .tip{ margin-top: 10px; color:#0f172a; font-weight: 850; }
+  </style>
+</head>
+
+<body>
+  <header class="top">
+    <div class="top-inner">
+      <div class="title">
+        <h1>Dashboard Admin</h1>
+        <p id="hello">Hi, admin</p>
+      </div>
+
+      <div class="btns">
+        <button class="btn ghost" id="btnToStudent">Ke portal pelajar</button>
+        <button class="btn" id="btnLogout">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="wrap">
+      <div class="banner" id="statusBanner">Semak akses...</div>
+
+      <div class="grid">
+        <section class="card">
+          <h2>Pengurusan</h2>
+          <p>Ini ruang admin untuk urus kandungan: nota dan kuiz ikut kelas/subject.</p>
+
+          <div class="items">
+            <!-- ✅ BARU: Kelas -->
+            <div class="item">
+              <div>
+                <p class="t">Kelas</p>
+                <p class="d">Create kelas & dapatkan class code untuk pelajar join.</p>
+              </div>
+              <a class="chip" href="./create-class.html">Buka</a>
+            </div>
+
+            <div class="item">
+              <div>
+                <p class="t">Nota</p>
+                <p class="d">Tambah / edit nota, dan release/unrelease.</p>
+              </div>
+              <a class="chip" href="./notes.html">Buka</a>
+            </div>
+
+            <div class="item">
+              <div>
+                <p class="t">Kuiz</p>
+                <p class="d">Tambah kuiz (Google Form link), dan aktif/nonaktif.</p>
+              </div>
+              <a class="chip" href="./quizzes.html">Buka</a>
+            </div>
+
+            <div class="item">
+              <div>
+                <p class="t">Subjek</p>
+                <p class="d">(Optional) Kalau nak tambah subject ikut bab.</p>
+              </div>
+              <span class="chip" style="opacity:.85;">Auto (guna sheet / notes page)</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>Nota ringkas</h2>
+
+          <div class="checklist">
+            <div class="check"><span>✅</span><div>Admin login guna halaman login yang sama.</div></div>
+            <div class="check"><span>✅</span><div>Lepas login, sistem auto-redirect ikut role.</div></div>
+            <div class="check"><span>✅</span><div>Kalau pelajar cuba buka halaman admin, sistem akan halang.</div></div>
+          </div>
+
+          <div class="tip">Tip: Lepas create kelas, bagi pelajar <b>class code</b> untuk join.</div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const hello = document.getElementById("hello");
+    const statusBanner = document.getElementById("statusBanner");
+
+    function getBaseUrl(){
+      const cfg = window.APP_CONFIG;
+      return (cfg && cfg.BASE_URL) ? cfg.BASE_URL : null;
+    }
+
+    async function apiPost(params){
+      const BASE_URL = getBaseUrl();
+      if(!BASE_URL) throw new Error("APP_CONFIG.BASE_URL tak wujud. Semak config.js");
+
+      const body = new URLSearchParams();
+      Object.entries(params).forEach(([k,v]) => body.append(k, v ?? ""));
+
+      const res = await fetch(BASE_URL, { method:"POST", body });
+      const text = await res.text();
+      try{ return JSON.parse(text); }
+      catch(e){ return { ok:false, message:"Invalid JSON from server", raw:text }; }
+    }
+
+    async function boot(){
+      const token = localStorage.getItem("kk_token") || "";
+      if(!token){
+        location.href = "../pelajar/login.html";
+        return;
+      }
+
+      const me = await apiPost({ action:"me", token });
+      if(!me || !me.ok || !me.user){
+        localStorage.removeItem("kk_token");
+        localStorage.removeItem("kk_user");
+        location.href = "../pelajar/login.html";
+        return;
+      }
+
+      const role = String(me.user.role || "").toLowerCase();
+      if(role !== "admin"){
+        statusBanner.textContent = "Akses admin tidak dibenarkan untuk akaun ini.";
+        statusBanner.style.background = "rgba(239,68,68,.10)";
+        statusBanner.style.borderColor = "rgba(239,68,68,.22)";
+        statusBanner.style.color = "#991b1b";
+        setTimeout(()=> location.href = "../pelajar/dashboard.html", 700);
+        return;
+      }
+
+      hello.textContent = `Hi, ${me.user.name || me.user.email || "admin"}`;
+      statusBanner.textContent = "Akses admin disahkan.";
+    }
+
+    document.getElementById("btnLogout").addEventListener("click", ()=>{
+      localStorage.removeItem("kk_token");
+      localStorage.removeItem("kk_user");
+      location.href = "../pelajar/login.html";
+    });
+
+    document.getElementById("btnToStudent").addEventListener("click", ()=>{
+      location.href = "../pelajar/dashboard.html";
+    });
+
+    boot();
   </script>
 </body>
 </html>
