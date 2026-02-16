@@ -1,164 +1,231 @@
-<!doctype html>
+admin/create-class.html
+
+<!DOCTYPE html>
 <html lang="ms">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Buat Kelas • Admin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Kelas • kura kura hijau</title>
+
   <link rel="stylesheet" href="../styles.css" />
+  <script src="../config.js"></script>
+
+  <style>
+    .page{ min-height:100vh; padding: 18px 16px 40px; }
+    .top{ position: sticky; top: 0; z-index: 20; background: rgba(255,255,255,.75); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,.50); }
+    .top-inner{ max-width: 1100px; margin: 0 auto; padding: 14px 8px; display:flex; align-items:center; justify-content:space-between; gap: 12px; }
+    .brand{ display:flex; flex-direction:column; gap: 4px; }
+    .brand h1{ margin:0; font-size: 22px; letter-spacing: -0.02em; line-height: 1.1; font-weight: 950; }
+    .brand .sub{ margin:0; color:#334155; font-weight:850; font-size: 13px; opacity: .9; }
+
+    .btn{ border: 0; cursor: pointer; padding: 10px 14px; border-radius: 14px; font-weight: 900; background: #059669; color: #fff; box-shadow: 0 8px 18px rgba(5,150,105,.18); }
+    .btn:hover{ background:#047857; }
+    .btn.ghost{
+      background: rgba(255,255,255,.75);
+      color:#0f172a;
+      border: 1px solid rgba(15,23,42,.10);
+      box-shadow: 0 10px 30px rgba(2,6,23,.06);
+    }
+    .btn.ghost:hover{ background: rgba(255,255,255,.90); }
+
+    .container{ max-width: 1100px; margin: 16px auto 0; display:grid; gap: 14px; }
+
+    .card{
+      background: rgba(255,255,255,.82);
+      border: 1px solid rgba(255,255,255,.60);
+      border-radius: 18px;
+      box-shadow: 0 14px 40px rgba(2,6,23,.10);
+      padding: 16px;
+    }
+
+    .section-title{ margin:0 0 10px; font-size: 18px; font-weight: 950; letter-spacing: -0.02em; }
+    .muted{ color:#475569; opacity:.95; }
+    .msg{ display:none; margin: 12px 0 0; padding: 10px 12px; border-radius: 14px; font-weight: 850; }
+    .msg.ok{ background: rgba(16,185,129,.12); border: 1px solid rgba(16,185,129,.25); color:#065f46; }
+    .msg.err{ background: rgba(239,68,68,.12); border: 1px solid rgba(239,68,68,.25); color:#991b1b; }
+
+    .form{ display:grid; gap: 10px; max-width: 520px; }
+    label{ font-weight: 900; color:#0f172a; }
+    input{
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(15,23,42,.14);
+      background: rgba(255,255,255,.90);
+      outline: none;
+      font-weight: 750;
+    }
+    input:focus{ border-color: rgba(14,165,233,.65); box-shadow: 0 0 0 4px rgba(14,165,233,.12); }
+    .row{ display:flex; gap: 10px; flex-wrap: wrap; align-items:center; }
+    .pill{
+      display:inline-flex; align-items:center; gap: 8px;
+      padding: 10px 12px; border-radius: 999px;
+      background: rgba(2,6,23,.04);
+      border: 1px solid rgba(2,6,23,.08);
+      font-weight: 900;
+    }
+    .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+  </style>
 </head>
 <body>
-  <header class="topbar">
-    <div>
-      <h1>Buat Kelas</h1>
-      <p class="muted">Generate class code automatik. Lepas create, boleh terus urus subject/nota/kuiz.</p>
-    </div>
-    <div class="actions">
-      <button class="btn" onclick="go('index.htm')">⬅ Admin</button>
-      <button class="btn danger" onclick="logout()">Keluar</button>
+  <header class="top">
+    <div class="top-inner">
+      <div class="brand">
+        <h1>Create Kelas</h1>
+        <p class="sub" id="who">Admin</p>
+      </div>
+
+      <div class="row">
+        <a class="btn ghost" href="./dashboard.html">← Dashboard</a>
+        <button class="btn ghost" id="btnToStudent">Ke portal pelajar</button>
+        <button class="btn" id="btnLogout">Logout</button>
+      </div>
     </div>
   </header>
 
-  <main class="container">
-    <div id="status" class="notice"></div>
+  <main class="page">
+    <div class="container">
+      <section class="card">
+        <h2 class="section-title">Buat kelas baru</h2>
+        <p class="muted" style="margin:0 0 12px;">
+          Lepas create, sistem akan bagi <b>class code</b>. Pelajar guna code tu untuk join.
+        </p>
 
-    <section class="card">
-      <h2>Maklumat Kelas</h2>
-
-      <div class="row">
-        <div class="col">
-          <label for="className">Nama kelas</label>
-          <input id="className" type="text" placeholder="Contoh: Kelas DUP4A (Accounting)" />
-          <div class="small muted" style="margin-top:6px;">
-            Tip: guna nama yang pelajar senang cam “DUP4A Accounting 2026”.
+        <form class="form" id="formCreate">
+          <div>
+            <label for="className">Nama kelas</label>
+            <input id="className" name="className" placeholder="Contoh: Kelas DUP4A (Accounting)" required />
           </div>
-        </div>
-      </div>
 
-      <div class="toolbar" style="margin-top:12px;">
-        <button class="btn primary" id="btnCreate">Create</button>
-        <button class="btn" onclick="resetForm()">Reset</button>
-      </div>
-    </section>
+          <div class="row">
+            <button class="btn" type="submit" id="btnCreate">Create kelas</button>
+            <span class="pill" id="result" style="display:none;">
+              Class code: <span class="mono" id="classCode"></span>
+            </span>
+          </div>
 
-    <section class="card" id="resultCard" style="display:none;">
-      <h2>Berjaya</h2>
-      <p class="muted">Bagi pelajar code ni untuk join.</p>
+          <div class="msg" id="msg"></div>
+        </form>
+      </section>
 
-      <div class="row">
-        <div class="col">
-          <label>Class Code</label>
-          <input id="outCode" type="text" readonly />
-        </div>
-      </div>
-
-      <div class="toolbar" style="margin-top:12px;">
-        <button class="btn" onclick="copyCode()">Copy Code</button>
-        <button class="btn" id="btnManage">Urus Kelas</button>
-        <button class="btn" onclick="go('index.htm')">Kembali ke Senarai Kelas</button>
-      </div>
-
-      <div class="small muted" id="outMeta" style="margin-top:10px;"></div>
-    </section>
+      <section class="card">
+        <h2 class="section-title">Tips cepat</h2>
+        <p class="muted" style="margin:0;">
+          ✅ Lepas pelajar join, data masuk ke sheet <b>Enrollments</b>.<br>
+          ✅ Nota & kuiz ikut <b>classId → subjectId</b> (based on structure sheet kau).<br>
+          ✅ Kalau nak disable kelas, buat di sheet <b>Classes</b> (isActive=FALSE).
+        </p>
+      </section>
+    </div>
   </main>
 
-<script src="../app.js"></script>
-<script>
-let createdClassId = "";
+  <script>
+    const msgEl = document.getElementById("msg");
+    const whoEl = document.getElementById("who");
+    const resultEl = document.getElementById("result");
+    const codeEl = document.getElementById("classCode");
+    const btnCreate = document.getElementById("btnCreate");
 
-(function init(){
-  requireAuthOrRedirect();
-  ensureAdmin();
-  document.getElementById("btnCreate").addEventListener("click", onCreate);
-  document.getElementById("className").addEventListener("keydown", (e)=>{
-    if(e.key === "Enter") onCreate();
-  });
-})();
-
-async function ensureAdmin(){
-  const me = await apiPost({ action:"me" });
-  if(!me.ok) return setStatus(me.message || "Gagal semak akaun.");
-  if(String(me.user.role||"").toLowerCase() !== "admin"){
-    setStatus("Akses ditolak. Akaun ini bukan admin.");
-    document.getElementById("btnCreate").disabled = true;
-  }
-}
-
-function setStatus(msg, isError=true){
-  const el = document.getElementById("status");
-  el.textContent = msg || "";
-  el.style.display = msg ? "block" : "none";
-  // styles.css dah ada .notice, kita biar simple
-  if(msg){
-    el.style.borderColor = isError ? "#f3b4b4" : "#cfe9d8";
-    el.style.background = isError ? "#fff1f1" : "#f2fff7";
-  }
-}
-
-function resetForm(){
-  createdClassId = "";
-  document.getElementById("className").value = "";
-  document.getElementById("resultCard").style.display = "none";
-  setStatus("");
-}
-
-async function onCreate(){
-  setStatus("");
-
-  const className = document.getElementById("className").value.trim();
-  if(!className){
-    setStatus("Nama kelas tak boleh kosong.");
-    return;
-  }
-
-  const btn = document.getElementById("btnCreate");
-  btn.disabled = true;
-  btn.textContent = "Creating...";
-
-  try{
-    const res = await apiPost({ action:"adminCreateClass", className });
-    if(!res.ok){
-      setStatus(res.message || "Gagal create kelas.");
-      return;
+    function showMsg(type, text){
+      msgEl.className = "msg " + (type === "ok" ? "ok" : "err");
+      msgEl.textContent = text;
+      msgEl.style.display = "block";
+    }
+    function clearMsg(){
+      msgEl.style.display = "none";
+      msgEl.textContent = "";
+      msgEl.className = "msg";
     }
 
-    createdClassId = res.classId || "";
-    document.getElementById("outCode").value = res.classCode || "";
-    document.getElementById("outMeta").textContent =
-      `classId: ${createdClassId || "-"} • createdAt: ${new Date().toISOString()}`;
+    function getBaseUrl(){
+      const cfg = window.APP_CONFIG;
+      return (cfg && cfg.BASE_URL) ? cfg.BASE_URL : null;
+    }
 
-    document.getElementById("resultCard").style.display = "block";
+    async function apiPost(params){
+      const BASE_URL = getBaseUrl();
+      if(!BASE_URL) throw new Error("APP_CONFIG.BASE_URL tak wujud. Semak config.js");
 
-    const manageBtn = document.getElementById("btnManage");
-    manageBtn.onclick = () => {
-      if(!createdClassId) return;
-      go(`class.html?classId=${encodeURIComponent(createdClassId)}`);
-    };
+      const body = new URLSearchParams();
+      Object.entries(params).forEach(([k,v]) => body.append(k, v ?? ""));
 
-    setStatus("Kelas berjaya dicipta ✅", false);
-  }catch(err){
-    setStatus("Tak dapat connect server. Semak BASE_URL dan Console.");
-  }finally{
-    btn.disabled = false;
-    btn.textContent = "Create";
-  }
-}
+      const res = await fetch(BASE_URL, { method:"POST", body });
+      const text = await res.text();
+      try{ return JSON.parse(text); }
+      catch(e){ return { ok:false, message:"Invalid JSON from server", raw:text }; }
+    }
 
-async function copyCode(){
-  const code = document.getElementById("outCode").value || "";
-  if(!code) return;
+    async function boot(){
+      clearMsg();
+      const token = localStorage.getItem("kk_token") || "";
+      if(!token){
+        location.href = "../pelajar/login.html";
+        return;
+      }
 
-  try{
-    await navigator.clipboard.writeText(code);
-    setStatus("Dah copy code ✅", false);
-  }catch(_){
-    // fallback: select text
-    const el = document.getElementById("outCode");
-    el.focus();
-    el.select();
-    document.execCommand("copy");
-    setStatus("Dah copy code ✅", false);
-  }
-}
-</script>
+      const me = await apiPost({ action:"me", token });
+      if(!me || !me.ok || !me.user){
+        localStorage.removeItem("kk_token");
+        localStorage.removeItem("kk_user");
+        location.href = "../pelajar/login.html";
+        return;
+      }
+
+      const role = String(me.user.role || "").toLowerCase();
+      if(role !== "admin"){
+        showMsg("err", "Akses admin tidak dibenarkan untuk akaun ini.");
+        setTimeout(()=> location.href = "../pelajar/dashboard.html", 700);
+        return;
+      }
+
+      whoEl.textContent = `Hi, ${me.user.name || me.user.email || "Admin"}`;
+    }
+
+    document.getElementById("btnLogout").addEventListener("click", ()=>{
+      localStorage.removeItem("kk_token");
+      localStorage.removeItem("kk_user");
+      location.href = "../pelajar/login.html";
+    });
+
+    document.getElementById("btnToStudent").addEventListener("click", ()=>{
+      location.href = "../pelajar/dashboard.html";
+    });
+
+    document.getElementById("formCreate").addEventListener("submit", async (e)=>{
+      e.preventDefault();
+      clearMsg();
+      resultEl.style.display = "none";
+      codeEl.textContent = "";
+
+      const token = localStorage.getItem("kk_token") || "";
+      const className = (document.getElementById("className").value || "").trim();
+      if(!className){
+        showMsg("err", "Nama kelas tak boleh kosong.");
+        return;
+      }
+
+      btnCreate.disabled = true;
+      btnCreate.textContent = "Creating...";
+
+      try{
+        const r = await apiPost({ action:"adminCreateClass", token, className });
+        if(!r || !r.ok){
+          showMsg("err", r && r.message ? r.message : "Gagal create kelas.");
+          return;
+        }
+
+        showMsg("ok", "Kelas berjaya dibuat.");
+        codeEl.textContent = r.class && r.class.classCode ? r.class.classCode : "-";
+        resultEl.style.display = "inline-flex";
+      }catch(err){
+        showMsg("err", String(err && err.message ? err.message : err));
+      }finally{
+        btnCreate.disabled = false;
+        btnCreate.textContent = "Create kelas";
+      }
+    });
+
+    boot();
+  </script>
 </body>
 </html>
