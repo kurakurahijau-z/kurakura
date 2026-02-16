@@ -1,81 +1,34 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ms">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>kura kura hijau</title>
-
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>kura kura hijau • Portal</title>
   <link rel="stylesheet" href="./styles.css" />
   <script src="./config.js"></script>
   <script src="./app.js"></script>
-
-  <style>
-    .hero{
-      min-height: 100vh;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding: 26px 16px;
-    }
-    .center{
-      width:min(980px, 92vw);
-      text-align:center;
-    }
-    .logo{
-      font-size:72px;
-      letter-spacing:-0.03em;
-      font-weight: 950;
-      margin: 0 0 16px;
-    }
-    .logo .a{ color:#059669; }
-    .logo .b{ color:#0ea5e9; }
-    .logo .c{ color:#0f172a; }
-    .cards{
-      margin-top: 22px;
-      display:grid;
-      grid-template-columns: repeat(2, minmax(0,1fr));
-      gap: 16px;
-    }
-    @media(max-width:760px){ .cards{ grid-template-columns: 1fr; } }
-    .pick{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      padding: 18px;
-      border-radius: 18px;
-      border: 1px solid rgba(15,23,42,0.10);
-      background: rgba(255,255,255,0.70);
-      text-decoration:none;
-      color: inherit;
-      box-shadow: 0 14px 40px rgba(2,6,23,0.07);
-    }
-    .pick .t{ font-size:18px; font-weight:950; margin:0; }
-    .pick .d{ margin:6px 0 0; color: rgba(15,23,42,0.65); font-weight:800; }
-  </style>
 </head>
 <body class="stage">
-  <main class="hero">
-    <div class="center">
-      <h1 class="logo"><span class="a">kura</span> <span class="b">kura</span> <span class="c">hijau</span></h1>
-
-      <div class="cards">
-        <a class="pick" href="./pelajar/login.html">
-          <div>
-            <p class="t">Pelajar</p>
-            <p class="d">Akses kelas, nota & kuiz</p>
-          </div>
-          <span class="chip">Portal</span>
-        </a>
-
-        <a class="pick" href="./bukan-pelajar/index.html">
-          <div>
-            <p class="t">Bukan Pelajar</p>
-            <p class="d">Maklumat & ruang umum</p>
-          </div>
-          <span class="chip">Ruang</span>
-        </a>
+  <header class="topbar">
+    <div class="inner">
+      <div>
+        <h1>kura kura hijau</h1>
+        <p class="muted">Portal pembelajaran (Admin + Pelajar)</p>
+      </div>
+      <div class="actions">
+        <a class="btn ghost" href="./pelajar/login.html">Login</a>
       </div>
     </div>
+  </header>
+
+  <main class="container">
+    <section class="card">
+      <h2 style="margin:0; font-weight:950;">Masuk portal</h2>
+      <p class="muted">Login satu tempat. Sistem auto-redirect ikut role (admin / pelajar).</p>
+      <div style="margin-top:12px;">
+        <a class="btn" href="./pelajar/login.html">Pergi Login</a>
+      </div>
+    </section>
   </main>
 </body>
 </html>
