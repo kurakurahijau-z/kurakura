@@ -1,5 +1,3 @@
-admin/dashboard.html
-
 <!DOCTYPE html>
 <html lang="ms">
 <head>
@@ -72,6 +70,31 @@ admin/dashboard.html
       font-size: 12px;
       white-space: nowrap;
     }
+
+    /* kecil sikit untuk form create class */
+    .row{ display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; }
+    .input{
+      width:100%;
+      max-width:520px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(15,23,42,.14);
+      background: rgba(255,255,255,.75);
+      font-weight: 850;
+      outline: none;
+    }
+    .input:focus{ border-color: rgba(5,150,105,.55); box-shadow: 0 0 0 4px rgba(5,150,105,.12); }
+    .result{
+      display:none;
+      margin-top:12px;
+      padding: 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(15,23,42,.10);
+      background: rgba(255,255,255,.65);
+      font-weight: 850;
+      color:#0f172a;
+      line-height: 1.7;
+    }
   </style>
 </head>
 
@@ -129,12 +152,22 @@ admin/dashboard.html
         </section>
 
         <section class="card">
-          <h2 class="section-title">Nota ringkas</h2>
+          <h2 class="section-title">Create Kelas</h2>
           <p class="muted" style="margin:0;">
-            ✅ Admin login guna halaman login yang sama.<br>
-            ✅ Lepas login, sistem auto-redirect ikut role.<br>
-            ✅ Kalau pelajar cuba buka halaman admin, sistem akan halang.
+            Lepas create, sistem akan bagi <b>class code</b> untuk pelajar join.
           </p>
+
+          <div class="row">
+            <input id="className" class="input" placeholder="Contoh: DTM40384 - Prinsip Akaun" />
+            <button class="btn" id="btnCreateClass" type="button">Create</button>
+          </div>
+
+          <div id="createResult" class="result"></div>
+
+          <div style="margin-top:16px;">
+            <h3 class="section-title" style="margin-bottom:6px;">Kelas saya</h3>
+            <div id="ownedList" class="list"></div>
+          </div>
         </section>
       </div>
     </div>
@@ -143,6 +176,9 @@ admin/dashboard.html
   <script>
     const msgEl = document.getElementById("msg");
     const whoEl = document.getElementById("who");
+    const ownedList = document.getElementById("ownedList");
+    const classNameEl = document.getElementById("className");
+    const createResultEl = document.getElementById("createResult");
 
     function showMsg(type, text){
       msgEl.className = "msg " + (type === "ok" ? "ok" : "err");
@@ -173,13 +209,50 @@ admin/dashboard.html
       catch(e){ return { ok:false, message:"Invalid JSON from server", raw:text }; }
     }
 
-    async function boot(){
-      clearMsg();
+    function escapeHtml(s){
+      return String(s ?? "")
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
 
+    function renderOwned(classes){
+      ownedList.innerHTML = "";
+      if(!classes || !classes.length){
+        ownedList.innerHTML = `
+          <div class="item">
+            <div>
+              <p class="t">Tiada kelas lagi</p>
+              <p class="d">Create kelas kat atas, nanti dia muncul sini.</p>
+            </div>
+            <span class="chip">—</span>
+          </div>`;
+        return;
+      }
+
+      classes.forEach(c=>{
+        const active = (c.isActive === false) ? "inactive" : "active";
+        const chip = active === "active" ? "aktif" : "tidak aktif";
+        const row = document.createElement("div");
+        row.className = "item";
+        row.innerHTML = `
+          <div>
+            <p class="t">${escapeHtml(c.className || c.classId)}</p>
+            <p class="d">classCode: <b>${escapeHtml(c.classCode || "-")}</b> • classId: ${escapeHtml(c.classId || "-")}</p>
+          </div>
+          <span class="chip">${chip}</span>
+        `;
+        ownedList.appendChild(row);
+      });
+    }
+
+    async function guardAdmin(){
       const token = localStorage.getItem("kk_token") || "";
       if(!token){
         location.href = "../pelajar/login.html";
-        return;
+        return null;
       }
 
       const me = await apiPost({ action:"me", token });
@@ -187,18 +260,33 @@ admin/dashboard.html
         localStorage.removeItem("kk_token");
         localStorage.removeItem("kk_user");
         location.href = "../pelajar/login.html";
-        return;
+        return null;
       }
 
       const role = String(me.user.role || "").toLowerCase();
       if(role !== "admin"){
         showMsg("err", "Akses admin tidak dibenarkan untuk akaun ini.");
         setTimeout(()=> location.href = "../pelajar/dashboard.html", 700);
-        return;
+        return null;
       }
 
       whoEl.textContent = `Hi, ${me.user.name || me.user.email || "Admin"}`;
+      return { token, user: me.user };
+    }
+
+    async function refreshOwned(token){
+      const r = await apiPost({ action:"adminListOwnedClasses", token });
+      if(!r || !r.ok) throw new Error(r?.error || r?.message || "Gagal load kelas admin.");
+      renderOwned(r.classes || []);
+    }
+
+    async function boot(){
+      clearMsg();
+      const session = await guardAdmin();
+      if(!session) return;
+
       showMsg("ok", "Akses admin disahkan.");
+      await refreshOwned(session.token);
     }
 
     document.getElementById("btnLogout").addEventListener("click", ()=>{
@@ -209,6 +297,42 @@ admin/dashboard.html
 
     document.getElementById("btnToStudent").addEventListener("click", ()=>{
       location.href = "../pelajar/dashboard.html";
+    });
+
+    document.getElementById("btnCreateClass").addEventListener("click", async ()=>{
+      createResultEl.style.display = "none";
+      createResultEl.textContent = "";
+
+      try{
+        const session = await guardAdmin();
+        if(!session) return;
+
+        const className = String(classNameEl.value || "").trim();
+        if(!className){
+          showMsg("err", "Nama kelas tak boleh kosong.");
+          return;
+        }
+
+        const r = await apiPost({ action:"createClass", token: session.token, className });
+        if(!r || !r.ok){
+          showMsg("err", r?.error || r?.message || "Gagal create kelas.");
+          return;
+        }
+
+        showMsg("ok", "Kelas berjaya dicipta ✅");
+
+        createResultEl.innerHTML = `
+          <div><b>Class ID:</b> ${escapeHtml(r.classId)}</div>
+          <div><b>Class Code:</b> ${escapeHtml(r.classCode)}</div>
+          <div><b>Nama:</b> ${escapeHtml(r.className)}</div>
+        `;
+        createResultEl.style.display = "block";
+
+        classNameEl.value = "";
+        await refreshOwned(session.token);
+      }catch(err){
+        showMsg("err", err?.message || String(err));
+      }
     });
 
     boot();
