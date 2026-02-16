@@ -1,4 +1,4 @@
 window.APP_CONFIG = {
-  BASE_URL: "https://script.google.com/macros/s/AKfycbxTOhwbSkTgHoMvrp3EMRtKJTWm4UlddGlySl0pNbN4ytM2M0PhvAbpWd_JI0g3IR6H/exec",
+  BASE_URL: "https://script.google.com/macros/s/AKfycbzyd3baWT8RFojuWhjKCbmbSTaQoTlDzpeVsa9sf9jwkodGEXv7BXS38BqU1ltASis/exec",
   APP_BASE: "/kurakura"
 };
