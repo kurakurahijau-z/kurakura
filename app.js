@@ -1,121 +1,84 @@
-// app.js - shared helpers (GitHub Pages safe, Apps Script friendly)
+// app.js
+(function () {
+  const BASE_URL = (window.APP_CONFIG && window.APP_CONFIG.BASE_URL) || "";
 
-// === SET BASE URL (Google Apps Script Web App URL) ===
-const BASE_URL =
-  window.APP_CONFIG?.BASE_URL ||
-  "https://script.google.com/macros/s/AKfycbzyd3baWT8RFojuWhjKCbmbSTaQoTlDzpeVsa9sf9jwkodGEXv7BXS38BqU1ltASis/exec";
-
-// token storage keys
-const TOKEN_KEY = "kk_token";
-const USER_KEY  = "kk_user";
-
-// ===== Base path helper (fix untuk GitHub Pages subpath: /kurakura) =====
-function getAppBasePath(){
-  if (window.APP_CONFIG?.APP_BASE) return window.APP_CONFIG.APP_BASE.replace(/\/$/, "");
-  const parts = (window.location.pathname || "").split("/").filter(Boolean);
-  if (!parts.length) return "";
-  return "/" + parts[0];
-}
-
-const APP_BASE = getAppBasePath();
-
-function toUrl(path){
-  path = String(path || "").trim();
-  if (!path) path = "/index.html";
-  if (!path.startsWith("/")) path = "/" + path;
-  if (APP_BASE && path.startsWith(APP_BASE + "/")) return path;
-  return (APP_BASE || "") + path;
-}
-
-function go(path){
-  window.location.href = toUrl(path);
-}
-
-function logout(){
-  localStorage.removeItem(TOKEN_KEY);
-  localStorage.removeItem(USER_KEY);
-  go("/index.html");
-}
-
-function requireAuthOrRedirect(){
-  const t = localStorage.getItem(TOKEN_KEY);
-  if(!t) go("/index.html");
-}
-
-function getToken(){ return localStorage.getItem(TOKEN_KEY) || ""; }
-
-function getUser(){
-  try { return JSON.parse(localStorage.getItem(USER_KEY) || "{}"); }
-  catch(_) { return {}; }
-}
-
-function requireAdminOrRedirect(){
-  requireAuthOrRedirect();
-  const u = getUser();
-  if (String(u.role || "").toLowerCase() !== "admin") {
-    go("/pelajar/dashboard.html");
+  function getToken() {
+    return localStorage.getItem("kkh_token") || "";
   }
-}
-
-function requireStudentOrRedirect(){
-  requireAuthOrRedirect();
-  const u = getUser();
-  if (String(u.role || "").toLowerCase() === "admin") {
-    go("/admin/dashboard.html");
+  function setToken(t) {
+    localStorage.setItem("kkh_token", t || "");
   }
-}
+  function clearToken() {
+    localStorage.removeItem("kkh_token");
+  }
 
-function getParam(name){
-  const url = new URL(window.location.href);
-  return url.searchParams.get(name) || "";
-}
+  async function safeParseResponse(res) {
+    const text = await res.text();
+    // Cuba parse JSON kalau boleh
+    try {
+      return { ok: true, data: JSON.parse(text), raw: text };
+    } catch (e) {
+      return { ok: false, data: null, raw: text };
+    }
+  }
 
-/**
- * ✅ Apps Script CORS-safe POST
- * - guna application/x-www-form-urlencoded (URLSearchParams)
- * - tak set Content-Type header (browser auto set)
- * - elak OPTIONS preflight
- */
-async function apiPost(payload){
-  payload = payload || {};
-  payload.token = payload.token || getToken();
+  async function apiGet(action, params = {}) {
+    if (!BASE_URL) throw new Error("BASE_URL kosong. Semak config.js");
 
-  const body = new URLSearchParams();
-  Object.entries(payload).forEach(([k,v]) => body.append(k, v ?? ""));
+    const url = new URL(BASE_URL);
+    url.searchParams.set("action", action);
 
-  const res = await fetch(BASE_URL, {
-    method: "POST",
-    body
-  });
+    const token = getToken();
+    if (token) url.searchParams.set("token", token);
 
-  const text = await res.text();
-  try { return JSON.parse(text); }
-  catch(e){ return { ok:false, message:"Response bukan JSON", raw:text }; }
-}
+    Object.entries(params).forEach(([k, v]) => {
+      if (v !== undefined && v !== null) url.searchParams.set(k, String(v));
+    });
 
-/**
- * Optional GET helper (kalau kau nak test cepat)
- */
-async function apiGet(params){
-  params = params || {};
-  params.token = params.token || getToken();
+    const res = await fetch(url.toString(), { method: "GET" });
+    const parsed = await safeParseResponse(res);
 
-  const qs = new URLSearchParams();
-  Object.entries(params).forEach(([k,v]) => qs.append(k, v ?? ""));
+    if (!parsed.ok) {
+      // Bila deploy tak public, Apps Script akan return HTML (verify/login)
+      throw new Error(
+        "Server tak bagi JSON. Ini biasanya sebab DEPLOY bukan 'Anyone'.\n\nResponse (ringkas):\n" +
+          parsed.raw.slice(0, 220)
+      );
+    }
 
-  const url = BASE_URL + (BASE_URL.includes("?") ? "&" : "?") + qs.toString();
-  const res = await fetch(url, { method:"GET" });
+    return parsed.data;
+  }
 
-  const text = await res.text();
-  try { return JSON.parse(text); }
-  catch(e){ return { ok:false, message:"Response bukan JSON", raw:text }; }
-}
+  async function apiPost(action, body = {}) {
+    if (!BASE_URL) throw new Error("BASE_URL kosong. Semak config.js");
 
-// --- escaping
-function escapeHtml(s){
-  s = String(s ?? "");
-  return s.replace(/[&<>"']/g, m => ({
-    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
-  }[m]));
-}
-function escapeAttr(s){ return escapeHtml(s); }
+    const token = getToken();
+    const payload = { action, token, ...body };
+
+    const res = await fetch(BASE_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    const parsed = await safeParseResponse(res);
+
+    if (!parsed.ok) {
+      throw new Error(
+        "Server tak bagi JSON. Ini biasanya sebab DEPLOY bukan 'Anyone'.\n\nResponse (ringkas):\n" +
+          parsed.raw.slice(0, 220)
+      );
+    }
+
+    return parsed.data;
+  }
+
+  // expose globally
+  window.KKH = {
+    apiGet,
+    apiPost,
+    getToken,
+    setToken,
+    clearToken
+  };
+})();
