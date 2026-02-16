@@ -1,4 +1,3 @@
-
 // app.js - shared helpers (GitHub Pages safe)
 
 // === SET BASE URL (Google Apps Script Web App URL) ===
