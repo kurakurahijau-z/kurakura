@@ -1,34 +1,21 @@
+pelajar/index.html
+
 <!DOCTYPE html>
 <html lang="ms">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pelajar • kura kura hijau</title>
-
-  <link rel="stylesheet" href="../styles.css" />
-  <script src="../config.js"></script>
-  <script src="../app.js"></script>
+  <meta charset="UTF-8">
+  <title>Pelajar</title>
+  <link rel="stylesheet" href="../styles.css">
 </head>
+<body class="stage">
 
-<body>
-  <div class="wrap">
-    <div class="container">
-      <div class="card" style="text-align:center">
-        <div class="title">Pelajar</div>
-        <div class="muted" style="margin-top:6px">Redirecting…</div>
-      </div>
-    </div>
+<main style="min-height:100vh;display:flex;align-items:center;justify-content:center;">
+  <div class="card" style="text-align:center">
+    <h1>Pelajar</h1>
+    <p>Portal pembelajaran</p>
+    <a class="btn-primary" href="login.html">Log Masuk</a>
   </div>
+</main>
 
-  <script>
-    (function(){
-      const token = localStorage.getItem("kk_token");
-      if(token){
-        window.location.href = "./dashboard.html";
-      }else{
-        window.location.href = "./login.html";
-      }
-    })();
-  </script>
 </body>
 </html>
