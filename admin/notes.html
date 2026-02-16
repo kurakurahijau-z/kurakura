@@ -1,208 +1,122 @@
-admin/notes.html
-
 <!DOCTYPE html>
 <html lang="ms">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin Nota • kura kura hijau</title>
-
   <link rel="stylesheet" href="../styles.css" />
   <script src="../config.js"></script>
-
-  <style>
-    .page{ min-height:100vh; padding: 18px 16px 40px; }
-    .top{ position: sticky; top: 0; z-index: 20; background: rgba(255,255,255,.75); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,.50); }
-    .top-inner{ max-width: 1100px; margin: 0 auto; padding: 14px 8px; display:flex; align-items:center; justify-content:space-between; gap: 12px; }
-    .brand h1{ margin:0; font-size: 20px; font-weight: 950; }
-    .brand p{ margin:4px 0 0; color:#334155; font-weight:800; font-size: 12px; }
-
-    .btn{ border: 0; cursor: pointer; padding: 10px 14px; border-radius: 14px; font-weight: 900; background: #059669; color: #fff; box-shadow: 0 8px 18px rgba(5,150,105,.18); }
-    .btn:hover{ background:#047857; }
-    .btn.ghost{ background: rgba(255,255,255,.75); color:#0f172a; border: 1px solid rgba(15,23,42,.10); box-shadow: 0 10px 30px rgba(2,6,23,.06); }
-    .btn.ghost:hover{ background: rgba(255,255,255,.90); }
-    .btn.small{ padding: 8px 10px; border-radius: 12px; font-size: 12px; }
-
-    .container{ max-width: 1100px; margin: 16px auto 0; display:grid; gap: 14px; }
-
-    .card{ background: rgba(255,255,255,.82); border: 1px solid rgba(255,255,255,.55); border-radius: 18px; box-shadow: 0 10px 30px rgba(2, 6, 23, .10); padding: 18px; }
-
-    label{ display:block; font-weight: 900; margin: 10px 0 6px; }
-    select, input{
-      width:100%; box-sizing:border-box; padding: 12px 12px;
-      border-radius: 14px; border: 1px solid rgba(15,23,42,.16);
-      background: rgba(255,255,255,.70); outline:none;
-      font-weight: 800;
-    }
-    input:focus, select:focus{ border-color: rgba(5,150,105,.55); box-shadow: 0 0 0 4px rgba(5,150,105,.14); }
-
-    .msg{ display:none; padding: 10px 12px; border-radius: 14px; font-weight: 900; }
-    .msg.err{ display:block; background: rgba(239,68,68,.10); border: 1px solid rgba(239,68,68,.28); color: #991b1b; }
-    .msg.ok{ display:block; background: rgba(34,197,94,.10); border: 1px solid rgba(34,197,94,.28); color: #065f46; }
-
-    table{ width:100%; border-collapse: collapse; }
-    th, td{ padding: 10px 8px; border-bottom: 1px solid rgba(15,23,42,.08); vertical-align: top; }
-    th{ text-align:left; font-size: 12px; color:#334155; font-weight: 950; }
-    td{ font-size: 13px; font-weight: 800; color:#0f172a; }
-    .muted{ color:#334155; font-weight: 800; opacity:.9; font-size: 12px; }
-    .pill{ display:inline-flex; padding: 4px 10px; border-radius: 999px; border:1px solid rgba(15,23,42,.12); background: rgba(255,255,255,.65); font-size: 12px; font-weight: 950; }
-    .rowBtns{ display:flex; gap: 8px; flex-wrap: wrap; }
-    .link{ color:#059669; font-weight: 950; text-decoration: none; }
-    .link:hover{ text-decoration: underline; }
-
-    .grid{ display:grid; gap:14px; grid-template-columns: 1fr; }
-    @media(min-width: 900px){ .grid{ grid-template-columns: 1fr 1fr; } }
-  </style>
+  <script src="../app.js"></script>
 </head>
 <body class="stage">
-  <header class="top">
-    <div class="top-inner">
-      <div class="brand">
+  <header class="topbar">
+    <div class="inner">
+      <div>
         <h1>Admin • Nota</h1>
-        <p id="who">Loading...</p>
+        <p id="who" class="muted">Loading...</p>
       </div>
-      <div style="display:flex; gap:10px;">
+      <div class="actions">
         <a class="btn ghost" href="./dashboard.html">← Dashboard</a>
-        <button class="btn" id="btnLogout" type="button">Logout</button>
+        <button class="btn danger" onclick="logout()">Logout</button>
       </div>
     </div>
   </header>
 
-  <main class="page">
-    <div class="container">
-      <div id="msg" class="msg"></div>
+  <main class="container">
+    <div id="msg" class="notice"></div>
 
-      <div class="card">
-        <div class="grid">
-          <div>
-            <label>Kelas (owner kau)</label>
-            <select id="classSel"></select>
-            <div class="muted" style="margin-top:8px;">Kalau dropdown kosong, maknanya dalam sheet <b>Classes</b> belum ada row ownerUserId = userId admin (U001).</div>
-          </div>
-
-          <div>
-            <label>Subject</label>
-            <select id="subjectSel"></select>
-            <div class="muted" style="margin-top:8px;">Subject ambil dari sheet <b>Subjects</b>. Kalau nak tambah cepat, guna form “Tambah Nota” – dia paksa pilih subject dulu.</div>
-          </div>
+    <section class="card">
+      <div class="grid2">
+        <div class="card" style="padding:14px;">
+          <label>Kelas (owner)</label>
+          <select id="classSel"></select>
+          <p class="muted small" style="margin-top:8px;">
+            Kalau dropdown kosong, semak sheet <b>Classes.ownerUserId</b> mesti sama dengan <b>userId admin</b>.
+          </p>
         </div>
 
-        <div style="display:flex; gap:10px; margin-top:12px; flex-wrap:wrap;">
-          <button class="btn" id="btnReload" type="button">Reload</button>
-          <button class="btn ghost" id="btnNew" type="button">+ Tambah Nota</button>
+        <div class="card" style="padding:14px;">
+          <label>Subject</label>
+          <select id="subjectSel"></select>
+          <p class="muted small" style="margin-top:8px;">
+            Subject ambil dari sheet <b>Subjects</b>. Kalau belum ada, tambah dulu.
+          </p>
         </div>
       </div>
 
-      <div class="card">
-        <h3 style="margin:0 0 10px; font-weight:950;">Senarai Nota</h3>
-        <div class="muted" style="margin-bottom:10px;">Admin boleh edit, release/draft, dan aktif/nonaktif.</div>
+      <div style="display:flex; gap:10px; margin-top:12px; flex-wrap:wrap;">
+        <button class="btn" id="btnReload" type="button">Reload</button>
+        <button class="btn ghost" id="btnNew" type="button">+ Tambah Nota</button>
+      </div>
+    </section>
 
-        <div style="overflow:auto;">
-          <table>
-            <thead>
-              <tr>
-                <th>Title</th>
-                <th>Subject</th>
-                <th>Status</th>
-                <th>Link</th>
-                <th>Tindakan</th>
-              </tr>
-            </thead>
-            <tbody id="rows"></tbody>
-          </table>
-        </div>
+    <section class="card">
+      <h3 style="margin:0 0 10px; font-weight:950;">Senarai Nota</h3>
+      <p class="muted small" style="margin:0 0 10px;">Pelajar nampak hanya <b>released</b> + <b>active</b>.</p>
+
+      <div style="overflow:auto;">
+        <table style="width:100%; border-collapse:collapse;">
+          <thead>
+            <tr>
+              <th style="text-align:left; padding:10px 8px; border-bottom:1px solid rgba(15,23,42,.08);">Title</th>
+              <th style="text-align:left; padding:10px 8px; border-bottom:1px solid rgba(15,23,42,.08);">Subject</th>
+              <th style="text-align:left; padding:10px 8px; border-bottom:1px solid rgba(15,23,42,.08);">Status</th>
+              <th style="text-align:left; padding:10px 8px; border-bottom:1px solid rgba(15,23,42,.08);">Link</th>
+              <th style="text-align:left; padding:10px 8px; border-bottom:1px solid rgba(15,23,42,.08);">Tindakan</th>
+            </tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card" id="formCard" style="display:none;">
+      <h3 style="margin:0 0 10px; font-weight:950;" id="formTitle">Tambah Nota</h3>
+
+      <label>Subject</label>
+      <select id="fSubject"></select>
+
+      <label>Title</label>
+      <input id="fTitle" placeholder="Contoh: Slide Bab 1" />
+
+      <label>Content Link</label>
+      <input id="fLink" placeholder="https://..." />
+
+      <label>Release Status</label>
+      <select id="fRelease">
+        <option value="draft">draft</option>
+        <option value="released">released</option>
+      </select>
+
+      <div style="display:flex; gap:10px; margin-top:14px; flex-wrap:wrap;">
+        <button class="btn" id="btnSave" type="button">Simpan</button>
+        <button class="btn ghost" id="btnCancel" type="button">Batal</button>
       </div>
 
-      <div class="card" id="formCard" style="display:none;">
-        <h3 style="margin:0 0 10px; font-weight:950;" id="formTitle">Tambah Nota</h3>
-
-        <label>Subject</label>
-        <select id="fSubject"></select>
-
-        <label>Title</label>
-        <input id="fTitle" placeholder="Contoh: Slide Bab 1" />
-
-        <label>Content Link</label>
-        <input id="fLink" placeholder="https://..." />
-
-        <label>Release Status</label>
-        <select id="fRelease">
-          <option value="draft">draft</option>
-          <option value="released">released</option>
-        </select>
-
-        <div style="display:flex; gap:10px; margin-top:14px; flex-wrap:wrap;">
-          <button class="btn" id="btnSave" type="button">Simpan</button>
-          <button class="btn ghost" id="btnCancel" type="button">Batal</button>
-        </div>
-
-        <div class="muted" style="margin-top:10px;">
-          Nota yang <b>released</b> sahaja akan nampak di portal pelajar.
-        </div>
-      </div>
-    </div>
+      <p class="muted small" style="margin-top:10px;">
+        Nota yang <b>released</b> sahaja akan nampak di portal pelajar.
+      </p>
+    </section>
   </main>
 
   <script>
     const $ = (id)=>document.getElementById(id);
     const msgEl = $("msg");
-    const whoEl = $("who");
 
     let token = "";
-    let meUser = null;
-
     let currentClassId = "";
     let subjects = [];
     let notes = [];
     let editingNoteId = "";
 
-    function showMsg(type, text){
-      msgEl.className = "msg " + (type === "ok" ? "ok" : "err");
-      msgEl.textContent = text;
-      msgEl.style.display = "block";
+    function showMsg(text, ok){
+      msgEl.style.display="block";
+      msgEl.textContent=text;
+      msgEl.style.background = ok ? "rgba(34,197,94,.10)" : "rgba(239,68,68,.10)";
+      msgEl.style.border = ok ? "1px solid rgba(34,197,94,.28)" : "1px solid rgba(239,68,68,.28)";
+      msgEl.style.color = ok ? "#065f46" : "#991b1b";
     }
-    function clearMsg(){
-      msgEl.style.display = "none";
-      msgEl.textContent = "";
-      msgEl.className = "msg";
-    }
-
-    function getBaseUrl(){
-      const cfg = window.APP_CONFIG;
-      return (cfg && cfg.BASE_URL) ? cfg.BASE_URL : null;
-    }
-    async function apiPost(params){
-      const BASE_URL = getBaseUrl();
-      if(!BASE_URL) throw new Error("APP_CONFIG.BASE_URL tak wujud. Semak config.js");
-
-      const body = new URLSearchParams();
-      Object.entries(params).forEach(([k,v]) => body.append(k, v ?? ""));
-
-      const res = await fetch(BASE_URL, { method:"POST", body });
-      const text = await res.text();
-      try{ return JSON.parse(text); }
-      catch(e){ return { ok:false, message:"Invalid JSON from server", raw:text }; }
-    }
-
-    function requireLogin(){
-      token = localStorage.getItem("kk_token") || "";
-      if(!token){ location.href = "../pelajar/login.html"; return false; }
-      return true;
-    }
-
-    async function guardAdmin(){
-      const me = await apiPost({ action:"me", token });
-      if(!me || !me.ok || !me.user){
-        localStorage.removeItem("kk_token"); localStorage.removeItem("kk_user");
-        location.href = "../pelajar/login.html"; return false;
-      }
-      if(String(me.user.role||"").toLowerCase() !== "admin"){
-        location.href = "../pelajar/dashboard.html"; return false;
-      }
-      meUser = me.user;
-      whoEl.textContent = `Hi, ${me.user.name || me.user.email || "Admin"}`;
-      return true;
-    }
+    function clearMsg(){ msgEl.style.display="none"; msgEl.textContent=""; }
 
     function fillSelect(sel, items, getVal, getText){
       sel.innerHTML = "";
@@ -214,98 +128,105 @@ admin/notes.html
       });
     }
 
+    async function guardAdmin(){
+      token = getToken();
+      requireAuthOrRedirect();
+      const me = await apiPost({ action:"me", token });
+      if(!me.ok){ logout(); return false; }
+      if(String(me.user?.role||"").toLowerCase()!=="admin"){
+        location.href="../pelajar/dashboard.html"; return false;
+      }
+      $("who").textContent = `Hi, ${me.user?.name || me.user?.email || "Admin"}`;
+      return true;
+    }
+
     async function loadClasses(){
       const r = await apiPost({ action:"adminListOwnedClasses", token });
       if(!r.ok) throw new Error(r.message || "Gagal load classes");
-
       fillSelect($("classSel"), r.classes || [], x=>x.classId, x=>`${x.className} (${x.classCode})`);
       currentClassId = $("classSel").value || "";
     }
 
     async function loadSubjects(){
-      if(!currentClassId){ subjects = []; return; }
+      if(!currentClassId){ subjects=[]; return; }
       const r = await apiPost({ action:"adminListSubjects", token, classId: currentClassId });
       if(!r.ok) throw new Error(r.message || "Gagal load subjects");
       subjects = r.subjects || [];
-
-      // subject filter dropdown + form dropdown
       fillSelect($("subjectSel"), subjects, s=>s.subjectId, s=>`${s.subjectName}${s.isActive ? "" : " (inactive)"}`);
       fillSelect($("fSubject"), subjects, s=>s.subjectId, s=>`${s.subjectName}${s.isActive ? "" : " (inactive)"}`);
     }
 
     async function loadNotes(){
-      if(!currentClassId){ notes=[]; renderNotes(); return; }
+      if(!currentClassId){ notes=[]; render(); return; }
       const r = await apiPost({ action:"adminListNotes", token, classId: currentClassId });
       if(!r.ok) throw new Error(r.message || "Gagal load notes");
       notes = r.notes || [];
-      renderNotes();
+      render();
     }
 
-    function renderNotes(){
+    function render(){
       const tbody = $("rows");
       tbody.innerHTML = "";
+      const filter = $("subjectSel").value || "";
+      const arr = filter ? notes.filter(n=>n.subjectId===filter) : notes;
 
-      const subjectFilter = $("subjectSel").value || "";
-      const filtered = subjectFilter ? notes.filter(n=>n.subjectId === subjectFilter) : notes;
+      if(!arr.length){
+        tbody.innerHTML = `<tr><td colspan="5" class="muted" style="padding:12px 8px;">Tiada nota.</td></tr>`;
+        return;
+      }
 
-      filtered.forEach(n=>{
+      arr.forEach(n=>{
         const tr = document.createElement("tr");
-
-        const td1 = document.createElement("td");
-        td1.textContent = n.title || "-";
-
-        const td2 = document.createElement("td");
-        td2.innerHTML = `<div>${n.subjectName || n.subjectId}</div><div class="muted">${n.subjectId}</div>`;
-
-        const td3 = document.createElement("td");
-        td3.innerHTML = `
-          <div class="pill">${(n.releaseStatus||"draft").toLowerCase()}</div>
-          <div class="muted" style="margin-top:6px;">${n.isActive ? "active" : "inactive"}</div>
+        tr.innerHTML = `
+          <td style="padding:10px 8px; border-bottom:1px solid rgba(15,23,42,.08); font-weight:900;">${escapeHtml(n.title||"-")}</td>
+          <td style="padding:10px 8px; border-bottom:1px solid rgba(15,23,42,.08);">
+            <div style="font-weight:900;">${escapeHtml(n.subjectName||n.subjectId||"-")}</div>
+            <div class="muted small">${escapeHtml(n.subjectId||"")}</div>
+          </td>
+          <td style="padding:10px 8px; border-bottom:1px solid rgba(15,23,42,.08);">
+            <div class="tab ${String(n.releaseStatus||"draft").toLowerCase()==="released" ? "active":""}">${escapeHtml(String(n.releaseStatus||"draft"))}</div>
+            <div class="muted small" style="margin-top:6px;">${n.isActive ? "active" : "inactive"}</div>
+          </td>
+          <td style="padding:10px 8px; border-bottom:1px solid rgba(15,23,42,.08);">
+            ${n.contentLink ? `<a target="_blank" href="${escapeAttr(n.contentLink)}">Buka</a>` : `<span class="muted small">-</span>`}
+          </td>
+          <td style="padding:10px 8px; border-bottom:1px solid rgba(15,23,42,.08);">
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button class="btn ghost" data-act="edit">Edit</button>
+              <button class="btn" data-act="release">${String(n.releaseStatus||"draft").toLowerCase()==="released" ? "Set Draft" : "Release"}</button>
+              <button class="btn ghost" data-act="active">${n.isActive ? "Deactivate" : "Activate"}</button>
+            </div>
+          </td>
         `;
-
-        const td4 = document.createElement("td");
-        td4.innerHTML = n.contentLink ? `<a class="link" href="${n.contentLink}" target="_blank" rel="noopener">Buka</a>` : `<span class="muted">-</span>`;
-
-        const td5 = document.createElement("td");
-        td5.className = "rowBtns";
-        td5.innerHTML = `
-          <button class="btn small ghost" data-act="edit">Edit</button>
-          <button class="btn small" data-act="toggleRelease">${(String(n.releaseStatus||"").toLowerCase()==="released")?"Set Draft":"Release"}</button>
-          <button class="btn small ghost" data-act="toggleActive">${n.isActive ? "Deactivate" : "Activate"}</button>
-        `;
-
-        td5.querySelector('[data-act="edit"]').onclick = ()=>openForm(n);
-        td5.querySelector('[data-act="toggleRelease"]').onclick = ()=>toggleRelease(n);
-        td5.querySelector('[data-act="toggleActive"]').onclick = ()=>toggleActive(n);
-
-        tr.appendChild(td1); tr.appendChild(td2); tr.appendChild(td3); tr.appendChild(td4); tr.appendChild(td5);
+        tr.querySelector('[data-act="edit"]').onclick = ()=>openForm(n);
+        tr.querySelector('[data-act="release"]').onclick = ()=>toggleRelease(n);
+        tr.querySelector('[data-act="active"]').onclick = ()=>toggleActive(n);
         tbody.appendChild(tr);
       });
     }
 
     function openForm(note){
-      $("formCard").style.display = "block";
+      $("formCard").style.display="block";
       if(note){
         editingNoteId = note.noteId;
-        $("formTitle").textContent = "Edit Nota";
+        $("formTitle").textContent="Edit Nota";
         $("fSubject").value = note.subjectId;
         $("fTitle").value = note.title || "";
         $("fLink").value = note.contentLink || "";
         $("fRelease").value = (String(note.releaseStatus||"draft").toLowerCase()==="released") ? "released" : "draft";
       }else{
         editingNoteId = "";
-        $("formTitle").textContent = "Tambah Nota";
+        $("formTitle").textContent="Tambah Nota";
         $("fSubject").value = $("subjectSel").value || (subjects[0]?.subjectId || "");
-        $("fTitle").value = "";
-        $("fLink").value = "";
-        $("fRelease").value = "draft";
+        $("fTitle").value="";
+        $("fLink").value="";
+        $("fRelease").value="draft";
       }
       window.scrollTo({ top: document.body.scrollHeight, behavior:"smooth" });
     }
-
     function closeForm(){
-      $("formCard").style.display = "none";
-      editingNoteId = "";
+      $("formCard").style.display="none";
+      editingNoteId="";
     }
 
     async function saveNote(){
@@ -315,10 +236,7 @@ admin/notes.html
       const contentLink = $("fLink").value.trim();
       const releaseStatus = $("fRelease").value;
 
-      if(!subjectId || !title){
-        showMsg("err","Subject dan title wajib.");
-        return;
-      }
+      if(!subjectId || !title) return showMsg("Subject dan title wajib.", false);
 
       const r = await apiPost({
         action:"adminUpsertNote",
@@ -329,80 +247,56 @@ admin/notes.html
         contentLink,
         releaseStatus
       });
+      if(!r.ok) return showMsg(r.message || "Gagal simpan nota", false);
 
-      if(!r.ok){
-        showMsg("err", r.message || "Gagal simpan nota");
-        return;
-      }
-
-      showMsg("ok", "Nota disimpan.");
+      showMsg("Nota disimpan.", true);
       closeForm();
       await loadNotes();
     }
 
-    async function toggleRelease(note){
+    async function toggleRelease(n){
       clearMsg();
-      const nowRel = String(note.releaseStatus||"draft").toLowerCase();
-      const next = (nowRel === "released") ? "draft" : "released";
-
-      const r = await apiPost({ action:"adminSetNoteRelease", token, noteId: note.noteId, releaseStatus: next });
-      if(!r.ok){ showMsg("err", r.message || "Gagal tukar release"); return; }
-
-      showMsg("ok", "Berjaya update releaseStatus.");
+      const now = String(n.releaseStatus||"draft").toLowerCase();
+      const next = (now==="released") ? "draft" : "released";
+      const r = await apiPost({ action:"adminSetNoteRelease", token, noteId:n.noteId, releaseStatus:next });
+      if(!r.ok) return showMsg(r.message || "Gagal update release", false);
+      showMsg("Berjaya update releaseStatus.", true);
       await loadNotes();
     }
 
-    async function toggleActive(note){
+    async function toggleActive(n){
       clearMsg();
-      const next = note.isActive ? "false" : "true";
-      const r = await apiPost({ action:"adminSetNoteActive", token, noteId: note.noteId, isActive: next });
-      if(!r.ok){ showMsg("err", r.message || "Gagal tukar active"); return; }
-
-      showMsg("ok", "Berjaya update active.");
+      const next = n.isActive ? "false" : "true";
+      const r = await apiPost({ action:"adminSetNoteActive", token, noteId:n.noteId, isActive:next });
+      if(!r.ok) return showMsg(r.message || "Gagal update active", false);
+      showMsg("Berjaya update active.", true);
       await loadNotes();
     }
 
-    $("btnLogout").onclick = ()=>{
-      localStorage.removeItem("kk_token");
-      localStorage.removeItem("kk_user");
-      location.href = "../pelajar/login.html";
-    };
-
-    $("classSel").onchange = async ()=>{
-      currentClassId = $("classSel").value || "";
-      try{
-        await loadSubjects();
-        await loadNotes();
-      }catch(e){
-        console.error(e);
-        showMsg("err", e.message || String(e));
-      }
-    };
-
-    $("subjectSel").onchange = renderNotes;
     $("btnReload").onclick = async ()=>{
-      try{ clearMsg(); await loadSubjects(); await loadNotes(); showMsg("ok","Reload ok."); }
-      catch(e){ console.error(e); showMsg("err", e.message || String(e)); }
+      try{ clearMsg(); await loadSubjects(); await loadNotes(); showMsg("Reload ok.", true); }
+      catch(e){ console.error(e); showMsg(e.message || String(e), false); }
     };
     $("btnNew").onclick = ()=>openForm(null);
     $("btnCancel").onclick = closeForm;
-    $("btnSave").onclick = ()=>saveNote();
+    $("btnSave").onclick = saveNote;
+    $("classSel").onchange = async ()=>{
+      currentClassId = $("classSel").value || "";
+      try{ await loadSubjects(); await loadNotes(); }
+      catch(e){ console.error(e); showMsg(e.message || String(e), false); }
+    };
+    $("subjectSel").onchange = render;
 
     (async ()=>{
       try{
-        if(!requireLogin()) return;
         if(!await guardAdmin()) return;
-
         await loadClasses();
         await loadSubjects();
         await loadNotes();
-
-        if(!currentClassId){
-          showMsg("err","Tiada kelas owner admin ditemui. Semak sheet Classes.ownerUserId = userId admin.");
-        }
+        if(!currentClassId) showMsg("Tiada kelas owner admin ditemui.", false);
       }catch(e){
         console.error(e);
-        showMsg("err", e.message || String(e));
+        showMsg(e.message || String(e), false);
       }
     })();
   </script>
