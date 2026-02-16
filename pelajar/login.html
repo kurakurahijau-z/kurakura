@@ -7,6 +7,7 @@
 
   <link rel="stylesheet" href="../styles.css" />
   <script src="../config.js"></script>
+  <script src="../app.js"></script>
 
   <style>
     .wrap{ min-height:100vh; display:grid; place-items:center; padding:24px 16px; }
@@ -96,24 +97,6 @@
       msgEl.textContent = "";
       msgEl.className = "msg";
     }
-    function getBaseUrl(){
-      const cfg = window.APP_CONFIG;
-      return (cfg && cfg.BASE_URL) ? cfg.BASE_URL : null;
-    }
-
-    async function apiPost(obj){
-      const BASE_URL = getBaseUrl();
-      if(!BASE_URL) throw new Error("APP_CONFIG.BASE_URL tak wujud. Semak config.js");
-
-      const res = await fetch(BASE_URL, {
-        method: "POST",
-        headers: { "Content-Type":"application/json" },
-        body: JSON.stringify(obj || {})
-      });
-      const text = await res.text();
-      try { return JSON.parse(text); }
-      catch(e){ return { ok:false, message:"Invalid JSON from server", raw:text }; }
-    }
 
     form.addEventListener("submit", async (e)=>{
       e.preventDefault();
@@ -125,21 +108,24 @@
       showMsg("ok", "Checking...");
 
       try{
-        const data = await apiPost({ action:"login", email, password });
+        // ✅ Guna KKH.apiPost (yang dah CORS-safe)
+        const data = await KKH.apiPost("login", { email, password });
+
         if(!data || !data.ok){
-          showMsg("err", data?.message || "Login gagal");
+          showMsg("err", data?.error || data?.message || "Login gagal");
           return;
         }
 
-        localStorage.setItem("kk_token", data.token || "");
-        localStorage.setItem("kk_user", JSON.stringify(data.user || {}));
+        // ✅ simpan ikut key standard
+        KKH.setToken(data.token || "");
+        KKH.setUser(data.user || {});
 
-        // role-based redirect
-        const role = String(data.user?.role || "").toLowerCase();
-        if(role === "admin") location.href = "../admin/dashboard.html";
+        // ✅ role-based redirect ikut backend (isAdmin boolean)
+        if (data.user && data.user.isAdmin) location.href = "../admin/dashboard.html";
         else location.href = "./dashboard.html";
 
       } catch(err){
+        console.error(err);
         showMsg("err", "Tak dapat connect server. Semak BASE_URL dan Console.");
       }
     });
