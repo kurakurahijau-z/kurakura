@@ -1,99 +1,82 @@
 <!doctype html>
 <html lang="ms">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Dashboard Admin • kura kura hijau</title>
+  <title>Dashboard Admin</title>
   <link rel="stylesheet" href="../styles.css" />
   <script src="../config.js"></script>
   <script src="../app.js"></script>
 </head>
-<body>
-  <div class="page">
-    <div class="topbar">
+<body class="stage">
+  <header class="topbar">
+    <div class="inner">
       <div>
-        <h1 style="margin:0;">Dashboard Admin</h1>
-        <div id="hello" style="color:#4b5563;">Hi, ...</div>
+        <h1>Dashboard Admin</h1>
+        <p id="who" class="muted">Loading...</p>
       </div>
-      <div style="display:flex;gap:10px;">
-        <a class="btn" href="../pelajar/dashboard.html">Ke portal pelajar</a>
-        <button class="btn primary" id="btnLogout">Logout</button>
+      <div class="actions">
+        <a class="btn ghost" href="../pelajar/dashboard.html">Ke portal pelajar</a>
+        <button class="btn danger" onclick="logout()">Keluar</button>
       </div>
     </div>
+  </header>
 
-    <div id="msg" class="alert" style="display:none;margin-top:14px;"></div>
+  <main class="container">
+    <section class="card">
+      <h2 style="margin:0; font-weight:950;">Pengurusan</h2>
+      <p class="muted">Ruang admin untuk urus kelas, nota dan kuiz.</p>
 
-    <div class="grid" style="margin-top:16px;">
-      <div class="card">
-        <h2 style="margin:0 0 6px;">Pengurusan</h2>
-        <p style="margin:0 0 14px;color:#4b5563;">Ruang admin untuk urus kelas, nota dan kuiz.</p>
-
-        <div class="item">
-          <div>
-            <b>Kelas</b><br>
-            <span style="color:#4b5563;">Create kelas & dapatkan class code untuk pelajar join.</span>
+      <div class="grid2" style="margin-top:12px;">
+        <div class="card" style="padding:14px;">
+          <h3 style="margin:0;">Kelas</h3>
+          <p class="muted small">Create kelas & dapatkan class code untuk pelajar join.</p>
+          <div style="margin-top:10px;">
+            <a class="btn" href="./class.html">Buka</a>
           </div>
-          <a class="btn" href="./create-class.html">Buka</a>
         </div>
 
-        <div class="item">
-          <div>
-            <b>Nota</b><br>
-            <span style="color:#4b5563;">Tambah/edit nota, release/unrelease.</span>
+        <div class="card" style="padding:14px;">
+          <h3 style="margin:0;">Nota</h3>
+          <p class="muted small">Tambah/edit nota, release/unrelease.</p>
+          <div style="margin-top:10px;">
+            <a class="btn" href="./notes.html">Buka</a>
           </div>
-          <a class="btn" href="./notes.html">Buka</a>
         </div>
 
-        <div class="item">
-          <div>
-            <b>Kuiz</b><br>
-            <span style="color:#4b5563;">Tambah kuiz (Google Form link), aktif/nonaktif.</span>
+        <div class="card" style="padding:14px;">
+          <h3 style="margin:0;">Kuiz</h3>
+          <p class="muted small">Tambah kuiz (Google Form link), aktif/nonaktif.</p>
+          <div style="margin-top:10px;">
+            <a class="btn" href="./quizzes.html">Buka</a>
           </div>
-          <a class="btn" href="./quizzes.html">Buka</a>
         </div>
       </div>
 
-      <div class="card">
-        <h2 style="margin:0 0 6px;">Nota ringkas</h2>
-        <ul style="margin:0;padding-left:18px;color:#111827;">
+      <div class="card" style="padding:14px; margin-top:14px;">
+        <h3 style="margin:0 0 8px;">Nota ringkas</h3>
+        <ul style="margin:0; padding-left:18px; font-weight:850; color:var(--muted);">
           <li>Admin login guna halaman login yang sama.</li>
           <li>Lepas login, sistem auto-redirect ikut role.</li>
           <li>Kalau pelajar cuba buka halaman admin, sistem halang.</li>
         </ul>
-        <p style="margin-top:12px;color:#4b5563;">
+        <p class="muted small" style="margin-top:10px;">
           Tip: Lepas create kelas, bagi pelajar <b>class code</b> untuk join.
         </p>
       </div>
-    </div>
-  </div>
+    </section>
+  </main>
 
-<script>
-  const msg = document.getElementById("msg");
-  function showMsg(text){
-    msg.style.display="block";
-    msg.textContent=text;
-    msg.style.background="#fee2e2";
-    msg.style.border="1px solid #fecaca";
-    msg.style.color="#991b1b";
-  }
-
-  async function boot(){
-    try{
-      const me = await KKH.apiGet("me");
-      if (!me.ok) throw new Error(me.error || "Sila login semula.");
-      if (!me.user || !me.user.isAdmin) location.href = "../pelajar/login.html";
-      document.getElementById("hello").textContent = "Hi, " + (me.user.name || me.user.email);
-    }catch(err){
-      showMsg(err.message || String(err));
-    }
-  }
-
-  document.getElementById("btnLogout").addEventListener("click", () => {
-    KKH.clearToken();
-    location.href = "../pelajar/login.html";
-  });
-
-  boot();
-</script>
+  <script>
+    (async ()=>{
+      requireAuthOrRedirect();
+      const r = await apiPost({ action:"me", token:getToken() });
+      if(!r.ok){ logout(); return; }
+      if(String(r.user?.role||"").toLowerCase()!=="admin"){
+        location.href = "../pelajar/dashboard.html"; return;
+      }
+      document.getElementById("who").textContent = `Hi, ${r.user?.name || r.user?.email || "admin"}`;
+    })();
+  </script>
 </body>
 </html>
