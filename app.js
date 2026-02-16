@@ -1,73 +1,112 @@
-// app.js
-(function(){
-  const cfg = window.APP_CONFIG || {};
-  const BASE_URL = cfg.BASE_URL;
+app.js
 
-  function mustBaseUrl(){
-    if(!BASE_URL || String(BASE_URL).includes("PASTE_WEB_APP_EXEC_URL")){
-      throw new Error("BASE_URL belum set. Pergi config.js dan paste URL Apps Script /exec.");
-    }
+// app.js - shared helpers (GitHub Pages safe)
+
+// === SET BASE URL (Google Apps Script Web App URL) ===
+const BASE_URL =
+  window.APP_CONFIG?.BASE_URL ||
+  "https://script.google.com/macros/s/AKfycbxTOhwbSkTgHoMvrp3EMRtKJTWm4UlddGlySl0pNbN4ytM2M0PhvAbpWd_JI0g3IR6H/exec";
+
+// token storage keys
+const TOKEN_KEY = "kk_token";
+const USER_KEY  = "kk_user";
+
+// ===== Base path helper (fix untuk GitHub Pages subpath: /kurakura) =====
+function getAppBasePath(){
+  // Kalau config.js ada define APP_BASE, guna itu (paling solid)
+  if (window.APP_CONFIG?.APP_BASE) return window.APP_CONFIG.APP_BASE.replace(/\/$/, "");
+
+  // Auto-detect: ambik first segment path (contoh: /kurakura/pelajar/login.html)
+  const parts = (window.location.pathname || "").split("/").filter(Boolean);
+  if (!parts.length) return ""; // root domain
+
+  // GitHub Pages biasa: /<repo-name>/...
+  return "/" + parts[0];
+}
+
+const APP_BASE = getAppBasePath();
+
+function toUrl(path){
+  // path boleh jadi "/index.html" atau "pelajar/login.html"
+  path = String(path || "").trim();
+  if (!path) path = "/index.html";
+  if (!path.startsWith("/")) path = "/" + path;
+
+  // elak double base (kalau user pass "/kurakura/index.html")
+  if (APP_BASE && path.startsWith(APP_BASE + "/")) return path;
+
+  return (APP_BASE || "") + path;
+}
+
+function go(path){
+  window.location.href = toUrl(path);
+}
+
+function logout(){
+  localStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem(USER_KEY);
+  go("/index.html");
+}
+
+function requireAuthOrRedirect(){
+  const t = localStorage.getItem(TOKEN_KEY);
+  if(!t) go("/index.html");
+}
+
+// ===== User helpers =====
+function getToken(){ return localStorage.getItem(TOKEN_KEY) || ""; }
+
+function getUser(){
+  try { return JSON.parse(localStorage.getItem(USER_KEY) || "{}"); }
+  catch(_) { return {}; }
+}
+
+function requireAdminOrRedirect(){
+  requireAuthOrRedirect();
+  const u = getUser();
+  if (String(u.role || "").toLowerCase() !== "admin") {
+    // kalau bukan admin, campak balik ke dashboard pelajar
+    go("/pelajar/dashboard.html");
   }
+}
 
-  async function apiPost(params){
-    mustBaseUrl();
-    const body = new URLSearchParams();
-    Object.entries(params || {}).forEach(([k,v])=> body.append(k, v ?? ""));
-    const res = await fetch(BASE_URL, { method:"POST", body });
-    const text = await res.text();
-    try{ return JSON.parse(text); }
-    catch(e){ return { ok:false, message:"Invalid JSON from server", raw:text }; }
+function requireStudentOrRedirect(){
+  requireAuthOrRedirect();
+  const u = getUser();
+  if (String(u.role || "").toLowerCase() === "admin") {
+    go("/admin/dashboard.html");
   }
+}
 
-  function getParam(name){
-    const url = new URL(location.href);
-    return url.searchParams.get(name) || "";
-  }
+// ===== URL param helper =====
+function getParam(name){
+  const url = new URL(window.location.href);
+  return url.searchParams.get(name) || "";
+}
 
-  function go(path){ location.href = path; }
+// ===== API =====
+async function apiPost(payload){
+  payload = payload || {};
+  payload.token = payload.token || getToken();
 
-  function escapeHtml(s){
-    return String(s ?? "")
-      .replaceAll("&","&amp;")
-      .replaceAll("<","&lt;")
-      .replaceAll(">","&gt;")
-      .replaceAll('"',"&quot;")
-      .replaceAll("'","&#039;");
-  }
-  function escapeAttr(s){ return escapeHtml(s); }
+  const res = await fetch(BASE_URL, {
+    method: "POST",
+    headers: { "Content-Type":"application/json" },
+    body: JSON.stringify(payload)
+  });
 
-  function getToken(){ return localStorage.getItem("kk_token") || ""; }
-  function setToken(t){ localStorage.setItem("kk_token", t || ""); }
-  function clearToken(){ localStorage.removeItem("kk_token"); localStorage.removeItem("kk_user"); }
+  let data = null;
+  try{ data = await res.json(); }
+  catch(_){ data = { ok:false, message:"Invalid JSON response" }; }
 
-  function requireAuthOrRedirect(){
-    const t = getToken();
-    if(!t){ location.href = "/pelajar/login.html"; }
-  }
+  return data;
+}
 
-  async function me(){
-    const t = getToken();
-    if(!t) return { ok:false, message:"No token" };
-    return apiPost({ action:"me", token:t });
-  }
-
-  function logout(){
-    clearToken();
-    location.href = "/pelajar/login.html";
-  }
-
-  // expose globals (so HTML can call)
-  window.apiPost = apiPost;
-  window.getParam = getParam;
-  window.go = go;
-  window.escapeHtml = escapeHtml;
-  window.escapeAttr = escapeAttr;
-
-  window.getToken = getToken;
-  window.setToken = setToken;
-  window.clearToken = clearToken;
-
-  window.requireAuthOrRedirect = requireAuthOrRedirect;
-  window.me = me;
-  window.logout = logout;
-})();
+// --- escaping
+function escapeHtml(s){
+  s = String(s ?? "");
+  return s.replace(/[&<>"']/g, m => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+  }[m]));
+}
+function escapeAttr(s){ return escapeHtml(s); }
