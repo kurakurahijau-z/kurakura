@@ -1,5 +1,3 @@
-admin/class.html
-
 <!doctype html>
 <html lang="ms">
 <head>
@@ -7,449 +5,115 @@ admin/class.html
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Urus Kelas • Admin</title>
   <link rel="stylesheet" href="../styles.css" />
+  <script src="../config.js"></script>
+  <script src="../app.js"></script>
 </head>
-<body>
+<body class="stage">
   <header class="topbar">
-    <div>
-      <h1 id="title">Urus Kelas</h1>
-      <p id="sub" class="muted"></p>
-    </div>
-    <div class="actions">
-      <button class="btn" onclick="go('index.html')">⬅ Admin</button>
-      <button class="btn" onclick="go('../dashboard.html')">Dashboard</button>
-      <button class="btn danger" onclick="logout()">Keluar</button>
+    <div class="inner">
+      <div>
+        <h1>Urus Kelas</h1>
+        <p id="who" class="muted">Loading...</p>
+      </div>
+      <div class="actions">
+        <a class="btn ghost" href="./dashboard.html">← Dashboard</a>
+        <button class="btn danger" onclick="logout()">Keluar</button>
+      </div>
     </div>
   </header>
 
   <main class="container">
-    <div id="status" class="notice"></div>
+    <div id="msg" class="notice"></div>
 
     <section class="card">
-      <div class="tabs">
-        <button class="tab active" data-tab="subjects" onclick="switchTab('subjects')">Subjects</button>
-        <button class="tab" data-tab="notes" onclick="switchTab('notes')">Notes</button>
-        <button class="tab" data-tab="quizzes" onclick="switchTab('quizzes')">Quizzes</button>
-      </div>
+      <div class="grid2">
+        <div class="card" style="padding:14px;">
+          <h2 style="margin:0; font-weight:950;">Create Kelas</h2>
+          <p class="muted small">Auto generate classCode (contoh PMS-1234).</p>
 
-      <!-- SUBJECTS -->
-      <div id="tab-subjects" class="tabpanel">
-        <div class="row">
-          <div class="col">
-            <h2>Subjects</h2>
-            <p class="muted">Subjects ikut kelas. `isActive` boleh on/off.</p>
-          </div>
-          <div class="col right">
-            <button class="btn" onclick="openSubjectModal()">+ Tambah Subject</button>
-          </div>
-        </div>
-        <div id="subjectsList" class="list"></div>
-      </div>
+          <label>Nama kelas</label>
+          <input id="className" placeholder="Contoh: Kelas DUP4A (Accounting)" />
 
-      <!-- NOTES -->
-      <div id="tab-notes" class="tabpanel" style="display:none">
-        <div class="row">
-          <div class="col">
-            <h2>Notes</h2>
-            <p class="muted">Pelajar nampak hanya `releaseStatus=released` dan `isActive=true`.</p>
-          </div>
-          <div class="col right">
-            <button class="btn" onclick="openNoteModal()">+ Tambah Nota</button>
-          </div>
+          <button class="btn" id="btnCreate" style="margin-top:12px;">Create</button>
         </div>
 
-        <div class="filters">
-          <label>Subject</label>
-          <select id="noteSubjectFilter" onchange="renderNotes()"></select>
+        <div class="card" style="padding:14px;">
+          <h2 style="margin:0; font-weight:950;">Senarai kelas (owner)</h2>
+          <div id="list" class="list" style="margin-top:10px;"></div>
         </div>
-
-        <div id="notesList" class="list"></div>
-      </div>
-
-      <!-- QUIZZES -->
-      <div id="tab-quizzes" class="tabpanel" style="display:none">
-        <div class="row">
-          <div class="col">
-            <h2>Quizzes</h2>
-            <p class="muted">Pelajar nampak kuiz hanya bila `isActive=true`.</p>
-          </div>
-          <div class="col right">
-            <button class="btn" onclick="openQuizModal()">+ Tambah Kuiz</button>
-          </div>
-        </div>
-
-        <div class="filters">
-          <label>Subject</label>
-          <select id="quizSubjectFilter" onchange="renderQuizzes()"></select>
-        </div>
-
-        <div id="quizzesList" class="list"></div>
       </div>
     </section>
   </main>
 
-  <!-- MODALS -->
-  <div id="modal" class="modal" style="display:none">
-    <div class="modal-card">
-      <div class="modal-head">
-        <h3 id="modalTitle">Modal</h3>
-        <button class="iconbtn" onclick="closeModal()">✕</button>
-      </div>
-      <div id="modalBody"></div>
-      <div class="modal-foot">
-        <button class="btn" onclick="closeModal()">Cancel</button>
-        <button id="modalSaveBtn" class="btn primary">Save</button>
-      </div>
-    </div>
-  </div>
+  <script>
+    const msg = document.getElementById("msg");
+    const list = document.getElementById("list");
+    function showMsg(text, ok){
+      msg.style.display="block";
+      msg.textContent=text;
+      msg.style.background = ok ? "rgba(34,197,94,.10)" : "rgba(239,68,68,.10)";
+      msg.style.border = ok ? "1px solid rgba(34,197,94,.28)" : "1px solid rgba(239,68,68,.28)";
+      msg.style.color = ok ? "#065f46" : "#991b1b";
+    }
+    function clearMsg(){ msg.style.display="none"; msg.textContent=""; }
 
-<script src="../app.js"></script>
-<script>
-let CLASS_ID = "";
-let CLASS = null;
+    async function guard(){
+      requireAuthOrRedirect();
+      const r = await apiPost({ action:"me", token:getToken() });
+      if(!r.ok){ logout(); return null; }
+      if(String(r.user?.role||"").toLowerCase()!=="admin"){
+        location.href="../pelajar/dashboard.html"; return null;
+      }
+      document.getElementById("who").textContent = `Hi, ${r.user?.name || r.user?.email || "admin"}`;
+      return r.user;
+    }
 
-let SUBJECTS = [];
-let NOTES = [];
-let QUIZZES = [];
+    async function loadClasses(){
+      list.innerHTML="";
+      const r = await apiPost({ action:"adminListOwnedClasses", token:getToken() });
+      if(!r.ok){
+        list.innerHTML = `<div class="muted">Gagal load classes.</div>`;
+        return;
+      }
+      const arr = r.classes || [];
+      if(!arr.length){
+        list.innerHTML = `<div class="muted">Belum ada kelas.</div>`;
+        return;
+      }
+      arr.forEach(c=>{
+        const div = document.createElement("div");
+        div.className="item";
+        div.innerHTML = `
+          <div class="item-main">
+            <div class="item-title">${escapeHtml(c.className)}</div>
+            <div class="muted small">classCode: <b>${escapeHtml(c.classCode)}</b> • classId: ${escapeHtml(c.classId)}</div>
+          </div>
+          <div class="item-actions">
+            <a class="btn ghost" href="./notes.html">Nota</a>
+            <a class="btn ghost" href="./quizzes.html">Kuiz</a>
+          </div>
+        `;
+        list.appendChild(div);
+      });
+    }
 
-(async function init(){
-  requireAuthOrRedirect();
+    document.getElementById("btnCreate").onclick = async ()=>{
+      clearMsg();
+      const className = document.getElementById("className").value.trim();
+      if(!className) return showMsg("Nama kelas wajib.", false);
 
-  const me = await apiPost({ action:"me" });
-  if(!me.ok) return setStatus(me.message || "Gagal load profile.");
-  if(String(me.user.role||"").toLowerCase() !== "admin"){
-    return setStatus("Akses ditolak: bukan admin.");
-  }
+      const r = await apiPost({ action:"adminCreateClass", token:getToken(), className });
+      if(!r.ok) return showMsg(r.message || "Gagal create kelas.", false);
 
-  CLASS_ID = getParam("classId");
-  if(!CLASS_ID) return setStatus("classId tiada dalam URL.");
+      showMsg(`Berjaya create kelas. ClassCode: ${r.class?.classCode}`, true);
+      document.getElementById("className").value="";
+      await loadClasses();
+    };
 
-  // confirm class + ownership via admin endpoints (soft)
-  const c = await apiPost({ action:"getClass", classId: CLASS_ID });
-  if(!c.ok) return setStatus(c.message || "Gagal load class.");
-  CLASS = c.class;
-
-  document.getElementById("title").textContent = `Urus Kelas: ${CLASS.className}`;
-  document.getElementById("sub").textContent = `classId: ${CLASS.classId} • classCode: ${CLASS.classCode}`;
-
-  await reloadAll();
-})();
-
-async function reloadAll(){
-  setStatus("");
-  // Subjects
-  const s = await apiPost({ action:"adminListSubjects", classId: CLASS_ID });
-  if(!s.ok) return setStatus(s.message || "Gagal load subjects.");
-  SUBJECTS = s.subjects || [];
-
-  // Notes (admin view)
-  const n = await apiPost({ action:"adminListNotes", classId: CLASS_ID });
-  if(!n.ok) return setStatus(n.message || "Gagal load notes.");
-  NOTES = n.notes || [];
-
-  // Quizzes (admin view)
-  const q = await apiPost({ action:"adminListQuizzes", classId: CLASS_ID });
-  if(!q.ok) return setStatus(q.message || "Gagal load quizzes.");
-  QUIZZES = q.quizzes || [];
-
-  renderSubjects();
-  setupFilters();
-  renderNotes();
-  renderQuizzes();
-}
-
-function setStatus(msg){
-  const el = document.getElementById("status");
-  el.textContent = msg || "";
-  el.style.display = msg ? "block" : "none";
-}
-
-function switchTab(name){
-  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
-  document.querySelector(`.tab[data-tab="${name}"]`).classList.add("active");
-  document.querySelectorAll(".tabpanel").forEach(p=>p.style.display="none");
-  document.getElementById(`tab-${name}`).style.display = "block";
-}
-
-/* ---------------- Subjects ---------------- */
-function renderSubjects(){
-  const root = document.getElementById("subjectsList");
-  root.innerHTML = "";
-  if(!SUBJECTS.length){
-    root.innerHTML = `<div class="muted">Tiada subject lagi.</div>`;
-    return;
-  }
-
-  SUBJECTS.forEach(s=>{
-    const div = document.createElement("div");
-    div.className = "item";
-    div.innerHTML = `
-      <div class="item-main">
-        <div class="item-title">${escapeHtml(s.subjectName)}</div>
-        <div class="muted small">subjectId: ${escapeHtml(s.subjectId)} • sortOrder: ${Number(s.sortOrder||0)}</div>
-      </div>
-      <div class="item-actions">
-        <label class="toggle">
-          <input type="checkbox" ${s.isActive ? "checked":""} onchange="toggleSubjectActive('${s.subjectId}', this.checked)">
-          <span>Active</span>
-        </label>
-      </div>
-    `;
-    root.appendChild(div);
-  });
-}
-
-async function toggleSubjectActive(subjectId, on){
-  const res = await apiPost({ action:"adminSetSubjectActive", subjectId, isActive: on });
-  if(!res.ok) { alert(res.message || "Gagal update subject."); return; }
-  await reloadAll();
-}
-
-function openSubjectModal(){
-  openModal("Tambah Subject", `
-    <div class="form">
-      <label>Nama Subject</label>
-      <input id="m_subjectName" placeholder="Contoh: Chapter 1 - Introduction" />
-      <label>Sort Order (angka kecil dulu)</label>
-      <input id="m_sortOrder" type="number" value="0" />
-    </div>
-  `, async ()=>{
-    const subjectName = document.getElementById("m_subjectName").value.trim();
-    const sortOrder = Number(document.getElementById("m_sortOrder").value || 0);
-    if(!subjectName) return alert("Nama subject wajib.");
-
-    const res = await apiPost({ action:"adminCreateSubject", classId: CLASS_ID, subjectName, sortOrder });
-    if(!res.ok) return alert(res.message || "Gagal create subject.");
-    closeModal();
-    await reloadAll();
-  });
-}
-
-/* ---------------- Filters ---------------- */
-function setupFilters(){
-  const noteSel = document.getElementById("noteSubjectFilter");
-  const quizSel = document.getElementById("quizSubjectFilter");
-
-  const opts = [`<option value="__all">All Subjects</option>`]
-    .concat(SUBJECTS.map(s=>`<option value="${escapeAttr(s.subjectId)}">${escapeHtml(s.subjectName)}</option>`))
-    .join("");
-
-  noteSel.innerHTML = opts;
-  quizSel.innerHTML = opts;
-}
-
-/* ---------------- Notes ---------------- */
-function renderNotes(){
-  const root = document.getElementById("notesList");
-  root.innerHTML = "";
-
-  const filter = document.getElementById("noteSubjectFilter").value || "__all";
-  const list = (filter==="__all") ? NOTES : NOTES.filter(n=>n.subjectId===filter);
-
-  if(!list.length){
-    root.innerHTML = `<div class="muted">Tiada nota untuk filter ini.</div>`;
-    return;
-  }
-
-  list.forEach(n=>{
-    const div = document.createElement("div");
-    div.className = "item";
-    div.innerHTML = `
-      <div class="item-main">
-        <div class="item-title">${escapeHtml(n.title)}</div>
-        <div class="muted small">
-          ${escapeHtml(n.subjectName || n.subjectId)} •
-          releaseStatus: <b>${escapeHtml(n.releaseStatus||"")}</b> •
-          active: <b>${n.isActive ? "TRUE":"FALSE"}</b>
-        </div>
-        ${n.contentLink ? `<div class="small"><a href="${escapeAttr(n.contentLink)}" target="_blank">Buka link</a></div>` : ""}
-      </div>
-      <div class="item-actions">
-        <button class="btn" onclick='openNoteModal(${JSON.stringify(n)})'>Edit</button>
-        <label class="toggle">
-          <input type="checkbox" ${n.isActive ? "checked":""} onchange="toggleNoteActive('${n.noteId}', this.checked)">
-          <span>Active</span>
-        </label>
-        <button class="btn ${String(n.releaseStatus).toLowerCase()==="released" ? "":"primary"}"
-          onclick="toggleNoteRelease('${n.noteId}', '${String(n.releaseStatus||'draft').toLowerCase()==='released' ? 'draft' : 'released'}')">
-          ${String(n.releaseStatus).toLowerCase()==="released" ? "Unrelease" : "Release"}
-        </button>
-      </div>
-    `;
-    root.appendChild(div);
-  });
-}
-
-async function toggleNoteActive(noteId, on){
-  const res = await apiPost({ action:"adminSetNoteActive", noteId, isActive: on });
-  if(!res.ok) { alert(res.message || "Gagal update nota."); return; }
-  await reloadAll();
-}
-
-async function toggleNoteRelease(noteId, status){
-  const res = await apiPost({ action:"adminSetNoteRelease", noteId, releaseStatus: status });
-  if(!res.ok) { alert(res.message || "Gagal release nota."); return; }
-  await reloadAll();
-}
-
-function openNoteModal(note){
-  const isEdit = !!note;
-  const subjectOptions = SUBJECTS.map(s=>`<option value="${escapeAttr(s.subjectId)}">${escapeHtml(s.subjectName)}</option>`).join("");
-
-  openModal(isEdit ? "Edit Nota" : "Tambah Nota", `
-    <div class="form">
-      <label>Subject</label>
-      <select id="m_noteSubject">${subjectOptions}</select>
-
-      <label>Tajuk Nota</label>
-      <input id="m_noteTitle" placeholder="Contoh: Nota 1 - Pengenalan" />
-
-      <label>Link Kandungan (Google Drive/Docs/PDF)</label>
-      <input id="m_noteLink" placeholder="https://..." />
-
-      <label>Release Status</label>
-      <select id="m_noteRelease">
-        <option value="draft">draft</option>
-        <option value="released">released</option>
-      </select>
-    </div>
-  `, async ()=>{
-    const subjectId = document.getElementById("m_noteSubject").value;
-    const title = document.getElementById("m_noteTitle").value.trim();
-    const contentLink = document.getElementById("m_noteLink").value.trim();
-    const releaseStatus = document.getElementById("m_noteRelease").value;
-
-    if(!subjectId) return alert("Subject wajib.");
-    if(!title) return alert("Tajuk wajib.");
-
-    const payload = { action:"adminUpsertNote", subjectId, title, contentLink, releaseStatus };
-    if(isEdit) payload.noteId = note.noteId;
-
-    const res = await apiPost(payload);
-    if(!res.ok) return alert(res.message || "Gagal simpan nota.");
-
-    closeModal();
-    await reloadAll();
-  });
-
-  // set defaults
-  if(isEdit){
-    document.getElementById("m_noteSubject").value = note.subjectId;
-    document.getElementById("m_noteTitle").value = note.title || "";
-    document.getElementById("m_noteLink").value = note.contentLink || "";
-    document.getElementById("m_noteRelease").value = (String(note.releaseStatus||"draft").toLowerCase()==="released") ? "released" : "draft";
-  }else{
-    // default to first subject
-    if(SUBJECTS[0]) document.getElementById("m_noteSubject").value = SUBJECTS[0].subjectId;
-  }
-}
-
-/* ---------------- Quizzes ---------------- */
-function renderQuizzes(){
-  const root = document.getElementById("quizzesList");
-  root.innerHTML = "";
-
-  const filter = document.getElementById("quizSubjectFilter").value || "__all";
-  const list = (filter==="__all") ? QUIZZES : QUIZZES.filter(q=>q.subjectId===filter);
-
-  if(!list.length){
-    root.innerHTML = `<div class="muted">Tiada kuiz untuk filter ini.</div>`;
-    return;
-  }
-
-  list.forEach(q=>{
-    const div = document.createElement("div");
-    div.className = "item";
-    div.innerHTML = `
-      <div class="item-main">
-        <div class="item-title">${escapeHtml(q.title)}</div>
-        <div class="muted small">
-          ${escapeHtml(q.subjectName || q.subjectId)} • active: <b>${q.isActive ? "TRUE":"FALSE"}</b>
-        </div>
-        ${q.quizLink ? `<div class="small"><a href="${escapeAttr(q.quizLink)}" target="_blank">Buka kuiz</a></div>` : ""}
-      </div>
-      <div class="item-actions">
-        <button class="btn" onclick='openQuizModal(${JSON.stringify(q)})'>Edit</button>
-        <label class="toggle">
-          <input type="checkbox" ${q.isActive ? "checked":""} onchange="toggleQuizActive('${q.quizId}', this.checked)">
-          <span>Active</span>
-        </label>
-      </div>
-    `;
-    root.appendChild(div);
-  });
-}
-
-async function toggleQuizActive(quizId, on){
-  const res = await apiPost({ action:"adminSetQuizActive", quizId, isActive: on });
-  if(!res.ok) { alert(res.message || "Gagal update kuiz."); return; }
-  await reloadAll();
-}
-
-function openQuizModal(quiz){
-  const isEdit = !!quiz;
-  const subjectOptions = SUBJECTS.map(s=>`<option value="${escapeAttr(s.subjectId)}">${escapeHtml(s.subjectName)}</option>`).join("");
-
-  openModal(isEdit ? "Edit Kuiz" : "Tambah Kuiz", `
-    <div class="form">
-      <label>Subject</label>
-      <select id="m_quizSubject">${subjectOptions}</select>
-
-      <label>Tajuk Kuiz</label>
-      <input id="m_quizTitle" placeholder="Contoh: Kuiz 1 - Chapter 1" />
-
-      <label>Link Kuiz (Google Form / Quizizz / dsb)</label>
-      <input id="m_quizLink" placeholder="https://..." />
-
-      <label>Active</label>
-      <select id="m_quizActive">
-        <option value="true">true</option>
-        <option value="false">false</option>
-      </select>
-    </div>
-  `, async ()=>{
-    const subjectId = document.getElementById("m_quizSubject").value;
-    const title = document.getElementById("m_quizTitle").value.trim();
-    const quizLink = document.getElementById("m_quizLink").value.trim();
-    const isActive = document.getElementById("m_quizActive").value;
-
-    if(!subjectId) return alert("Subject wajib.");
-    if(!title) return alert("Tajuk wajib.");
-    if(!quizLink) return alert("Link kuiz wajib.");
-
-    const payload = { action:"adminUpsertQuiz", subjectId, title, quizLink, isActive };
-    if(isEdit) payload.quizId = quiz.quizId;
-
-    const res = await apiPost(payload);
-    if(!res.ok) return alert(res.message || "Gagal simpan kuiz.");
-
-    closeModal();
-    await reloadAll();
-  });
-
-  if(isEdit){
-    document.getElementById("m_quizSubject").value = quiz.subjectId;
-    document.getElementById("m_quizTitle").value = quiz.title || "";
-    document.getElementById("m_quizLink").value = quiz.quizLink || "";
-    document.getElementById("m_quizActive").value = quiz.isActive ? "true" : "false";
-  }else{
-    if(SUBJECTS[0]) document.getElementById("m_quizSubject").value = SUBJECTS[0].subjectId;
-    document.getElementById("m_quizActive").value = "true";
-  }
-}
-
-/* ---------------- Modal helpers ---------------- */
-function openModal(title, bodyHtml, onSave){
-  document.getElementById("modalTitle").textContent = title;
-  document.getElementById("modalBody").innerHTML = bodyHtml;
-  const btn = document.getElementById("modalSaveBtn");
-  btn.onclick = onSave;
-  document.getElementById("modal").style.display = "flex";
-}
-function closeModal(){
-  document.getElementById("modal").style.display = "none";
-  document.getElementById("modalBody").innerHTML = "";
-}
-
-</script>
+    (async ()=>{
+      const u = await guard(); if(!u) return;
+      await loadClasses();
+    })();
+  </script>
 </body>
 </html>
