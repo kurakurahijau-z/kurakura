@@ -1,29 +1,34 @@
-// app.js (Stable - form POST, no CORS preflight)
+// app.js (CORS-safe + consistent storage keys)
 (function () {
   const BASE_URL = (window.APP_CONFIG && window.APP_CONFIG.BASE_URL) || "";
 
-  // ✅ guna 1 standard key je supaya semua page seragam
-  const TOKEN_KEY = "kk_token";
-  const USER_KEY  = "kk_user";
+  // ✅ Consistent keys (ikut yang kau guna dalam pelajar/login & pelajar/dashboard)
+  const KEY_TOKEN = "kk_token";
+  const KEY_USER  = "kk_user";
 
   function getToken() {
-    return localStorage.getItem(TOKEN_KEY) || "";
+    return localStorage.getItem(KEY_TOKEN) || "";
   }
   function setToken(t) {
-    localStorage.setItem(TOKEN_KEY, t || "");
+    localStorage.setItem(KEY_TOKEN, t || "");
   }
   function clearToken() {
-    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(KEY_TOKEN);
   }
-  function setUser(u){
-    localStorage.setItem(USER_KEY, JSON.stringify(u || null));
+
+  function getUser() {
+    try {
+      const raw = localStorage.getItem(KEY_USER);
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) {
+      return null;
+    }
   }
-  function getUser(){
-    try{ return JSON.parse(localStorage.getItem(USER_KEY) || "null"); }
-    catch(e){ return null; }
+  function setUser(u) {
+    localStorage.setItem(KEY_USER, JSON.stringify(u || {}));
   }
-  function clearUser(){
-    localStorage.removeItem(USER_KEY);
+  function clearUser() {
+    localStorage.removeItem(KEY_USER);
   }
 
   async function safeParseResponse(res) {
@@ -53,7 +58,7 @@
 
     if (!parsed.ok) {
       throw new Error(
-        "Server tak bagi JSON (mungkin HTML verify/login atau deploy setting salah).\n\nResponse (ringkas):\n" +
+        "Server tak bagi JSON. Ini biasanya sebab DEPLOY bukan 'Anyone' atau response HTML.\n\n" +
         parsed.raw.slice(0, 220)
       );
     }
@@ -61,32 +66,23 @@
     return parsed.data;
   }
 
-  // ✅ POST guna URLSearchParams (form) - paling stabil utk Apps Script
   async function apiPost(action, body = {}) {
     if (!BASE_URL) throw new Error("BASE_URL kosong. Semak config.js");
 
     const token = getToken();
+    const payload = { action, token, ...body };
 
-    const form = new URLSearchParams();
-    form.append("action", action);
-
-    // token hanya bila ada (login tak perlu token)
-    if (token) form.append("token", token);
-
-    Object.entries(body || {}).forEach(([k, v]) => {
-      if (v !== undefined && v !== null) form.append(k, String(v));
-    });
-
+    // ✅ PENTING: JANGAN SET headers Content-Type (elak CORS preflight)
     const res = await fetch(BASE_URL, {
       method: "POST",
-      body: form
+      body: JSON.stringify(payload)
     });
 
     const parsed = await safeParseResponse(res);
 
     if (!parsed.ok) {
       throw new Error(
-        "Server tak bagi JSON (mungkin HTML verify/login atau deploy setting salah).\n\nResponse (ringkas):\n" +
+        "Server tak bagi JSON. Ini biasanya sebab DEPLOY bukan 'Anyone' atau response HTML.\n\n" +
         parsed.raw.slice(0, 220)
       );
     }
@@ -102,6 +98,8 @@
     clearToken,
     getUser,
     setUser,
-    clearUser
+    clearUser,
+    KEY_TOKEN,
+    KEY_USER
   };
 })();
