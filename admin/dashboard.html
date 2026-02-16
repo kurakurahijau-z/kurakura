@@ -7,7 +7,6 @@
 
   <link rel="stylesheet" href="../styles.css" />
   <script src="../config.js"></script>
-  <script src="../app.js"></script>
 
   <style>
     .page{ min-height:100vh; padding: 18px 16px 40px; }
@@ -62,6 +61,7 @@
     }
     .item .t{ margin:0; font-weight: 950; font-size: 14px; color:#0f172a; }
     .item .d{ margin:6px 0 0; font-weight: 850; font-size: 12px; color:#334155; opacity:.92; }
+
     .chip{
       padding: 6px 10px;
       border-radius: 999px;
@@ -73,6 +73,10 @@
       text-decoration: none;
       color: inherit;
     }
+    .chip:hover{ background: rgba(255,255,255,.9); }
+
+    .tips{ margin-top: 10px; padding: 12px; border-radius: 14px; background: rgba(255,255,255,.65); border: 1px solid rgba(15,23,42,.08); }
+    .tips b{ color:#0f172a; }
   </style>
 </head>
 
@@ -99,23 +103,22 @@
         <section class="card">
           <h2 class="section-title">Pengurusan</h2>
           <p class="muted">
-            Ini ruang admin untuk urus: <b>kelas</b>, <b>subject</b>, <b>nota</b> dan <b>kuiz</b>.
+            Flow yang betul: <b>Create Kelas</b> → <b>Tambah Subject</b> → barulah <b>Nota</b> & <b>Kuiz</b>.
           </p>
 
           <div class="list" style="margin-top:12px;">
-
             <div class="item">
               <div>
-                <p class="t">Kelas</p>
-                <p class="d">Create kelas baru (sistem bagi class code untuk pelajar join).</p>
+                <p class="t">Create Kelas</p>
+                <p class="d">Bina kelas baru & sistem bagi class code untuk pelajar join.</p>
               </div>
               <a class="chip" href="./create-class.html">Buka</a>
             </div>
 
             <div class="item">
               <div>
-                <p class="t">Subject</p>
-                <p class="d">Tambah subject ikut kelas (Bab/Topik). Wajib untuk Nota/Kuiz.</p>
+                <p class="t">Subjects</p>
+                <p class="d">Tambah “Bab/Topik” ikut kelas (wajib sebelum tambah nota/kuiz).</p>
               </div>
               <a class="chip" href="./subjects.html">Buka</a>
             </div>
@@ -135,20 +138,30 @@
               </div>
               <a class="chip" href="./quizzes.html">Buka</a>
             </div>
+          </div>
 
+          <div class="tips">
+            <div class="muted" style="margin:0;">
+              <b>Nota penting:</b><br>
+              • Kalau dropdown subject kosong dalam Notes/Quizzes → maknanya Subjects untuk kelas tu belum ada row.<br>
+              • Untuk pelajar nampak nota: <b>releaseStatus = released</b> dan <b>isActive = TRUE</b>.
+            </div>
           </div>
         </section>
 
         <section class="card">
-          <h2 class="section-title">Nota ringkas</h2>
+          <h2 class="section-title">Status akses</h2>
           <p class="muted" style="margin:0;">
             ✅ Admin login guna halaman login yang sama.<br>
             ✅ Lepas login, sistem auto-redirect ikut role.<br>
-            ✅ Kalau pelajar cuba buka halaman admin, sistem akan halang.<br>
-            <br>
-            Urutan paling selamat:
-            <b>Create Kelas</b> → <b>Create Subject</b> → baru <b>Nota</b>/<b>Kuiz</b>.
+            ✅ Kalau pelajar cuba buka halaman admin, sistem akan halang.
           </p>
+
+          <div class="tips">
+            <div class="muted" style="margin:0;">
+              Kalau page <b>Subjects</b> keluar “<b>KKH is not defined</b>”, itu bukan backend—itu frontend page tu tak load helper script yang betul (atau file JS ada tajuk fail kat baris pertama).
+            </div>
+          </div>
         </section>
       </div>
     </div>
@@ -225,7 +238,9 @@
       location.href = "../pelajar/dashboard.html";
     });
 
-    boot();
+    boot().catch(err=>{
+      showMsg("err", err?.message || String(err));
+    });
   </script>
 </body>
 </html>
