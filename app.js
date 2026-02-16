@@ -1,4 +1,3 @@
-app.js
 
 // app.js - shared helpers (GitHub Pages safe)
 
