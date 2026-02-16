@@ -1,3 +1,5 @@
+admin/index.htm
+
 <!doctype html>
 <html lang="ms">
 <head>
@@ -13,7 +15,6 @@
       <p id="meLine" class="muted"></p>
     </div>
     <div class="actions">
-      <button class="btn primary" onclick="go('create-class.html')">+ Buat Kelas</button>
       <button class="btn" onclick="go('../dashboard.html')">Dashboard</button>
       <button class="btn danger" onclick="logout()">Keluar</button>
     </div>
@@ -41,7 +42,6 @@
     setStatus("Akses ditolak. Akaun ini bukan admin.");
     return;
   }
-
   document.getElementById("meLine").textContent =
     `Hi, ${me.user.name || me.user.email} (Admin)`;
 
@@ -60,13 +60,8 @@ function setStatus(msg){
 function renderClasses(list){
   const root = document.getElementById("classes");
   root.innerHTML = "";
-
   if(!list.length){
-    root.innerHTML = `
-      <div class="muted">
-        Tiada kelas lagi. Tekan <b>+ Buat Kelas</b> dekat atas.
-      </div>
-    `;
+    root.innerHTML = `<div class="muted">Tiada kelas (owned) dijumpai.</div>`;
     return;
   }
 
