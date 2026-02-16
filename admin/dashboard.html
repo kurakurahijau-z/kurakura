@@ -1,82 +1,217 @@
-<!doctype html>
+admin/dashboard.html
+
+<!DOCTYPE html>
 <html lang="ms">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Dashboard Admin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard Admin • kura kura hijau</title>
+
   <link rel="stylesheet" href="../styles.css" />
   <script src="../config.js"></script>
-  <script src="../app.js"></script>
+
+  <style>
+    .page{ min-height:100vh; padding: 18px 16px 40px; }
+    .top{ position: sticky; top: 0; z-index: 20; background: rgba(255,255,255,.75); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,.50); }
+    .top-inner{ max-width: 1100px; margin: 0 auto; padding: 14px 8px; display:flex; align-items:center; justify-content:space-between; gap: 12px; }
+
+    .brand{ display:flex; flex-direction:column; gap: 4px; }
+    .brand h1{ margin:0; font-size: 22px; letter-spacing: -0.02em; line-height: 1.1; font-weight: 950; }
+    .brand .sub{ margin:0; color:#334155; font-weight:850; font-size: 13px; opacity: .9; }
+
+    .btn{ border: 0; cursor: pointer; padding: 10px 14px; border-radius: 14px; font-weight: 900; background: #059669; color: #fff; box-shadow: 0 8px 18px rgba(5,150,105,.18); }
+    .btn:hover{ background:#047857; }
+    .btn.ghost{
+      background: rgba(255,255,255,.75);
+      color:#0f172a;
+      border: 1px solid rgba(15,23,42,.10);
+      box-shadow: 0 10px 30px rgba(2,6,23,.06);
+    }
+    .btn.ghost:hover{ background: rgba(255,255,255,.90); }
+
+    .container{ max-width: 1100px; margin: 16px auto 0; display:grid; gap: 14px; }
+
+    .card{
+      background: rgba(255,255,255,.82);
+      border: 1px solid rgba(255,255,255,.55);
+      border-radius: 18px;
+      box-shadow: 0 10px 30px rgba(2, 6, 23, .10);
+      padding: 18px;
+    }
+
+    .msg{ display:none; padding: 10px 12px; border-radius: 14px; font-weight: 900; }
+    .msg.err{ display:block; background: rgba(239,68,68,.10); border: 1px solid rgba(239,68,68,.28); color: #991b1b; }
+    .msg.ok{ display:block; background: rgba(34,197,94,.10); border: 1px solid rgba(34,197,94,.28); color: #065f46; }
+
+    .grid{ display:grid; gap: 14px; grid-template-columns: 1fr; }
+    @media(min-width: 900px){ .grid{ grid-template-columns: 1.1fr .9fr; } }
+
+    .section-title{ margin: 0 0 10px; font-size: 16px; font-weight: 950; letter-spacing: -.01em; }
+    .muted{ margin:0; color:#334155; font-weight: 850; opacity: .92; line-height: 1.6; }
+
+    .list{ display:grid; gap: 10px; margin-top: 10px; }
+    .item{
+      border-radius: 16px;
+      padding: 12px;
+      background: rgba(255,255,255,.68);
+      border: 1px solid rgba(15,23,42,.08);
+      box-shadow: 0 14px 34px rgba(2,6,23,.06);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+    }
+    .item .t{ margin:0; font-weight: 950; font-size: 14px; color:#0f172a; }
+    .item .d{ margin:6px 0 0; font-weight: 850; font-size: 12px; color:#334155; opacity:.92; }
+    .chip{
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(15,23,42,.12);
+      background: rgba(255,255,255,.65);
+      font-weight: 900;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+  </style>
 </head>
+
 <body class="stage">
-  <header class="topbar">
-    <div class="inner">
-      <div>
+  <header class="top">
+    <div class="top-inner">
+      <div class="brand">
         <h1>Dashboard Admin</h1>
-        <p id="who" class="muted">Loading...</p>
+        <p class="sub" id="who">Loading...</p>
       </div>
-      <div class="actions">
-        <a class="btn ghost" href="../pelajar/dashboard.html">Ke portal pelajar</a>
-        <button class="btn danger" onclick="logout()">Keluar</button>
+
+      <div style="display:flex; gap:10px; align-items:center;">
+        <button class="btn ghost" id="btnToStudent" type="button">Ke portal pelajar</button>
+        <button class="btn" id="btnLogout" type="button">Logout</button>
       </div>
     </div>
   </header>
 
-  <main class="container">
-    <section class="card">
-      <h2 style="margin:0; font-weight:950;">Pengurusan</h2>
-      <p class="muted">Ruang admin untuk urus kelas, nota dan kuiz.</p>
+  <main class="page">
+    <div class="container">
+      <div id="msg" class="msg"></div>
 
-      <div class="grid2" style="margin-top:12px;">
-        <div class="card" style="padding:14px;">
-          <h3 style="margin:0;">Kelas</h3>
-          <p class="muted small">Create kelas & dapatkan class code untuk pelajar join.</p>
-          <div style="margin-top:10px;">
-            <a class="btn" href="./class.html">Buka</a>
-          </div>
-        </div>
+      <div class="grid">
+        <section class="card">
+          <h2 class="section-title">Pengurusan</h2>
+          <p class="muted">
+            Ini ruang admin untuk urus kandungan: <b>nota</b> dan <b>kuiz</b> ikut kelas/subject.
+          </p>
 
-        <div class="card" style="padding:14px;">
-          <h3 style="margin:0;">Nota</h3>
-          <p class="muted small">Tambah/edit nota, release/unrelease.</p>
-          <div style="margin-top:10px;">
-            <a class="btn" href="./notes.html">Buka</a>
-          </div>
-        </div>
+          <div class="list" style="margin-top:12px;">
+            <div class="item">
+              <div>
+                <p class="t">Nota</p>
+                <p class="d">Tambah / edit nota, dan release/unrelease.</p>
+              </div>
+              <a class="chip" href="./notes.html">Buka</a>
+            </div>
 
-        <div class="card" style="padding:14px;">
-          <h3 style="margin:0;">Kuiz</h3>
-          <p class="muted small">Tambah kuiz (Google Form link), aktif/nonaktif.</p>
-          <div style="margin-top:10px;">
-            <a class="btn" href="./quizzes.html">Buka</a>
+            <div class="item">
+              <div>
+                <p class="t">Kuiz</p>
+                <p class="d">Tambah kuiz (Google Form link), dan aktif/nonaktif.</p>
+              </div>
+              <a class="chip" href="./quizzes.html">Buka</a>
+            </div>
+
+            <div class="item">
+              <div>
+                <p class="t">Subjek</p>
+                <p class="d">(Optional) Kalau nak tambah subject ikut bab.</p>
+              </div>
+              <span class="chip">Auto (guna sheet / notes page)</span>
+            </div>
           </div>
-        </div>
+        </section>
+
+        <section class="card">
+          <h2 class="section-title">Nota ringkas</h2>
+          <p class="muted" style="margin:0;">
+            ✅ Admin login guna halaman login yang sama.<br>
+            ✅ Lepas login, sistem auto-redirect ikut role.<br>
+            ✅ Kalau pelajar cuba buka halaman admin, sistem akan halang.
+          </p>
+        </section>
       </div>
-
-      <div class="card" style="padding:14px; margin-top:14px;">
-        <h3 style="margin:0 0 8px;">Nota ringkas</h3>
-        <ul style="margin:0; padding-left:18px; font-weight:850; color:var(--muted);">
-          <li>Admin login guna halaman login yang sama.</li>
-          <li>Lepas login, sistem auto-redirect ikut role.</li>
-          <li>Kalau pelajar cuba buka halaman admin, sistem halang.</li>
-        </ul>
-        <p class="muted small" style="margin-top:10px;">
-          Tip: Lepas create kelas, bagi pelajar <b>class code</b> untuk join.
-        </p>
-      </div>
-    </section>
+    </div>
   </main>
 
   <script>
-    (async ()=>{
-      requireAuthOrRedirect();
-      const r = await apiPost({ action:"me", token:getToken() });
-      if(!r.ok){ logout(); return; }
-      if(String(r.user?.role||"").toLowerCase()!=="admin"){
-        location.href = "../pelajar/dashboard.html"; return;
+    const msgEl = document.getElementById("msg");
+    const whoEl = document.getElementById("who");
+
+    function showMsg(type, text){
+      msgEl.className = "msg " + (type === "ok" ? "ok" : "err");
+      msgEl.textContent = text;
+      msgEl.style.display = "block";
+    }
+    function clearMsg(){
+      msgEl.style.display = "none";
+      msgEl.textContent = "";
+      msgEl.className = "msg";
+    }
+
+    function getBaseUrl(){
+      const cfg = window.APP_CONFIG;
+      return (cfg && cfg.BASE_URL) ? cfg.BASE_URL : null;
+    }
+
+    async function apiPost(params){
+      const BASE_URL = getBaseUrl();
+      if(!BASE_URL) throw new Error("APP_CONFIG.BASE_URL tak wujud. Semak config.js");
+
+      const body = new URLSearchParams();
+      Object.entries(params).forEach(([k,v]) => body.append(k, v ?? ""));
+
+      const res = await fetch(BASE_URL, { method:"POST", body });
+      const text = await res.text();
+      try{ return JSON.parse(text); }
+      catch(e){ return { ok:false, message:"Invalid JSON from server", raw:text }; }
+    }
+
+    async function boot(){
+      clearMsg();
+
+      const token = localStorage.getItem("kk_token") || "";
+      if(!token){
+        location.href = "../pelajar/login.html";
+        return;
       }
-      document.getElementById("who").textContent = `Hi, ${r.user?.name || r.user?.email || "admin"}`;
-    })();
+
+      const me = await apiPost({ action:"me", token });
+      if(!me || !me.ok || !me.user){
+        localStorage.removeItem("kk_token");
+        localStorage.removeItem("kk_user");
+        location.href = "../pelajar/login.html";
+        return;
+      }
+
+      const role = String(me.user.role || "").toLowerCase();
+      if(role !== "admin"){
+        showMsg("err", "Akses admin tidak dibenarkan untuk akaun ini.");
+        setTimeout(()=> location.href = "../pelajar/dashboard.html", 700);
+        return;
+      }
+
+      whoEl.textContent = `Hi, ${me.user.name || me.user.email || "Admin"}`;
+      showMsg("ok", "Akses admin disahkan.");
+    }
+
+    document.getElementById("btnLogout").addEventListener("click", ()=>{
+      localStorage.removeItem("kk_token");
+      localStorage.removeItem("kk_user");
+      location.href = "../pelajar/login.html";
+    });
+
+    document.getElementById("btnToStudent").addEventListener("click", ()=>{
+      location.href = "../pelajar/dashboard.html";
+    });
+
+    boot();
   </script>
 </body>
 </html>
