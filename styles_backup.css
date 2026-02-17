@@ -1,126 +1,105 @@
-/* =========================================================
-   KKH PRO TOUCHUP (SAFE APPEND) — paste at END of styles.css
-   - No HTML/JS changes needed
-   - Remove this block to rollback
-========================================================= */
 
-/* 1) Ambient moving background (soft, professional) */
-body.stage, body {
-  /* fallback color */
-  background: #eafff6;
-}
+styles.css
 
-body.stage::before, body::before {
-  content: "";
-  position: fixed;
-  inset: -40%;
-  z-index: -2;
-  background:
-    radial-gradient(closest-side at 20% 25%, rgba(16,185,129,.28), transparent 60%),
-    radial-gradient(closest-side at 80% 30%, rgba(14,165,233,.22), transparent 62%),
-    radial-gradient(closest-side at 50% 80%, rgba(132,204,22,.18), transparent 60%),
-    linear-gradient(120deg, rgba(20,184,166,.20), rgba(59,130,246,.10), rgba(34,197,94,.14));
-  filter: blur(30px) saturate(115%);
-  transform: translate3d(0,0,0);
-  animation: kkh-ambientMove 16s ease-in-out infinite alternate;
+:root{
+  --bg:#f6fffb;
+  --card:#ffffff;
+  --border:#e6eef0;
+  --text:#0b1b1a;
+  --muted:#5b6b6b;
+  --primary:#16a34a;
+  --danger:#ef4444;
+  --shadow:0 10px 30px rgba(0,0,0,.06);
+  --radius:18px;
 }
+*{ box-sizing:border-box; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; }
+body{ margin:0; background:linear-gradient(180deg,#e7fff7 0%, #f7fff4 60%, #ffffff 100%); color:var(--text); }
+a{ color:var(--primary); text-decoration:none; }
+a:hover{ text-decoration:underline; }
 
-body.stage::after, body::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  background: rgba(255,255,255,.35);
-  backdrop-filter: blur(0px);
-  -webkit-backdrop-filter: blur(0px);
+.topbar{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:18px 22px; gap:16px;
 }
+.topbar h1{ margin:0; font-size:20px; }
+.muted{ color:var(--muted); }
+.small{ font-size:12px; }
+.container{ max-width:1100px; margin:0 auto; padding:10px 18px 40px; }
+.card{
+  background:var(--card); border:1px solid var(--border);
+  border-radius:var(--radius); box-shadow:var(--shadow);
+  padding:18px;
+}
+.notice{
+  display:none;
+  padding:12px 14px; margin-bottom:12px;
+  border:1px solid var(--border);
+  border-radius:14px;
+  background:#f1fffa;
+}
+.actions{ display:flex; gap:10px; }
+.btn{
+  border:1px solid var(--border);
+  background:#fff; padding:10px 14px;
+  border-radius:14px; cursor:pointer;
+}
+.btn.primary{ background:var(--primary); color:#fff; border-color:transparent; }
+.btn.danger{ background:var(--danger); color:#fff; border-color:transparent; }
+.btn:hover{ filter:brightness(.98); }
 
-@keyframes kkh-ambientMove {
-  0%   { transform: translate(-2%, -1%) scale(1.02) rotate(0deg); }
-  50%  { transform: translate(2%, 1%) scale(1.05) rotate(1deg); }
-  100% { transform: translate(-1%, 2%) scale(1.03) rotate(-1deg); }
+.grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:12px; margin-top:12px; }
+.tile{
+  border:1px solid var(--border); border-radius:16px;
+  padding:14px; background:#fff;
 }
+.tile-title{ font-weight:700; }
+.tile-actions{ margin-top:10px; }
 
-/* 2) Global typography polish */
-* {
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+.row{ display:flex; gap:12px; align-items:flex-start; justify-content:space-between; }
+.col{ flex:1; }
+.right{ display:flex; justify-content:flex-end; align-items:center; }
 
-h1,h2,h3 {
-  letter-spacing: -0.02em;
+.tabs{ display:flex; gap:8px; margin-bottom:14px; }
+.tab{
+  padding:10px 12px; border-radius:999px;
+  border:1px solid var(--border); background:#fff; cursor:pointer;
 }
+.tab.active{ background:#eafff3; border-color:#bfe7d0; font-weight:700; }
 
-/* 3) Cards: glassy + better shadow */
-.card, .item, .result, .notice {
-  border-radius: 18px !important;
+.list{ display:flex; flex-direction:column; gap:10px; margin-top:12px; }
+.item{
+  display:flex; gap:12px; justify-content:space-between; align-items:flex-start;
+  border:1px solid var(--border); border-radius:16px; padding:12px;
 }
+.item-title{ font-weight:800; }
+.item-actions{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
 
-.card {
-  background: rgba(255,255,255,.86) !important;
-  border: 1px solid rgba(255,255,255,.55) !important;
-  box-shadow: 0 14px 40px rgba(2,6,23,.10) !important;
+.filters{ display:flex; gap:10px; align-items:center; margin-top:10px; }
+select, input{
+  width:100%; max-width:520px;
+  border:1px solid var(--border); border-radius:14px;
+  padding:10px 12px; outline:none;
 }
+label{ font-size:12px; color:var(--muted); display:block; margin:8px 0 6px; }
 
-.item {
-  background: rgba(255,255,255,.72) !important;
-  border: 1px solid rgba(15,23,42,.08) !important;
-  box-shadow: 0 12px 26px rgba(2,6,23,.06) !important;
-}
+.toggle{ display:flex; gap:8px; align-items:center; font-size:12px; color:var(--muted); }
 
-/* 4) Buttons: more premium, consistent */
-.btn, button.btn, a.btn {
-  border-radius: 14px !important;
-  font-weight: 900 !important;
-  transition: transform .12s ease, box-shadow .12s ease, background .12s ease;
-  box-shadow: 0 10px 24px rgba(5,150,105,.16) !important;
+.modal{
+  position:fixed; inset:0; background:rgba(0,0,0,.3);
+  display:flex; align-items:center; justify-content:center;
+  padding:18px;
 }
-
-.btn:hover, button.btn:hover, a.btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 14px 30px rgba(2,6,23,.12) !important;
+.modal-card{
+  width:min(720px, 96vw);
+  background:#fff; border-radius:18px; border:1px solid var(--border);
+  box-shadow:var(--shadow);
 }
-
-.btn:active, button.btn:active, a.btn:active {
-  transform: translateY(0px);
+.modal-head, .modal-foot{
+  padding:12px 14px; display:flex; align-items:center; justify-content:space-between;
+  border-bottom:1px solid var(--border);
 }
-
-/* Optional: ghost buttons feel nicer */
-.btn.ghost {
-  background: rgba(255,255,255,.72) !important;
-  border: 1px solid rgba(15,23,42,.10) !important;
-  box-shadow: 0 10px 26px rgba(2,6,23,.06) !important;
-}
-
-/* 5) Inputs: cleaner focus ring */
-.input, input, select, textarea {
-  border-radius: 14px !important;
-  border: 1px solid rgba(15,23,42,.14) !important;
-  background: rgba(255,255,255,.78) !important;
-  outline: none;
-  transition: box-shadow .12s ease, border-color .12s ease;
-}
-
-.input:focus, input:focus, select:focus, textarea:focus {
-  border-color: rgba(5,150,105,.55) !important;
-  box-shadow: 0 0 0 4px rgba(5,150,105,.12) !important;
-}
-
-/* 6) Topbar / sticky header (if exists) */
-.top, .topbar {
-  background: rgba(255,255,255,.70) !important;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(255,255,255,.55) !important;
-}
-
-/* 7) Small polish for muted text */
-.muted, .d, .sub {
-  opacity: .92;
-}
-
-/* Reduce motion option (accessibility) */
-@media (prefers-reduced-motion: reduce) {
-  body.stage::before, body::before { animation: none; }
-  .btn, button.btn, a.btn { transition: none; }
-}
+.modal-foot{ border-top:1px solid var(--border); border-bottom:none; }
+.modal-head h3{ margin:0; }
+.modal-body{ padding:14px; }
+#modalBody{ padding:14px; }
+.iconbtn{ border:none; background:transparent; cursor:pointer; font-size:18px; }
