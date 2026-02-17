@@ -228,3 +228,35 @@ h1,h2,h3 {
   body.stage::before, body::before { animation: none; }
   .btn, button.btn, a.btn { transition: none; }
 }
+/* =========================
+   AMBIENT GRADIENT BACKGROUND
+   ========================= */
+
+body.stage {
+  position: relative;
+  overflow-x: hidden;
+  background: #0f172a;
+}
+
+body.stage::before {
+  content: "";
+  position: fixed;
+  inset: -20%;
+  z-index: -1;
+  background: radial-gradient(circle at 20% 30%, #10b981 0%, transparent 40%),
+              radial-gradient(circle at 80% 20%, #0ea5e9 0%, transparent 40%),
+              radial-gradient(circle at 70% 80%, #6366f1 0%, transparent 40%),
+              radial-gradient(circle at 10% 80%, #f59e0b 0%, transparent 40%);
+  animation: ambientMove 18s ease-in-out infinite alternate;
+  filter: blur(80px);
+  opacity: 0.7;
+}
+
+@keyframes ambientMove {
+  0% {
+    transform: translate(0px, 0px) scale(1);
+  }
+  100% {
+    transform: translate(-60px, -40px) scale(1.15);
+  }
+}
