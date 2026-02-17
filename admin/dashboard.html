@@ -95,6 +95,55 @@
       color:#0f172a;
       line-height: 1.7;
     }
+
+    /* Subject UI */
+    .select{
+      width:100%;
+      max-width:520px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(15,23,42,.14);
+      background: rgba(255,255,255,.75);
+      font-weight: 850;
+      outline: none;
+    }
+    .select:focus{ border-color: rgba(5,150,105,.55); box-shadow: 0 0 0 4px rgba(5,150,105,.12); }
+    .split{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-top: 12px;
+    }
+    @media(min-width: 900px){
+      .split{ grid-template-columns: 1fr 1fr; }
+    }
+    .mini{
+      font-size:12px;
+      font-weight: 850;
+      color:#334155;
+      opacity:.9;
+      margin-top:6px;
+      line-height:1.5;
+    }
+    .pillbtn{
+      border: 1px solid rgba(15,23,42,.12);
+      background: rgba(255,255,255,.70);
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-weight: 900;
+      cursor:pointer;
+    }
+    .pillbtn:hover{ background: rgba(255,255,255,.90); }
+    .tag{
+      display:inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(15,23,42,.12);
+      background: rgba(255,255,255,.65);
+      font-weight: 900;
+      font-size: 12px;
+      margin-left: 8px;
+    }
   </style>
 </head>
 
@@ -144,9 +193,9 @@
             <div class="item">
               <div>
                 <p class="t">Subjek</p>
-                <p class="d">(Optional) Kalau nak tambah subject ikut bab.</p>
+                <p class="d">Wajib ada subjek dulu supaya dropdown nota/kuiz muncul.</p>
               </div>
-              <span class="chip">Auto (guna sheet / notes page)</span>
+              <button class="pillbtn" id="btnGoSubjects" type="button">Buka</button>
             </div>
           </div>
         </section>
@@ -170,6 +219,58 @@
           </div>
         </section>
       </div>
+
+      <!-- SUBJECTS CARD -->
+      <section class="card" id="subjectsCard" style="scroll-margin-top:90px;">
+        <h2 class="section-title">Subjek</h2>
+        <p class="muted" style="margin:0;">
+          Subjek akan digunakan dalam <b>Admin Nota</b> & <b>Admin Kuiz</b>. Pilih kelas dulu, kemudian tambah subjek ikut bab.
+        </p>
+
+        <div class="split">
+          <!-- left: form -->
+          <div>
+            <div class="row" style="margin-top:12px;">
+              <select id="subjClassSel" class="select"></select>
+              <button class="pillbtn" id="btnLoadSubjects" type="button">Load</button>
+            </div>
+            <div class="mini" id="subjHint">
+              Tip: kalau dropdown kelas kosong, pastikan kelas tu memang owner kau (sheet Classes ada ownerUserId = userId admin).
+            </div>
+
+            <div style="margin-top:14px;">
+              <div class="mini" style="margin-bottom:6px;">Tambah / Edit Subjek</div>
+              <input id="subjectId" class="input" placeholder="subjectId (optional, kalau nak edit). Contoh: S61B3C9721996" style="max-width:520px;"/>
+              <div style="height:8px;"></div>
+              <input id="subjectName" class="input" placeholder="Nama subjek. Contoh: Bab 1 - Pengenalan" style="max-width:520px;"/>
+              <div style="height:8px;"></div>
+
+              <div class="row">
+                <input id="sortOrder" class="input" type="number" placeholder="sortOrder (optional). Contoh: 1" style="max-width:220px;"/>
+                <select id="isActiveSel" class="select" style="max-width:220px;">
+                  <option value="TRUE">TRUE</option>
+                  <option value="FALSE">FALSE</option>
+                </select>
+                <button class="btn" id="btnSaveSubject" type="button">Simpan</button>
+              </div>
+
+              <div class="mini">
+                Nak edit cepat: klik mana-mana subject kat kanan (dia auto isi form). Nak tambah baru: biar subjectId kosong.
+              </div>
+            </div>
+          </div>
+
+          <!-- right: list -->
+          <div>
+            <div class="row" style="margin-top:12px; justify-content:space-between;">
+              <div class="mini" style="margin:0;"><b>Senarai Subjek</b></div>
+              <button class="pillbtn" id="btnClearForm" type="button">Clear form</button>
+            </div>
+            <div id="subjectsList" class="list" style="margin-top:10px;"></div>
+          </div>
+        </div>
+      </section>
+
     </div>
   </main>
 
@@ -179,6 +280,17 @@
     const ownedList = document.getElementById("ownedList");
     const classNameEl = document.getElementById("className");
     const createResultEl = document.getElementById("createResult");
+
+    const subjClassSel = document.getElementById("subjClassSel");
+    const subjectsListEl = document.getElementById("subjectsList");
+    const subjectIdEl = document.getElementById("subjectId");
+    const subjectNameEl = document.getElementById("subjectName");
+    const sortOrderEl = document.getElementById("sortOrder");
+    const isActiveSel = document.getElementById("isActiveSel");
+
+    let SESSION = null; // { token, user }
+    let OWNED_CLASSES = [];
+    let SUBJECTS = []; // subjects for selected class
 
     function showMsg(type, text){
       msgEl.className = "msg " + (type === "ok" ? "ok" : "err");
@@ -248,6 +360,97 @@
       });
     }
 
+    function renderClassDropdown(){
+      subjClassSel.innerHTML = "";
+      if(!OWNED_CLASSES.length){
+        subjClassSel.innerHTML = `<option value="">Tiada kelas</option>`;
+        return;
+      }
+      subjClassSel.innerHTML = OWNED_CLASSES
+        .map(c=>`<option value="${escapeHtml(c.classId)}">${escapeHtml(c.className)} (${escapeHtml(c.classCode)})</option>`)
+        .join("");
+    }
+
+    function clearSubjectForm(){
+      subjectIdEl.value = "";
+      subjectNameEl.value = "";
+      sortOrderEl.value = "";
+      isActiveSel.value = "TRUE";
+    }
+
+    function renderSubjects(){
+      subjectsListEl.innerHTML = "";
+      if(!SUBJECTS.length){
+        subjectsListEl.innerHTML = `
+          <div class="item">
+            <div>
+              <p class="t">Belum ada subjek</p>
+              <p class="d">Tambah subjek di sebelah kiri, kemudian “Simpan”.</p>
+            </div>
+            <span class="chip">—</span>
+          </div>`;
+        return;
+      }
+
+      SUBJECTS.forEach(s=>{
+        const row = document.createElement("div");
+        row.className = "item";
+        row.style.cursor = "pointer";
+        row.title = "Klik untuk edit";
+        row.innerHTML = `
+          <div>
+            <p class="t">${escapeHtml(s.subjectName || s.subjectId)}</p>
+            <p class="d">
+              subjectId: <b>${escapeHtml(s.subjectId)}</b>
+              • sortOrder: ${escapeHtml(String(s.sortOrder ?? 0))}
+              ${s.isActive ? `<span class="tag">aktif</span>` : `<span class="tag">off</span>`}
+            </p>
+          </div>
+          <button class="pillbtn" type="button" data-id="${escapeHtml(s.subjectId)}">${s.isActive ? "Off" : "On"}</button>
+        `;
+
+        // click row -> fill form
+        row.addEventListener("click", (ev)=>{
+          // kalau klik button toggle, jangan overwrite form dulu (handle bawah)
+          if(ev.target && ev.target.tagName === "BUTTON") return;
+          subjectIdEl.value = s.subjectId || "";
+          subjectNameEl.value = s.subjectName || "";
+          sortOrderEl.value = (s.sortOrder ?? 0);
+          isActiveSel.value = s.isActive ? "TRUE" : "FALSE";
+        });
+
+        // toggle button
+        const btn = row.querySelector("button");
+        btn.addEventListener("click", async (ev)=>{
+          ev.stopPropagation();
+          if(!SESSION) return;
+
+          const classId = subjClassSel.value;
+          const newActive = !s.isActive;
+
+          const res = await apiPost({
+            action: "adminUpsertSubject",
+            token: SESSION.token,
+            classId,
+            subjectId: s.subjectId,
+            subjectName: s.subjectName,
+            sortOrder: s.sortOrder ?? 0,
+            isActive: newActive ? "TRUE" : "FALSE"
+          });
+
+          if(!res || !res.ok){
+            showMsg("err", res?.error || res?.message || "Gagal update subject.");
+            return;
+          }
+
+          await loadSubjectsForSelectedClass();
+          showMsg("ok", `Subject ${newActive ? "diaktifkan" : "dimatikan"} ✅`);
+        });
+
+        subjectsListEl.appendChild(row);
+      });
+    }
+
     async function guardAdmin(){
       const token = localStorage.getItem("kk_token") || "";
       if(!token){
@@ -277,16 +480,52 @@
     async function refreshOwned(token){
       const r = await apiPost({ action:"adminListOwnedClasses", token });
       if(!r || !r.ok) throw new Error(r?.error || r?.message || "Gagal load kelas admin.");
-      renderOwned(r.classes || []);
+      OWNED_CLASSES = r.classes || [];
+      renderOwned(OWNED_CLASSES);
+      renderClassDropdown();
+    }
+
+    async function loadSubjectsForSelectedClass(){
+      if(!SESSION) return;
+      const classId = subjClassSel.value;
+      if(!classId){
+        SUBJECTS = [];
+        renderSubjects();
+        return;
+      }
+
+      const r = await apiPost({ action:"adminListSubjects", token: SESSION.token, classId });
+      if(!r || !r.ok){
+        SUBJECTS = [];
+        renderSubjects();
+        showMsg("err", r?.error || r?.message || "Gagal load subjects.");
+        return;
+      }
+
+      SUBJECTS = r.subjects || [];
+      // sort ikut sortOrder, then name
+      SUBJECTS.sort((a,b)=>{
+        const ao = Number(a.sortOrder ?? 0), bo = Number(b.sortOrder ?? 0);
+        if(ao !== bo) return ao - bo;
+        return String(a.subjectName||"").localeCompare(String(b.subjectName||""));
+      });
+
+      renderSubjects();
     }
 
     async function boot(){
       clearMsg();
-      const session = await guardAdmin();
-      if(!session) return;
+      SESSION = await guardAdmin();
+      if(!SESSION) return;
 
       showMsg("ok", "Akses admin disahkan.");
-      await refreshOwned(session.token);
+      await refreshOwned(SESSION.token);
+
+      // auto load subjects untuk class pertama (kalau ada)
+      if(OWNED_CLASSES[0]){
+        subjClassSel.value = OWNED_CLASSES[0].classId;
+        await loadSubjectsForSelectedClass();
+      }
     }
 
     document.getElementById("btnLogout").addEventListener("click", ()=>{
@@ -306,6 +545,7 @@
       try{
         const session = await guardAdmin();
         if(!session) return;
+        SESSION = session;
 
         const className = String(classNameEl.value || "").trim();
         if(!className){
@@ -330,9 +570,90 @@
 
         classNameEl.value = "";
         await refreshOwned(session.token);
+
+        // auto select class baru + load subjects list kosong
+        if(r.classId){
+          subjClassSel.value = r.classId;
+          SUBJECTS = [];
+          renderSubjects();
+          document.getElementById("subjectsCard").scrollIntoView({behavior:"smooth"});
+        }
       }catch(err){
         showMsg("err", err?.message || String(err));
       }
+    });
+
+    // Subjects controls
+    document.getElementById("btnGoSubjects").addEventListener("click", ()=>{
+      document.getElementById("subjectsCard").scrollIntoView({behavior:"smooth"});
+    });
+
+    document.getElementById("btnLoadSubjects").addEventListener("click", async ()=>{
+      try{
+        const session = await guardAdmin();
+        if(!session) return;
+        SESSION = session;
+        await loadSubjectsForSelectedClass();
+        showMsg("ok", "Subjects loaded ✅");
+      }catch(err){
+        showMsg("err", err?.message || String(err));
+      }
+    });
+
+    document.getElementById("btnClearForm").addEventListener("click", ()=>{
+      clearSubjectForm();
+    });
+
+    document.getElementById("btnSaveSubject").addEventListener("click", async ()=>{
+      try{
+        const session = await guardAdmin();
+        if(!session) return;
+        SESSION = session;
+
+        const classId = subjClassSel.value;
+        if(!classId){
+          showMsg("err", "Pilih kelas dulu.");
+          return;
+        }
+
+        const subjectId = String(subjectIdEl.value || "").trim(); // optional
+        const subjectName = String(subjectNameEl.value || "").trim();
+        const sortOrder = String(sortOrderEl.value || "").trim();
+        const isActive = String(isActiveSel.value || "TRUE").toUpperCase();
+
+        if(!subjectName){
+          showMsg("err", "Nama subjek tak boleh kosong.");
+          return;
+        }
+
+        const payload = {
+          action: "adminUpsertSubject",
+          token: session.token,
+          classId,
+          subjectName,
+          isActive
+        };
+        if(subjectId) payload.subjectId = subjectId;
+        if(sortOrder !== "") payload.sortOrder = sortOrder;
+
+        const r = await apiPost(payload);
+        if(!r || !r.ok){
+          showMsg("err", r?.error || r?.message || "Gagal simpan subject.");
+          return;
+        }
+
+        showMsg("ok", "Subject berjaya disimpan ✅");
+        clearSubjectForm();
+        await loadSubjectsForSelectedClass();
+      }catch(err){
+        showMsg("err", err?.message || String(err));
+      }
+    });
+
+    // load subjects when change class
+    subjClassSel.addEventListener("change", ()=>{
+      // auto load without popping error
+      loadSubjectsForSelectedClass().catch(()=>{});
     });
 
     boot();
