@@ -1,436 +1,213 @@
 <!doctype html>
 <html lang="ms">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Bukan Pelajar • Sistem Luar</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Bukan Pelajar • Akan Datang</title>
 
-  <!-- Tak guna styles.css supaya tak kacau sistem lain -->
-  <style>
-    :root{
-      --bg: #0b1220;
-      --card: rgba(255,255,255,.10);
-      --card2: rgba(255,255,255,.08);
-      --stroke: rgba(255,255,255,.14);
-      --text: rgba(255,255,255,.92);
-      --muted: rgba(255,255,255,.68);
-      --chip: rgba(255,255,255,.12);
-      --shadow: 0 18px 50px rgba(0,0,0,.35);
-      --radius: 18px;
-    }
+<style>
+:root{
+  --bg:#0b1220;
+  --card:rgba(255,255,255,.08);
+  --stroke:rgba(255,255,255,.12);
+  --text:rgba(255,255,255,.92);
+  --muted:rgba(255,255,255,.65);
+  --radius:18px;
+}
 
-    *{ box-sizing:border-box; }
-    body{
-      margin:0;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
-      background: radial-gradient(1200px 800px at 20% 10%, rgba(20,184,166,.18), transparent 55%),
-                  radial-gradient(1000px 700px at 90% 30%, rgba(59,130,246,.16), transparent 60%),
-                  radial-gradient(900px 650px at 40% 90%, rgba(34,197,94,.14), transparent 60%),
-                  var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      overflow-x:hidden;
-    }
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto;
+  background:
+    radial-gradient(1200px 800px at 10% 10%, rgba(20,184,166,.15), transparent 60%),
+    radial-gradient(900px 700px at 90% 30%, rgba(59,130,246,.15), transparent 60%),
+    radial-gradient(800px 600px at 40% 90%, rgba(34,197,94,.12), transparent 60%),
+    var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  overflow-x:hidden;
+}
 
-    /* Ambient blobs (animated, smooth) */
-    .ambient{
-      position:fixed;
-      inset:-120px;
-      z-index:-1;
-      filter: blur(40px);
-      opacity: .95;
-      pointer-events:none;
-    }
-    .blob{
-      position:absolute;
-      width: 520px;
-      height: 520px;
-      border-radius: 999px;
-      background: radial-gradient(circle at 30% 30%, rgba(20,184,166,.65), rgba(20,184,166,0) 60%);
-      animation: floatA 16s ease-in-out infinite;
-      mix-blend-mode: screen;
-    }
-    .blob.b2{
-      width: 560px; height:560px;
-      left: 60%;
-      top: 5%;
-      background: radial-gradient(circle at 35% 35%, rgba(59,130,246,.60), rgba(59,130,246,0) 62%);
-      animation: floatB 18s ease-in-out infinite;
-    }
-    .blob.b3{
-      width: 620px; height:620px;
-      left: 15%;
-      top: 55%;
-      background: radial-gradient(circle at 40% 35%, rgba(34,197,94,.55), rgba(34,197,94,0) 62%);
-      animation: floatC 20s ease-in-out infinite;
-    }
-    @keyframes floatA{
-      0%{ transform: translate(8%, 10%) scale(1); }
-      50%{ transform: translate(20%, 2%) scale(1.06); }
-      100%{ transform: translate(8%, 10%) scale(1); }
-    }
-    @keyframes floatB{
-      0%{ transform: translate(-10%, 6%) scale(1); }
-      50%{ transform: translate(-22%, 16%) scale(1.05); }
-      100%{ transform: translate(-10%, 6%) scale(1); }
-    }
-    @keyframes floatC{
-      0%{ transform: translate(12%, -6%) scale(1); }
-      50%{ transform: translate(-6%, -18%) scale(1.07); }
-      100%{ transform: translate(12%, -6%) scale(1); }
-    }
+/* ambient animation */
+.ambient{
+  position:fixed;
+  inset:-100px;
+  z-index:-1;
+  filter:blur(40px);
+}
+.blob{
+  position:absolute;
+  width:500px;height:500px;
+  border-radius:999px;
+  background:radial-gradient(circle at 30% 30%, rgba(20,184,166,.5), transparent 60%);
+  animation:float 18s ease-in-out infinite;
+}
+.blob.b2{
+  left:60%;top:10%;
+  background:radial-gradient(circle at 30% 30%, rgba(59,130,246,.5), transparent 60%);
+  animation-delay:3s;
+}
+.blob.b3{
+  left:20%;top:60%;
+  background:radial-gradient(circle at 30% 30%, rgba(34,197,94,.5), transparent 60%);
+  animation-delay:6s;
+}
+@keyframes float{
+  0%{transform:translate(0,0) scale(1)}
+  50%{transform:translate(40px,-30px) scale(1.08)}
+  100%{transform:translate(0,0) scale(1)}
+}
 
-    /* Top bar */
-    .top{
-      position: sticky;
-      top: 0;
-      z-index: 10;
-      background: rgba(11,18,32,.45);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      border-bottom: 1px solid rgba(255,255,255,.10);
-    }
-    .top-inner{
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 14px 16px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap: 12px;
-    }
-    .brand h1{
-      margin:0;
-      font-size: 18px;
-      letter-spacing: -.02em;
-      font-weight: 900;
-    }
-    .brand p{
-      margin: 4px 0 0;
-      font-size: 12px;
-      color: var(--muted);
-      font-weight: 700;
-    }
-    .actions{
-      display:flex;
-      gap:10px;
-      align-items:center;
-      flex-wrap:wrap;
-    }
-    .btn{
-      border: 1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.08);
-      color: var(--text);
-      padding: 10px 12px;
-      border-radius: 14px;
-      font-weight: 900;
-      cursor:pointer;
-      text-decoration:none;
-      display:inline-flex;
-      align-items:center;
-      gap: 8px;
-      transition: transform .12s ease, background .12s ease, border-color .12s ease;
-      box-shadow: 0 10px 28px rgba(0,0,0,.18);
-    }
-    .btn:hover{
-      transform: translateY(-1px);
-      background: rgba(255,255,255,.12);
-      border-color: rgba(255,255,255,.22);
-    }
-    .btn.primary{
-      border: 1px solid rgba(20,184,166,.32);
-      background: rgba(20,184,166,.16);
-    }
-    .btn.primary:hover{
-      background: rgba(20,184,166,.22);
-      border-color: rgba(20,184,166,.42);
-    }
+/* layout */
+.top{
+  backdrop-filter:blur(14px);
+  background:rgba(11,18,32,.45);
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+.top-inner{
+  max-width:1100px;
+  margin:0 auto;
+  padding:14px 16px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.top h1{
+  margin:0;
+  font-size:16px;
+  font-weight:900;
+}
+.btn{
+  text-decoration:none;
+  padding:9px 12px;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(255,255,255,.08);
+  color:white;
+  font-weight:900;
+}
+.btn:hover{
+  background:rgba(255,255,255,.14);
+}
 
-    /* Page */
-    .wrap{
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 22px 16px 40px;
-    }
+.wrap{
+  max-width:1100px;
+  margin:0 auto;
+  padding:40px 16px;
+}
 
-    .hero{
-      display:grid;
-      gap: 14px;
-      grid-template-columns: 1fr;
-      margin-top: 16px;
-    }
-    @media(min-width: 900px){
-      .hero{ grid-template-columns: 1.3fr .7fr; align-items: start; }
-    }
+.card{
+  background:var(--card);
+  border:1px solid var(--stroke);
+  border-radius:var(--radius);
+  padding:40px 20px;
+  text-align:center;
+  backdrop-filter:blur(12px);
+}
 
-    .card{
-      border-radius: var(--radius);
-      background: linear-gradient(180deg, var(--card), var(--card2));
-      border: 1px solid var(--stroke);
-      box-shadow: var(--shadow);
-      padding: 18px;
-    }
+.title{
+  font-size:28px;
+  font-weight:950;
+  margin:0;
+  letter-spacing:-.02em;
+}
 
-    .title{
-      margin:0;
-      font-size: 26px;
-      line-height: 1.15;
-      letter-spacing: -.03em;
-      font-weight: 950;
-    }
-    .desc{
-      margin: 10px 0 0;
-      color: var(--muted);
-      font-weight: 750;
-      line-height: 1.65;
-      font-size: 13px;
-    }
-    .chips{
-      display:flex;
-      gap: 8px;
-      flex-wrap:wrap;
-      margin-top: 12px;
-    }
-    .chip{
-      border: 1px solid rgba(255,255,255,.14);
-      background: var(--chip);
-      padding: 6px 10px;
-      border-radius: 999px;
-      font-weight: 900;
-      font-size: 12px;
-      color: rgba(255,255,255,.86);
-    }
+.subtitle{
+  margin-top:12px;
+  font-weight:800;
+  color:var(--muted);
+}
 
-    .grid{
-      display:grid;
-      grid-template-columns: 1fr;
-      gap: 12px;
-      margin-top: 16px;
-    }
-    @media(min-width: 780px){
-      .grid{ grid-template-columns: 1fr 1fr; }
-    }
+.grid{
+  margin-top:30px;
+  display:grid;
+  gap:16px;
+  grid-template-columns:1fr;
+}
+@media(min-width:768px){
+  .grid{grid-template-columns:1fr 1fr;}
+}
 
-    .sys{
-      display:flex;
-      gap: 12px;
-      align-items:flex-start;
-    }
-    .icon{
-      width: 44px; height: 44px;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.10);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size: 18px;
-      flex: 0 0 auto;
-      box-shadow: 0 10px 28px rgba(0,0,0,.16);
-    }
-    .sys h3{
-      margin: 0;
-      font-size: 14px;
-      font-weight: 950;
-      letter-spacing: -.01em;
-    }
-    .sys p{
-      margin: 6px 0 0;
-      color: var(--muted);
-      font-weight: 750;
-      font-size: 12px;
-      line-height: 1.6;
-    }
-    .sys .row{
-      display:flex;
-      gap: 10px;
-      margin-top: 10px;
-      flex-wrap:wrap;
-      align-items:center;
-    }
-    .link{
-      text-decoration:none;
-      font-weight: 950;
-      color: rgba(255,255,255,.92);
-      border: 1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.08);
-      padding: 9px 12px;
-      border-radius: 14px;
-      display:inline-flex;
-      align-items:center;
-      gap: 8px;
-      transition: transform .12s ease, background .12s ease, border-color .12s ease;
-    }
-    .link:hover{
-      transform: translateY(-1px);
-      background: rgba(255,255,255,.12);
-      border-color: rgba(255,255,255,.22);
-    }
-    .badge{
-      font-size: 11px;
-      font-weight: 950;
-      padding: 5px 9px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.16);
-      background: rgba(255,255,255,.10);
-      color: rgba(255,255,255,.82);
-    }
-    .badge.soon{
-      border-color: rgba(255,255,255,.12);
-      background: rgba(255,255,255,.07);
-      opacity: .92;
-    }
+.box{
+  background:var(--card);
+  border:1px solid var(--stroke);
+  border-radius:var(--radius);
+  padding:30px;
+  text-align:center;
+  backdrop-filter:blur(10px);
+}
+.box h3{
+  margin:0;
+  font-weight:950;
+}
+.box p{
+  margin-top:10px;
+  font-size:13px;
+  color:var(--muted);
+  font-weight:800;
+}
 
-    .foot{
-      margin-top: 16px;
-      color: rgba(255,255,255,.55);
-      font-weight: 800;
-      font-size: 12px;
-      text-align:center;
-    }
-
-    /* Accessibility: reduce motion */
-    @media (prefers-reduced-motion: reduce){
-      .blob{ animation: none !important; }
-      .btn, .link{ transition:none !important; }
-    }
-  </style>
+.footer{
+  margin-top:40px;
+  text-align:center;
+  font-size:12px;
+  color:rgba(255,255,255,.5);
+  font-weight:800;
+}
+</style>
 </head>
 
 <body>
-  <div class="ambient" aria-hidden="true">
-    <div class="blob"></div>
-    <div class="blob b2"></div>
-    <div class="blob b3"></div>
+
+<div class="ambient">
+  <div class="blob"></div>
+  <div class="blob b2"></div>
+  <div class="blob b3"></div>
+</div>
+
+<header class="top">
+  <div class="top-inner">
+    <h1>Bukan Pelajar</h1>
+    <a href="../index.html" class="btn">⬅ Kembali</a>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <div class="card">
+    <h2 class="title">Akan Datang</h2>
+    <div class="subtitle">
+      Akan Datang • Akan Datang • Akan Datang
+    </div>
   </div>
 
-  <header class="top">
-    <div class="top-inner">
-      <div class="brand">
-        <h1>Bukan Pelajar</h1>
-        <p>External Systems Hub • Direktori sistem & projek tambahan</p>
-      </div>
-
-      <div class="actions">
-        <!-- Tukar link balik ikut struktur kau -->
-        <a class="btn" href="../index.html">⬅ Home</a>
-        <a class="btn primary" href="../pelajar/login.html">Portal Pelajar</a>
-      </div>
+  <div class="grid">
+    <div class="box">
+      <h3>Akan Datang</h3>
+      <p>Akan Datang</p>
     </div>
-  </header>
 
-  <main class="wrap">
-    <section class="hero">
-      <div class="card">
-        <h2 class="title">Digital Systems Hub</h2>
-        <p class="desc">
-          Ini bukan portal kelas. Ini ruang untuk sistem luar — contoh rekod inovasi, laporan KPI,
-          borang program, audit, dashboard, dan apa-apa projek digital yang kau tambah kemudian.
-          Page ni memang <b>open untuk semua</b>. Setiap sistem akan ada <b>login masing-masing</b> bila orang klik.
-        </p>
-
-        <div class="chips">
-          <span class="chip">Public Directory</span>
-          <span class="chip">Sistem asing (external)</span>
-          <span class="chip">Future-ready</span>
-        </div>
-      </div>
-
-      <div class="card">
-        <h3 style="margin:0; font-size:14px; font-weight:950;">Nota ringkas</h3>
-        <p class="desc" style="margin-top:8px;">
-          Nak tambah sistem baru nanti senang je: tambah satu “card” baru kat bawah dan letak link.
-          Tak perlu kacau portal pelajar/admin.
-        </p>
-        <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
-          <span class="badge">Status: Live</span>
-          <span class="badge soon">More systems soon</span>
-        </div>
-      </div>
-    </section>
-
-    <section class="grid">
-      <!-- 1 -->
-      <div class="card sys">
-        <div class="icon">🏆</div>
-        <div style="flex:1;">
-          <h3>Sistem Rekod Inovasi</h3>
-          <p>Rekod, tracking, dan dokumentasi projek inovasi (dalaman / pertandingan).</p>
-          <div class="row">
-            <a class="link" href="#" target="_blank" rel="noopener">Buka Sistem ↗</a>
-            <span class="badge soon">Coming / Link belum letak</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- 2 -->
-      <div class="card sys">
-        <div class="icon">📊</div>
-        <div style="flex:1;">
-          <h3>KPI & Laporan</h3>
-          <p>Dashboard KPI, laporan unit, dan pemantauan pencapaian (ikut modul).</p>
-          <div class="row">
-            <a class="link" href="#" target="_blank" rel="noopener">Buka Sistem ↗</a>
-            <span class="badge soon">Coming / Link belum letak</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- 3 -->
-      <div class="card sys">
-        <div class="icon">🗂️</div>
-        <div style="flex:1;">
-          <h3>Program & Event</h3>
-          <p>Rekod program, pendaftaran peserta, kehadiran, dan sijil (ikut keperluan).</p>
-          <div class="row">
-            <a class="link" href="#" target="_blank" rel="noopener">Buka Sistem ↗</a>
-            <span class="badge soon">Coming / Link belum letak</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- 4 -->
-      <div class="card sys">
-        <div class="icon">🧾</div>
-        <div style="flex:1;">
-          <h3>Dokumen & Borang</h3>
-          <p>Hub borang rasmi, template, atau dokumen SOP yang perlu dicapai cepat.</p>
-          <div class="row">
-            <a class="link" href="#" target="_blank" rel="noopener">Buka Sistem ↗</a>
-            <span class="badge soon">Coming / Link belum letak</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- 5 -->
-      <div class="card sys">
-        <div class="icon">🧠</div>
-        <div style="flex:1;">
-          <h3>Knowledge Base</h3>
-          <p>Ruang rujukan, FAQ, tutorial ringkas untuk staff/pengguna sistem dalaman.</p>
-          <div class="row">
-            <a class="link" href="#" target="_blank" rel="noopener">Buka Sistem ↗</a>
-            <span class="badge soon">Coming / Link belum letak</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- 6 -->
-      <div class="card sys">
-        <div class="icon">➕</div>
-        <div style="flex:1;">
-          <h3>Akan Datang</h3>
-          <p>Sistem baru akan ditambah dari semasa ke semasa. Page ni memang dibuat untuk grow.</p>
-          <div class="row">
-            <span class="badge soon">Placeholder</span>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <div class="foot">
-      © kura kura hijau • External Systems Hub
+    <div class="box">
+      <h3>Akan Datang</h3>
+      <p>Akan Datang</p>
     </div>
-  </main>
+
+    <div class="box">
+      <h3>Akan Datang</h3>
+      <p>Akan Datang</p>
+    </div>
+
+    <div class="box">
+      <h3>Akan Datang</h3>
+      <p>Akan Datang</p>
+    </div>
+  </div>
+
+  <div class="footer">
+    Akan Datang
+  </div>
+
+</main>
 </body>
 </html>
