@@ -260,3 +260,38 @@ body.stage::before {
     transform: translate(-60px, -40px) scale(1.15);
   }
 }
+/* =========================
+   AMBIENT GRADIENT (LIGHT + FASTER)
+   ========================= */
+
+body.stage{
+  position: relative;
+  overflow-x: hidden;
+  background: #f8fafc; /* cerah, clean */
+}
+
+body.stage::before{
+  content:"";
+  position: fixed;
+  inset: -25%;
+  z-index: -1;
+
+  /* warna lembut + lebih “airy” */
+  background:
+    radial-gradient(600px 450px at 18% 30%, rgba(16,185,129,.45) 0%, rgba(16,185,129,0) 60%),
+    radial-gradient(650px 480px at 82% 22%, rgba(14,165,233,.45) 0%, rgba(14,165,233,0) 62%),
+    radial-gradient(700px 520px at 70% 82%, rgba(99,102,241,.38) 0%, rgba(99,102,241,0) 62%),
+    radial-gradient(560px 420px at 18% 85%, rgba(245,158,11,.28) 0%, rgba(245,158,11,0) 65%);
+
+  /* kurang blur supaya tak “lumpur” */
+  filter: blur(55px);
+  opacity: .75;
+
+  /* lebih laju */
+  animation: ambientMove 9s ease-in-out infinite alternate;
+}
+
+@keyframes ambientMove{
+  0%   { transform: translate(0px, 0px) scale(1); }
+  100% { transform: translate(-40px, -30px) scale(1.08); }
+}
