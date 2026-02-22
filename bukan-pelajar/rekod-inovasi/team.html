@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Urus Ahli Kumpulan</title>
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+  <style>
+    body{font-family:ui-sans-serif,system-ui;background:#f8fafc;margin:0;color:#0f172a}
+    .wrap{max-width:980px;margin:40px auto;padding:0 20px}
+    .card{background:#fff;border:1px solid #e5e7eb;border-radius:18px;padding:20px}
+    .top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+    .muted{color:#64748b;font-size:13px}
+    label{display:block;margin-top:12px;font-weight:800;font-size:13px;color:#334155}
+    input,select{
+      width:100%;padding:10px;border:1px solid #e5e7eb;
+      border-radius:12px;margin-top:6px;font-size:14px;background:#fff
+    }
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .btn{
+      margin-top:14px;padding:10px 14px;border-radius:12px;
+      border:1px solid #0f172a;background:#0f172a;color:#fff;font-weight:900;cursor:pointer
+    }
+    .btn.light{background:#fff;color:#0f172a;border-color:#e5e7eb}
+    table{width:100%;border-collapse:collapse;margin-top:14px;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden;background:#fff}
+    th,td{padding:10px 12px;border-bottom:1px solid #e5e7eb;font-size:14px;text-align:left;vertical-align:top}
+    th{background:#f1f5f9;font-size:13px;color:#334155}
+    .linkDanger{background:none;border:none;color:#b91c1c;font-weight:900;cursor:pointer}
+    .footer{
+      text-align:center;font-size:12px;color:#64748b;margin-top:18px;padding:12px 0;border-top:1px solid #e5e7eb;
+    }
+    .toggle{display:flex;align-items:center;gap:10px;margin-top:12px}
+    .toggle input{width:auto;margin:0}
+  </style>
+</head>
+
+<body onload="teamInit()">
+  <div class="wrap">
+    <div class="top">
+      <div class="muted">Login: <b id="meEmail">-</b></div>
+      <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+        <button class="btn light" onclick="location.href='./dashboard.html'">← Dashboard</button>
+        <button class="btn light" onclick="doLogout()">Logout</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 style="margin:0 0 6px;">Urus Ahli Kumpulan</h2>
+      <div class="muted">Owner/leader boleh tambah ahli. Ahli yang ditambah akan nampak inovasi ini bila login.</div>
+
+      <label>Pilih Inovasi</label>
+      <select id="innovationId"></select>
+
+      <div class="toggle">
+        <input type="checkbox" id="isExternal">
+        <label for="isExternal" style="margin:0;font-weight:900;">Ahli tiada dalam StaffDirectory (External)</label>
+      </div>
+
+      <!-- Directory mode -->
+      <div id="directoryBox">
+        <label>Cari Nama (StaffDirectory)</label>
+        <input id="staffPick" list="staffList" placeholder="Taip nama… pilih dari dropdown" />
+        <datalist id="staffList"></datalist>
+
+        <div class="row">
+          <div>
+            <label>Email Ahli (auto)</label>
+            <input id="memberEmail" placeholder="auto-fill lepas pilih nama" />
+          </div>
+          <div>
+            <label>Nama Ahli (auto)</label>
+            <input id="memberName" placeholder="auto-fill lepas pilih nama" />
+          </div>
+        </div>
+
+        <label>Jabatan/Unit (auto jika ada)</label>
+        <input id="memberDept" placeholder="contoh: Jabatan Perdagangan / Unit ..." />
+      </div>
+
+      <!-- External mode -->
+      <div id="externalBox" style="display:none;">
+        <div class="row">
+          <div>
+            <label>Email Ahli (External)</label>
+            <input id="memberEmail" placeholder="contoh: ali@domain.com" />
+          </div>
+          <div>
+            <label>Nama Ahli (External)</label>
+            <input id="memberName" placeholder="contoh: Ali Bin Abu" />
+          </div>
+        </div>
+
+        <label>Jabatan/Unit (External) — wajib</label>
+        <input id="memberDept" placeholder="contoh: Jabatan Mekanikal / Industri / Agensi luar" />
+      </div>
+
+      <div class="row">
+        <div>
+          <label>Peranan dalam kumpulan</label>
+          <select id="memberRole">
+            <option value="member">member</option>
+            <option value="coleader">coLeader</option>
+            <option value="leader">leader</option>
+          </select>
+          <div class="muted" style="margin-top:6px;">Tip: kalau nak bagi orang ke-2 boleh tambah ahli, set dia sebagai coLeader.</div>
+        </div>
+        <div style="display:flex;align-items:end;">
+          <button class="btn" style="width:100%;" onclick="teamAddMember(event)">+ Tambah Ahli</button>
+        </div>
+      </div>
+
+      <div id="teamMsg" class="muted" style="margin-top:10px;"></div>
+
+      <h3 style="margin:18px 0 8px;">Senarai Ahli</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Email</th><th>Nama</th><th>Jabatan/Unit</th><th>Role</th><th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="teamBody">
+          <tr><td colspan="5" class="muted">Loading…</td></tr>
+        </tbody>
+      </table>
+
+      <div class="footer">© <span id="y"></span> kurakurahijau.com</div>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById("y").textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
