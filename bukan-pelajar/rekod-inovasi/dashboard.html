@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard - Rekod Inovasi</title>
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+  <style>
+    :root{ --line:#e5e7eb; --muted:#64748b; --card:#fff; --bg:#f8fafc; --text:#0f172a; }
+    body{ margin:0; font-family: ui-sans-serif,system-ui,-apple-system; background:var(--bg); color:var(--text); }
+    .wrap{ max-width:1100px; margin:24px auto; padding:0 18px; }
+    .topbar{ display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; }
+    .who{ color:var(--muted); font-size:14px; }
+    .btn{
+      border:1px solid var(--line); background:white; padding:10px 14px; border-radius:12px;
+      cursor:pointer; font-weight:800;
+    }
+    .btn.primary{ background:#0f172a; color:white; border-color:#0f172a; }
+    .grid{ display:grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap:14px; margin-top:16px; }
+    .card{ background:var(--card); border:1px solid var(--line); border-radius:16px; padding:14px; }
+    .kpiLabel{ color:var(--muted); font-size:12px; }
+    .kpiVal{ font-size:28px; font-weight:900; margin-top:6px; }
+    h2{ margin:18px 0 10px; }
+    table{ width:100%; border-collapse:collapse; background:white; border:1px solid var(--line); border-radius:16px; overflow:hidden; }
+    th,td{ padding:10px 12px; border-bottom:1px solid var(--line); font-size:14px; text-align:left; vertical-align:top; }
+    th{ background:#f1f5f9; font-size:13px; color:#334155; }
+    .pill{ padding:4px 10px; border-radius:999px; font-size:12px; font-weight:900; display:inline-block; }
+    .pill.ok{ background:#dcfce7; color:#166534; }
+    .pill.warn{ background:#fef9c3; color:#854d0e; }
+    .muted{ color:var(--muted); }
+
+    .footer{
+      text-align:center;
+      font-size:12px;
+      color:#64748b;
+      margin-top:18px;
+      padding:12px 0;
+      border-top:1px solid #e5e7eb;
+    }
+    @media print{
+      body { background:white; }
+      .btn { display:none !important; }
+      .footer{
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background:white;
+        margin:0;
+      }
+    }
+    @media (max-width:900px){ .grid{ grid-template-columns: repeat(2,1fr);} }
+  </style>
+</head>
+
+<body onload="dashboardInit()">
+  <div class="wrap">
+    <div class="topbar">
+      <div class="who">
+        Login: <b id="meEmail">-</b> &nbsp; <span class="pill ok" id="meRole">user</span>
+      </div>
+
+      <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+        <!-- FLOW KERJA (primary dulu) -->
+        <button class="btn primary" onclick="location.href='./add-innovation.html'">+ Tambah Inovasi</button>
+        <button class="btn primary" onclick="location.href='./team.html'">Urus Ahli</button>
+        <button class="btn primary" onclick="location.href='./add-competition.html'">+ Tambah Penyertaan</button>
+
+        <!-- laporan kemudian -->
+        <button class="btn" onclick="refreshReport('2026')">Report Inovasi 2026</button>
+        <button class="btn" onclick="refreshCompetitionReport('2026')">Report Pertandingan 2026</button>
+        <button class="btn" onclick="doPrint()">Print / Save PDF</button>
+
+        <!-- util last -->
+        <button class="btn" onclick="refreshMyInnovations()">Refresh</button>
+        <button class="btn" onclick="doLogout()">Logout</button>
+      </div>
+    </div>
+
+    <!-- KPI (MY) -->
+    <div class="grid">
+      <div class="card"><div class="kpiLabel">Jumlah Inovasi</div><div class="kpiVal" id="countTotal">0</div></div>
+      <div class="card"><div class="kpiLabel">Bil. Tahun Terlibat</div><div class="kpiVal" id="countYears">0</div></div>
+      <div class="card"><div class="kpiLabel">Status Aktif</div><div class="kpiVal" id="countAktif">0</div></div>
+      <div class="card"><div class="kpiLabel">MyIPO (Yes)</div><div class="kpiVal" id="countMyipoYes">0</div></div>
+    </div>
+
+    <h2>Senarai Inovasi Saya</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Tajuk</th><th>Tahun</th><th>Kategori</th><th>Status</th><th>MyIPO</th><th>ID</th>
+        </tr>
+      </thead>
+      <tbody id="myListBody">
+        <tr><td colspan="6" class="muted">Loading…</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Report Inovasi <span id="rYear">2026</span></h2>
+    <div class="grid" style="grid-template-columns:repeat(4,1fr);">
+      <div class="card"><div class="kpiLabel">Jumlah Inovasi (2026)</div><div class="kpiVal" id="rTotal">0</div></div>
+      <div class="card"><div class="kpiLabel">Status Aktif</div><div class="kpiVal" id="rAktif">0</div></div>
+      <div class="card"><div class="kpiLabel">MyIPO Yes</div><div class="kpiVal" id="rMyipoYes">0</div></div>
+      <div class="card"><div class="kpiLabel">MyIPO No</div><div class="kpiVal" id="rMyipoNo">0</div></div>
+    </div>
+
+    <table style="margin-top:10px;">
+      <thead><tr><th>Tajuk</th><th>Kategori</th><th>Status</th><th>MyIPO</th></tr></thead>
+      <tbody id="reportBody">
+        <tr><td colspan="4" class="muted">Klik "Report Inovasi 2026".</td></tr>
+      </tbody>
+    </table>
+
+    <!-- COMPETITIONS -->
+    <h2>Penyertaan Pertandingan <span class="muted">(2026)</span></h2>
+    <div class="muted" id="cMsg" style="margin-bottom:8px;"></div>
+
+    <div class="grid" style="grid-template-columns:repeat(4,1fr);">
+      <div class="card"><div class="kpiLabel">Jumlah Penyertaan</div><div class="kpiVal" id="cTotal">0</div></div>
+      <div class="card"><div class="kpiLabel">Anugerah Khas</div><div class="kpiVal" id="cAK">0</div></div>
+      <div class="card"><div class="kpiLabel">Gold</div><div class="kpiVal" id="cGold">0</div></div>
+      <div class="card"><div class="kpiLabel">Antarabangsa</div><div class="kpiVal" id="cIntl">0</div></div>
+    </div>
+
+    <table style="margin-top:10px;">
+      <thead>
+        <tr>
+          <th>Tajuk Inovasi</th>
+          <th>Nama Event</th>
+          <th>Peringkat</th>
+          <th>Pingat</th>
+          <th>Anugerah Khas</th>
+          <th>Innovation ID</th>
+        </tr>
+      </thead>
+      <tbody id="compBody">
+        <tr><td colspan="6" class="muted">Klik "Report Pertandingan 2026".</td></tr>
+      </tbody>
+    </table>
+
+    <div class="footer">
+      Rekod Inovasi Jabatan | Dicetak: <span id="printedDate">-</span><br/>
+      © <span id="printedYear">-</span> kurakurahijau.com
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      const now = new Date();
+      const opt = { day:'2-digit', month:'short', year:'numeric' };
+      document.getElementById("printedDate").textContent = now.toLocaleDateString('en-GB', opt);
+      document.getElementById("printedYear").textContent = now.getFullYear();
+    })();
+  </script>
+</body>
+</html>
+else if (p.endsWith("/rekod-inovasi/") || p.endsWith("/rekod-inovasi")) {
+  if (getToken()) location.href = "./dashboard.html";
+}
