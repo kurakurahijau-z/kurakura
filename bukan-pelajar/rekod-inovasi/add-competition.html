@@ -1,0 +1,125 @@
+
+<!doctype html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tambah Penyertaan - Rekod Inovasi</title>
+
+  <!-- PENTING: config dulu, baru app.js -->
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+
+  <style>
+    :root{ --line:#e5e7eb; --muted:#64748b; --card:#fff; --bg:#f8fafc; --text:#0f172a; }
+    body{ margin:0; font-family: ui-sans-serif,system-ui,-apple-system; background:var(--bg); color:var(--text); }
+    .wrap{ max-width:980px; margin:24px auto; padding:0 18px; }
+    .topbar{ display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; }
+    .who{ color:var(--muted); font-size:14px; }
+    .btn{
+      border:1px solid var(--line); background:white; padding:10px 14px; border-radius:12px;
+      cursor:pointer; font-weight:800;
+    }
+    .btn.primary{ background:#0f172a; color:white; border-color:#0f172a; }
+    .card{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:18px;
+      max-width:720px;
+      margin:18px auto 0;
+    }
+    h1{ margin:0 0 6px; font-size:24px; }
+    .muted{ color:var(--muted); }
+    label{ display:block; font-size:13px; font-weight:800; margin:12px 0 6px; color:#334155; }
+    input, select{
+      width:100%;
+      border:1px solid var(--line);
+      background:white;
+      padding:10px 12px;
+      border-radius:12px;
+      font-size:14px;
+      outline:none;
+    }
+    .row2{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .actions{ margin-top:14px; display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+    @media (max-width:760px){ .row2{ grid-template-columns:1fr; } }
+  </style>
+</head>
+
+<body onload="addCompetitionInit()">
+  <div class="wrap">
+    <div class="topbar">
+      <div class="who">Login: <b id="meEmail">-</b></div>
+      <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+        <button class="btn" onclick="location.href='./dashboard.html'">← Dashboard</button>
+        <button class="btn" onclick="doLogout()">Logout</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h1>Tambah Penyertaan</h1>
+      <div class="muted">Pilih inovasi dulu, lepas tu isi butiran penyertaan.</div>
+
+      <form onsubmit="submitCompetition(event)">
+        <label>Pilih Inovasi</label>
+        <select id="innovationId" required>
+          <option value="">Loading…</option>
+        </select>
+
+        <label>Nama Event</label>
+        <input id="namaEvent" placeholder="contoh: iCOVEx 2026" required />
+
+        <div class="row2">
+          <div>
+            <label>Tahun</label>
+            <input id="tahun" value="2026" required />
+          </div>
+          <div>
+            <label>Peringkat</label>
+            <select id="peringkat" required>
+              <option value="">-- pilih --</option>
+              <option>Internal</option>
+              <option>Daerah</option>
+              <option>Negeri</option>
+              <option>Kebangsaan</option>
+              <option>Antarabangsa</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row2">
+          <div>
+            <label>Pingat / Keputusan</label>
+            <select id="pingat" required>
+              <option value="">-- pilih --</option>
+              <option>None</option>
+              <option>Bronze</option>
+              <option>Silver</option>
+              <option>Gold</option>
+              <option>Platinum</option>
+            </select>
+          </div>
+          <div>
+            <label>Anugerah Khas?</label>
+            <select id="anugerahKhas" required>
+              <option value="no">no</option>
+              <option value="yes">yes</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="anugerahKhasBox" style="display:none;">
+          <label>Nama Anugerah Khas</label>
+          <input id="namaAnugerahKhas" placeholder="contoh: Diamond Award" />
+        </div>
+
+        <div class="actions">
+          <button class="btn primary" type="submit">Simpan</button>
+          <div class="muted" id="saveMsg"></div>
+        </div>
+      </form>
+    </div>
+  </div>
+</body>
+</html>
