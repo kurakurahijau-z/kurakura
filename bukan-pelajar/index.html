@@ -154,12 +154,14 @@ body{
 /* clickable card */
 .box.link{
   cursor:pointer;
-  transition:transform .15s ease, background .15s ease;
+  transition:transform .15s ease, background .15s ease, border-color .15s ease;
 }
 .box.link:hover{
   transform:translateY(-2px);
   background:rgba(255,255,255,.10);
+  border-color:rgba(255,255,255,.18);
 }
+
 .pill{
   display:inline-flex;
   align-items:center;
@@ -188,6 +190,34 @@ body{
 a.clean{
   color:inherit;
   text-decoration:none;
+}
+
+/* badges top-right on cards */
+.badges{
+  position:absolute;
+  top:14px;
+  right:14px;
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+}
+.badge{
+  font-size:11px;
+  font-weight:950;
+  padding:6px 10px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(255,255,255,.08);
+  color:rgba(255,255,255,.92);
+}
+.badge.new{
+  border-color:rgba(34,197,94,.35);
+  background:rgba(34,197,94,.16);
+}
+.badge.secure{
+  border-color:rgba(59,130,246,.35);
+  background:rgba(59,130,246,.16);
 }
 </style>
 </head>
@@ -218,9 +248,13 @@ a.clean{
 
   <div class="grid">
 
-    <!-- ✅ CARD SISTEM: REKOD INOVASI (Option B) -->
+    <!-- ✅ CARD SISTEM: REKOD INOVASI -->
     <a class="clean" href="./rekod-inovasi/">
       <div class="box link">
+        <div class="badges">
+          <div class="badge secure">Akaun rasmi</div>
+        </div>
+
         <h3>Rekod Inovasi Jabatan</h3>
         <p>
           Sistem rekod inovasi, ahli kumpulan, penyertaan pertandingan, dan cetakan laporan (PDF).
@@ -230,12 +264,24 @@ a.clean{
       </div>
     </a>
 
-    <!-- baki cards (placeholder) -->
-    <div class="box">
-      <h3>Akan Datang</h3>
-      <p>Akan Datang</p>
-    </div>
+    <!-- ✅ CARD SISTEM: LEJAR AKREDITASI -->
+    <a class="clean" href="./lejar-akreditasi/">
+      <div class="box link" id="card-lejar">
+        <div class="badges">
+          <div class="badge new" id="badge-lejar">NEW</div>
+          <div class="badge secure">Akaun rasmi</div>
+        </div>
 
+        <h3>Lejar Akreditasi</h3>
+        <p>
+          Sistem rekod waran & belanja, status urusniaga (Kertas Kerja / Hantar Permohonan / Selesai / Batal),
+          kiraan baki available automatik, dan export PDF.
+        </p>
+        <div class="pill">Buka sistem <span>→</span></div>
+      </div>
+    </a>
+
+    <!-- baki cards -->
     <div class="box">
       <h3>Akan Datang</h3>
       <p>Akan Datang</p>
@@ -253,5 +299,31 @@ a.clean{
   </div>
 
 </main>
+
+<script>
+/* ===============================
+   KAEDAH A: AUTO HIDE "NEW" BADGE
+   - tukar tarikh release bila launch
+   - lepas X hari, badge NEW hilang
+================================= */
+
+// 🔧 set tarikh launch lejar-akreditasi (YYYY-MM-DD)
+const releaseDateLejar = new Date("2026-03-04");
+
+// 🔧 berapa hari nak bagi NEW muncul
+const daysVisible = 7;
+
+(function hideNewBadgeIfExpired(){
+  const today = new Date();
+  const diffTime = today.getTime() - releaseDateLejar.getTime();
+  const diffDays = diffTime / (1000 * 60 * 60 * 24);
+
+  if (diffDays > daysVisible) {
+    const badge = document.getElementById("badge-lejar");
+    if (badge) badge.style.display = "none";
+  }
+})();
+</script>
+
 </body>
 </html>
